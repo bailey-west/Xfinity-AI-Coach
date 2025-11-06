@@ -17,6 +17,12 @@
             --border-color: #ddd;
             --sidebar-bg: #fff;
             --sidebar-width: 240px;
+            --danger-color: #e74c3c;
+            --danger-color-dark: #c0392b;
+            --success-color: #007a4a;
+            --success-bg: #f0fff8;
+            --warn-bg: #fdfae7;
+            --warn-border: #fbf0b5;
         }
 
         body { 
@@ -100,13 +106,13 @@
             text-align: left;
         }
         .auth-button.sign-out {
-            background-color: #c0392b;
+            background-color: var(--danger-color);
         }
         .auth-button:hover {
             background-color: #00633b;
         }
         .auth-button.sign-out:hover {
-            background-color: #a03023;
+            background-color: var(--danger-color-dark);
         }
 
         /* Main Content Area */
@@ -233,7 +239,7 @@
         }
 
         .ai-button {
-            background-color: #007a4a;
+            background-color: var(--success-color);
             margin-top: 10px;
         }
         .ai-button:hover {
@@ -299,10 +305,29 @@
         .log-entry p, .log-entry ul {
             margin: 5px 0;
         }
+        .log-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .log-entry-date {
             font-weight: bold;
             font-size: 0.9em;
             color: var(--text-color-light);
+        }
+        /* NEW: Log Delete Button */
+        .log-delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-color-light);
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 5px;
+            width: auto;
+        }
+        .log-delete-btn:hover {
+            color: var(--danger-color);
+            background-color: #fdf2f2;
         }
         
         .log-entry-coaching {
@@ -356,8 +381,8 @@
         }
         .log-customer-intent {
             font-weight: bold;
-            background-color: #fdfae7;
-            border: 1px solid #fbf0b5;
+            background-color: var(--warn-bg);
+            border: 1px solid var(--warn-border);
             padding: 8px 12px;
             border-radius: 4px;
         }
@@ -433,12 +458,12 @@
             color: black;
         }
         .delete-btn {
-            background-color: #e74c3c;
+            background-color: var(--danger-color);
             margin-top: 15px;
             width: auto;
         }
         .delete-btn:hover {
-            background-color: #c0392b;
+            background-color: var(--danger-color-dark);
         }
         .form-grid {
             display: grid;
@@ -493,7 +518,40 @@
         .last-goal-callout em {
             color: var(--text-color-light);
         }
-
+        
+        /* NEW: Tracker Table */
+        #tracker-table-container {
+            background-color: var(--light-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        #tracker-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #tracker-table th, #tracker-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        #tracker-table th {
+            background-color: #f9f9f9;
+        }
+        #tracker-table tr:last-child td {
+            border-bottom: none;
+        }
+        .status-complete {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        .status-progress {
+            color: var(--text-color-light);
+            font-weight: bold;
+        }
+        #tracker-table .fa-check-circle {
+            margin-right: 5px;
+        }
 
     </style>
 </head>
@@ -514,6 +572,10 @@
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'Coaching')">
                 <i class="fa-solid fa-bullhorn"></i> Log Coaching
+            </a>
+            <!-- NEW: Monthly Tracker Link -->
+            <a href="#" class="nav-link" onclick="openPage(event, 'Tracker')">
+                <i class="fa-solid fa-calendar-check"></i> Monthly Tracker
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'ViewLogs')">
                 <i class="fa-solid fa-list-alt"></i> View Logs
@@ -696,37 +758,55 @@
                             <input type="text" id="coaching-sales" name="sales" placeholder="e.g., 10 mobile lines">
                         </div>
                     </div>
-
-                    <!-- NEW: AI Button for Coaching -->
-                    <div>
-                        <button type="button" class="ai-button" id="generate-ai-coaching-notes" style="margin-top: 0; margin-bottom: 20px;">Generate AI Coaching Prep</button>
-                        <div class="loader" id="coaching-notes-loader"></div>
-                    </div>
                     
                     <div>
                         <label for="coaching-progress">What Progress has been made since last coaching session?
                             <span class="label-hint">Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)</span>
                         </label>
-                        <textarea id="coaching-progress" name="progress" class="profile-notes" rows="3"></textarea>
+                        <textarea id="coaching-progress" name="progress" class="profile-notes" rows="3" placeholder="Type your raw notes here..."></textarea>
                     </div>
                     <div>
                         <label for="coaching-obstacles">What challenge or obstacles has the Coachee experienced?
                              <span class="label-hint">Ask something like, "What has been difficult for you recently?" (Include examples provided by Coachee)</span>
                         </label>
-                        <textarea id="coaching-obstacles" name="obstacles" class="profile-notes" rows="3"></textarea>
+                        <textarea id="coaching-obstacles" name="obstacles" class="profile-notes" rows="3" placeholder="Type your raw notes here..."></textarea>
                     </div>
                     <div>
                         <label for="coaching-actionplan">Action Plan: What actions will the Coachee commit to after this conversation?
                              <span class="label-hint">(Include SMART goal)</span>
                         </label>
-                        <textarea id="coaching-actionplan" name="actionPlan" class="profile-notes" rows="3" placeholder="e.g., 'I will use a T-chart on my next 3 interactions.'"></textarea>
+                        <textarea id="coaching-actionplan" name="actionPlan" class="profile-notes" rows="3" placeholder="Type a raw SMART goal here... (e.g., 'get 10 mobile lines next week')"></textarea>
                     </div>
 
-                    <button type="submit">Log Coaching Session</button>
+                    <!-- MODIFIED: Renamed button and text -->
+                    <button type="button" class="ai-button" id="generate-ai-coaching-notes" style="margin-top: 0; margin-bottom: 20px;">Generate AI-Assisted Notes & Log Session</button>
+                    <div class="loader" id="coaching-notes-loader"></div>
                 </form>
             </div>
+            
+            <!-- NEW: PAGE 3: Monthly Tracker -->
+            <div id="Tracker" class="page-content">
+                <h2 id="tracker-title">Monthly Goal Tracker</h2>
+                <p id="tracker-subtitle" style="text-align: center; margin-top: -10px; margin-bottom: 20px; font-size: 1.1em; color: var(--text-color-light);"></p>
+                <div id="tracker-table-container">
+                    <table id="tracker-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Role</th>
+                                <th>Observations (Goal: 4)</th>
+                                <th>Coaching Sessions (Goal: 2)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tracker-table-body">
+                            <!-- Rows will be added by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-            <!-- PAGE 3: View Logs -->
+            <!-- PAGE 4: View Logs -->
             <div id="ViewLogs" class="page-content">
                 <!-- ... existing view logs ... -->
                 <h2>View Performance Logs</h2>
@@ -749,7 +829,7 @@
                 </div>
             </div>
 
-            <!-- PAGE 4: Employee Management -->
+            <!-- PAGE 5: Employee Management -->
             <div id="Employees" class="page-content">
                 <!-- ... existing employee management ... -->
                 <form id="addEmployeeForm">
@@ -846,10 +926,28 @@
         // --- Gemini API Configuration ---
         const API_KEY = "AIzaSyAWY5r9ovt_nGjXPXmv0NNjYnDY-B255bc"; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        
+        // --- UPDATED: KPI Context ---
+        const KPI_CONTEXT = `
+            Please use the following Xfinity retail KPIs and expectations when generating SMART goals:
+            - tNPS score goal: 75
+            - XM% to goal: 100%
+            - XM conversion rate: 10%
+            - HSD (high speed data OR internet sale) to goal: 100%
+            - Gigabit+ sell in: 50%
+            - Video/CDV(Landline)/XH(Home security) unit % to goal: 100%
+            - Wablets: Watch/Tablet sale: minimum 2 per week, recommended 4 per week, with attach rate of 45%
+            - XMC (Xfinity Mobile Care or insurance unit) attach: 60%
+            - Unlimited Premium (higher mobile plan) attach: 45%
+            - New/New (New mobile line attach on a new internet sale, same day): 30% attach
+            - Monthly Mobile Line (LA) Goal: 40 per rep (approx 10-15 per week)
+            - 'Service to sales' means every service interaction (like a bill pay or equipment swap)
+              is an opportunity to perform an account review and pivot to a sale (especially Xfinity Mobile).
+        `;
+        // --- END KPI Context ---
+
 
         // --- Firebase Config & App Variables ---
-        
-        // REPLACED: Placeholder config with your provided config
         const firebaseConfig = {
           apiKey: "AIzaSyDaRTH_-SrDMlKePFfKUaUa0FeGDD1-KIA",
           authDomain: "retail-coaching-tool.firebaseapp.com",
@@ -859,11 +957,11 @@
           appId: "1:321362459125:web:b35448ac90801a5e0388bc",
           measurementId: "G-K8RYLXRG5H"
         };
-        // END REPLACEMENT
         
         const appId = firebaseConfig.projectId || 'default-app-id';
+        const DELETE_FAILSAFE_CODE = "DELETE-1234"; // NEW: Failsafe code
 
-        let db, auth, userId, googleProvider, app, analytics; // Added app and analytics
+        let db, auth, userId, googleProvider, app, analytics; 
         let employeesRef, observationsRef, coachingsRef;
         let employeesListener = null;
         let observationsListener = null;
@@ -873,6 +971,10 @@
         let localEmployees = {};
         let localObservations = [];
         let localCoachings = [];
+        
+        // NEW: Goal constants
+        const OBS_GOAL = 4;
+        const COACH_GOAL = 2;
 
         // --- Core Data Functions ---
         // ... calculateTenure function (unchanged) ...
@@ -898,6 +1000,50 @@
                 return ` (${days} days)`;
             }
             return ` (${tenureStr})`;
+        }
+        
+        /**
+         * NEW: Fiscal Month Calculator
+         * Returns an object { startDate, endDate, name }
+         */
+        function getFiscalMonthInfo(date) {
+            const day = date.getDate();
+            let startMonth = date.getMonth();
+            let startYear = date.getFullYear();
+            let endMonth = date.getMonth();
+            let endYear = date.getFullYear();
+
+            if (day < 22) {
+                // We are in the fiscal month that started *last* month
+                endMonth = date.getMonth();
+                endYear = date.getFullYear();
+                
+                startMonth = date.getMonth() - 1;
+                startYear = date.getFullYear();
+                if (startMonth < 0) {
+                    startMonth = 11; // December
+                    startYear -= 1;
+                }
+            } else {
+                // We are in the fiscal month that started *this* month
+                startMonth = date.getMonth();
+                startYear = date.getFullYear();
+
+                endMonth = date.getMonth() + 1;
+                endYear = date.getFullYear();
+                if (endMonth > 11) {
+                    endMonth = 0; // January
+                    endYear += 1;
+                }
+            }
+            
+            const startDate = new Date(startYear, startMonth, 22, 0, 0, 0);
+            const endDate = new Date(endYear, endMonth, 21, 23, 59, 59);
+            
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const fiscalMonthName = `Fiscal ${monthNames[endMonth]} ${endYear}`;
+
+            return { startDate, endDate, name: fiscalMonthName };
         }
 
 
@@ -969,10 +1115,21 @@
             for (const log of combinedLogs) { 
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'log-entry';
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'log-entry-header';
                 const dateP = document.createElement('p');
                 dateP.className = 'log-entry-date';
                 dateP.textContent = log.date.toDate().toLocaleString();
-                entryDiv.appendChild(dateP);
+                headerDiv.appendChild(dateP);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'log-delete-btn';
+                deleteBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
+                deleteBtn.addEventListener('click', () => {
+                    const logType = log.greatAssessment ? 'observations' : 'coachings';
+                    deleteLog(log.id, logType, logType === 'observations' ? 'Observation' : 'Coaching Session');
+                });
+                headerDiv.appendChild(deleteBtn);
+                entryDiv.appendChild(headerDiv);
                 if (log.greatAssessment) {
                     if(log.customerIntent) {
                         const intentP = document.createElement('p');
@@ -1035,17 +1192,80 @@
             }
         }
         
+        /**
+         * NEW: Updates the Monthly Tracker tab
+         */
+        function updateTrackerTab() {
+            const fiscalMonth = getFiscalMonthInfo(new Date());
+            document.getElementById('tracker-title').textContent = `Monthly Goal Tracker`;
+            document.getElementById('tracker-subtitle').textContent = `${fiscalMonth.name} (${fiscalMonth.startDate.toLocaleDateString()} - ${fiscalMonth.endDate.toLocaleDateString()})`;
+            
+            const tableBody = document.getElementById('tracker-table-body');
+            tableBody.innerHTML = ''; // Clear old data
+
+            // Filter logs by current fiscal month
+            const obsInMonth = localObservations.filter(obs => {
+                const date = obs.date.toDate();
+                return date >= fiscalMonth.startDate && date <= fiscalMonth.endDate;
+            });
+            const coachingInMonth = localCoachings.filter(c => {
+                const date = c.date.toDate();
+                return date >= fiscalMonth.startDate && date <= fiscalMonth.endDate;
+            });
+
+            const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+
+            for (const [id, profile] of sortedEmployees) {
+                const obsCount = obsInMonth.filter(obs => obs.employeeId === id).length;
+                const coachCount = coachingInMonth.filter(c => c.employeeId === id).length;
+                
+                const obsMet = obsCount >= OBS_GOAL;
+                const coachMet = coachCount >= COACH_GOAL;
+                const isComplete = obsMet && coachMet;
+                
+                const tr = document.createElement('tr');
+                
+                let statusClass = isComplete ? 'status-complete' : 'status-progress';
+                let statusText = isComplete ? '<i class="fa-solid fa-check-circle"></i> Complete' : 'In Progress';
+                
+                tr.innerHTML = `
+                    <td>${profile.name}</td>
+                    <td>${profile.role}</td>
+                    <td class="${obsMet ? 'status-complete' : ''}">${obsCount} / ${OBS_GOAL}</td>
+                    <td class="${coachMet ? 'status-complete' : ''}">${coachCount} / ${COACH_GOAL}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                `;
+                tableBody.appendChild(tr);
+            }
+        }
+        
         function refreshUI() {
             populateEmployeeDropdown('employee'); // Obs form
             populateEmployeeDropdown('log-employee-select'); // Log view
             populateEmployeeDropdown('coaching-employee-select'); // Coaching form
             populateEmployeeList(); // Manage employees
             
+            // Re-display logs for the currently selected employee in the log tab
             displayEmployeeLogs(document.getElementById('log-employee-select').value);
+            // NEW: Refresh tracker tab if it's active
+            if(document.getElementById('Tracker').classList.contains('active')) {
+                updateTrackerTab();
+            }
         }
 
         
         // --- Event Handling Functions ---
+        
+        // ... showDeleteFailsafe function (unchanged) ...
+        function showDeleteFailsafe(actionName) {
+            const userInput = prompt(`This action is permanent and cannot be undone.\n\nTo delete this ${actionName}, please type the failsafe code: ${DELETE_FAILSAFE_CODE}`);
+            if (userInput === DELETE_FAILSAFE_CODE) {
+                return true;
+            } else if (userInput !== null) { 
+                alert("Incorrect code. Deletion cancelled.");
+            }
+            return false;
+        }
         // ... addEmployee function (unchanged) ...
         async function addEmployee(event) {
             event.preventDefault();
@@ -1083,7 +1303,7 @@
         // ... deleteEmployee function (unchanged) ...
         async function deleteEmployee(idToDelete) {
             const employeeName = localEmployees[idToDelete]?.name || "this employee";
-            if (!confirm(`Are you sure you want to delete ${employeeName}? This will also delete all their observations and coaching logs.`)) {
+            if (!showDeleteFailsafe(`employee (${employeeName}) and ALL their logs`)) {
                 return;
             }
             try {
@@ -1094,77 +1314,31 @@
                 alert("Failed to delete employee. See console for details.");
             }
         }
+        // ... deleteLog function (unchanged) ...
+        async function deleteLog(logId, logType, logTypeName) {
+            if (!showDeleteFailsafe(logTypeName)) {
+                return;
+            }
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", logType, logId);
+                await deleteDoc(docRef);
+                console.log(`${logTypeName} deleted: ${logId}`);
+            } catch(e) {
+                console.error(`Error deleting ${logTypeName}:`, e);
+                alert(`Failed to delete ${logTypeName}. See console for details.`);
+            }
+        }
+        
         // ... getRadioValue function (unchanged) ...
         function getRadioValue(form, name) {
             const radio = form.querySelector(`input[name="${name}"]:checked`);
             return radio ? radio.value : "N/A";
         }
         
-        // ... logCoachingSession function (unchanged) ...
-        async function logCoachingSession(event) {
-            event.preventDefault();
-            const form = document.getElementById('coachingForm');
-            const employeeId = form.employeeId.value;
-            if (!employeeId) {
-                alert("Please select an employee.");
-                return;
-            }
-            const dateStr = form.date.value;
-            if (!dateStr) {
-                alert("Please select a session date.");
-                return;
-            }
-            const sessionDate = Timestamp.fromDate(new Date(dateStr + "T12:00:00"));
-            const newCoaching = {
-                employeeId: employeeId,
-                date: sessionDate,
-                sessionType: form.sessionType.value,
-                tnps: form.tnps.value || "",
-                sales: form.sales.value || "",
-                progress: form.progress.value.trim(),
-                obstacles: form.obstacles.value.trim(),
-                actionPlan: form.actionPlan.value.trim()
-            };
-            try {
-                await addDoc(coachingsRef, newCoaching);
-                const employeeName = localEmployees[employeeId].name;
-                alert(`Coaching session logged for ${employeeName}!`);
-                form.reset();
-                form.employeeId.value = "";
-                document.getElementById('coaching-date').valueAsDate = new Date(); // Reset date
-            } catch (e) {
-                console.error("Error logging coaching session:", e);
-                alert("Failed to log coaching session. See console for details.");
-            }
-        }
-
-        
-        // --- AI Generation Functions ---
-        // ... showLoading function (unchanged) ...
-        function showLoading(loaderId, buttonId, isLoading, buttonText = "Generating...") {
-            const loader = document.getElementById(loaderId);
-            const button = document.getElementById(buttonId);
-            if (isLoading) {
-                loader.style.display = 'block';
-                button.disabled = true;
-                button.textContent = buttonText;
-            } else {
-                loader.style.display = 'none';
-                button.disabled = false;
-                // Determine original text
-                if (buttonId.includes('summary')) {
-                    button.textContent = 'Generate AI Notes & Log Observation';
-                } else if (buttonId.includes('coaching-notes')) {
-                    button.textContent = 'Generate AI Coaching Prep';
-                } else if (buttonId.includes('coaching-plan')) {
-                     button.textContent = 'Generate AI Coaching Plan';
-                }
-            }
-        }
-        
         /**
          * Calls the Gemini API to generate an observation summary
          * and then logs the observation.
+         * UPDATED to include KPI_CONTEXT
          */
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
@@ -1220,6 +1394,10 @@
             let prompt = `Act as a sales manager for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${profile.name}.\n\n`;
             prompt += `Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 steps. **Use ${profile.name}'s name** where it feels natural to make it personal.\n\n`;
             prompt += `For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
+            
+            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`; // NEW
+            prompt += KPI_CONTEXT + "\n\n"; // NEW
+            
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
@@ -1324,11 +1502,8 @@
             }
         }
         
-        /**
-         * Calls the Gemini API to generate a full coaching plan.
-         */
+        // ... generateAICoachingPlan function (unchanged, but uses new KPI_CONTEXT) ...
         async function generateAICoachingPlan() {
-            // ... (this function remains unchanged from the previous version) ...
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
                 alert("Please select an employee from the dropdown first.");
@@ -1347,6 +1522,8 @@
             prompt += `The plan must include two distinct sections:\n`;
             prompt += `1.  **Feedback for ${profile.name}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **XFinity Mobile**.\n`;
             prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
+            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
+            prompt += KPI_CONTEXT + "\n\n";
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
@@ -1432,14 +1609,31 @@
         }
 
         /**
-         * NEW: Calls the Gemini API to generate coaching session prep notes.
+         * MODIFIED: Generates AI coaching notes based on manager's raw notes
+         * and then logs the session.
          */
-        async function generateAICoachingNotes() {
+        async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
             const employeeId = form.employeeId.value;
             
             if (!employeeId) {
                 alert("Please select an employee first.");
+                return;
+            }
+            
+            const dateStr = form.date.value;
+            if (!dateStr) {
+                alert("Please select a session date.");
+                return;
+            }
+            
+            // Get raw notes from user
+            const rawProgress = form.progress.value.trim();
+            const rawObstacles = form.obstacles.value.trim();
+            const rawActionPlan = form.actionPlan.value.trim();
+
+            if (!rawProgress || !rawObstacles || !rawActionPlan) {
+                alert("Please fill in your raw notes for Progress, Obstacles, and Action Plan before generating.");
                 return;
             }
 
@@ -1448,38 +1642,39 @@
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
-
-            let prompt = `Act as an expert Xfinity retail sales manager preparing for a 1-on-1 with ${profile.name}. Our store is 'service to sales' focused on Xfinity Mobile.\n\n`;
-            prompt += `Based on their profile and all past observations/coaching logs, generate notes for me to use *during* the session. I need:\n`;
-            prompt += `1.  **progress_notes:** A 1-2 sentence prompt for me to ask ${profile.name} about their progress since the last session. Reference the last 'Action Plan' if available.\n`;
-            prompt += `2.  **obstacles_notes:** A 1-2 sentence prompt for me to ask about challenges, based on trends from their observation logs (e.g., "I see we're still missing opportunities in the Explore step...").\n`;
-            prompt += `3.  **smart_goal:** A full, specific SMART goal for ${profile.name} to commit to, focusing on their biggest opportunity (likely related to 'service to sales' or 'Xfinity Mobile').\n\n`;
-
-            prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
-            prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
-            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
-
-            // Include full history for this request
-            prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n`;
-            if(obsHistory.length === 0) prompt += "No observations on file.\n\n";
-            obsHistory.slice(0, 5).forEach((log, i) => { // Send up to 5
-                prompt += `Log ${i+1} (${log.date.toDate().toLocaleDateString()}): Customer Intent: ${log.customerIntent}\n`;
-                if(log.greatAssessment) {
-                    prompt += `  Explore: (${log.greatAssessment.explore?.measurement}), Behaviors: ${log.greatAssessment.explore?.behaviors.join(', ') || 'none'}\n`;
-                    prompt += `  Ask: (${log.greatAssessment.ask?.measurement}), Behaviors: ${log.greatAssessment.ask?.behaviors.join(', ') || 'none'}\n`;
-                }
-            });
-
-            prompt += `\n--- COACHING HISTORY (Newest to Oldest) ---\n`;
-            if(coachingHistory.length === 0) prompt += "No coaching on file.\n\n";
-            coachingHistory.slice(0, 3).forEach((log, i) => { // Send up to 3
-                prompt += `Log ${i+1} (${log.date.toDate().toLocaleDateString()}): Action Plan: ${log.actionPlan}\n`;
-            });
-
-            prompt += `\n--- GENERATE JSON OUTPUT ---`;
             
-            showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Prepping...');
+            let prompt = `Act as an expert Xfinity retail sales manager. I am logging a 1-on-1 with ${profile.name}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
+            
+            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`; // NEW
+            prompt += KPI_CONTEXT + "\n\n"; // NEW
+            
+            prompt += `--- EMPLOYEE PROFILE ---\n`;
+            prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
+
+            prompt += `--- MANAGER'S RAW NOTES (INPUT) ---\n`;
+            prompt += `Progress: ${rawProgress}\n`;
+            prompt += `Obstacles: ${rawObstacles}\n`;
+            prompt += `Action Plan: ${rawActionPlan}\n\n`;
+            
+            prompt += `--- FULL PERFORMANCE HISTORY (for context) ---\n`;
+            const recentObs = obsHistory.slice(0, 2);
+            if(recentObs.length > 0) {
+                prompt += `Last Observation (${recentObs[0].date.toDate().toLocaleDateString()}): Customer Intent: ${recentObs[0].customerIntent}\n`;
+                prompt += `  Explore: (${recentObs[0].greatAssessment.explore?.measurement}), Ask: (${recentObs[0].greatAssessment.ask?.measurement})\n`;
+            }
+            const recentCoaching = coachingHistory.slice(0, 1);
+             if(recentCoaching.length > 0) {
+                prompt += `Last Coaching (${recentCoaching[0].date.toDate().toLocaleDateString()}): Last Action Plan: ${recentCoaching[0].actionPlan}\n`;
+            }
+            
+            prompt += `\n--- GENERATE JSON OUTPUT ---
+            Based on my raw notes, generate:
+            1.  **progress_note:** A refined, professional note summarizing the progress.
+            2.  **obstacles_note:** A refined, professional note summarizing the obstacles.
+            3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note and the employee's history/KPIs.
+            ---`;
+            
+            showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
             
             try {
                 const generationConfig = {
@@ -1487,8 +1682,8 @@
                     responseSchema: {
                         type: "OBJECT",
                         properties: {
-                            "progress_notes": { "type": "STRING" },
-                            "obstacles_notes": { "type": "STRING" },
+                            "progress_note": { "type": "STRING" },
+                            "obstacles_note": { "type": "STRING" },
                             "smart_goal": { "type": "STRING" }
                         }
                     }
@@ -1517,12 +1712,37 @@
 
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
+                
+                // Populate fields with AI notes
+                if (notesObject.progress_note) form.progress.value = notesObject.progress_note;
+                if (notesObject.obstacles_note) form.obstacles.value = notesObject.obstacles_note;
+                if (notesObject.smart_goal) form.actionPlan.value = notesObject.smart_goal;
 
-                if (notesObject.progress_notes) document.getElementById('coaching-progress').value = notesObject.progress_notes;
-                if (notesObject.obstacles_notes) document.getElementById('coaching-obstacles').value = notesObject.obstacles_notes;
-                if (notesObject.smart_goal) document.getElementById('coaching-actionplan').value = notesObject.smart_goal;
-
-                alert("AI coaching prep notes have been generated!");
+                // Auto-log the coaching session
+                // MODIFIED: Fixed timestamp logic
+                const now = new Date();
+                const dateParts = dateStr.split('-'); // [YYYY, MM, DD]
+                // Create date object from date input, then set the time to now
+                const sessionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], now.getHours(), now.getMinutes(), now.getSeconds());
+                const sessionTimestamp = Timestamp.fromDate(sessionDate);
+            
+                const newCoaching = {
+                    employeeId: employeeId,
+                    date: sessionTimestamp, // Use new timestamp
+                    sessionType: form.sessionType.value,
+                    tnps: form.tnps.value || "",
+                    sales: form.sales.value || "",
+                    progress: form.progress.value, // Use the new AI-generated note
+                    obstacles: form.obstacles.value, // Use the new AI-generated note
+                    actionPlan: form.actionPlan.value // Use the new AI-generated note
+                };
+            
+                await addDoc(coachingsRef, newCoaching);
+                const employeeName = localEmployees[employeeId].name;
+                alert(`AI-assisted coaching session logged for ${employeeName}!`);
+                form.reset();
+                form.employeeId.value = "";
+                document.getElementById('coaching-date').valueAsDate = new Date();
                 
             } catch (err) {
                 console.error('AI Coaching Prep Failed:', err);
@@ -1549,6 +1769,11 @@
             
             document.getElementById(pageName).style.display = 'block';
             event.currentTarget.className += ' active';
+            
+            // NEW: Update tracker tab when it's clicked
+            if (pageName === 'Tracker') {
+                updateTrackerTab();
+            }
         }
 
         // --- MODAL Functions ---
@@ -1715,14 +1940,16 @@
 
             // --- Add All UI Event Listeners ---
             document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
-            // REMOVED: obsForm listener, as it's now handled by the AI button
-            document.getElementById('coachingForm').addEventListener('submit', logCoachingSession);
+            // MODIFIED: This is now an AI-driven log
+            document.getElementById('coachingForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert("Please use the 'Generate AI Notes & Log Session' button to log this coaching.");
+            });
             
-            // MODIFIED: Renamed ID and function
             document.getElementById('generate-and-log-ai-summary').addEventListener('click', generateAndLogObservation);
             document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
-            // NEW: Listener for new coaching prep button
-            document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAICoachingNotes);
+            // MODIFIED: Renamed ID and function
+            document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
 
             document.getElementById('employee').addEventListener('change', (event) => {
                 displayLastSMARTGoal(event.target.value);
