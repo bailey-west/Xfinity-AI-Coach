@@ -1014,7 +1014,7 @@
                 </form>
             </div>
             
-            <!-- NEW: PAGE 3: Monthly Tracker -->
+            <!-- RESTORED: PAGE 3: Monthly Tracker -->
             <div id="Tracker" class="page-content">
                 <h2 id="tracker-title">Monthly Goal Tracker</h2>
                 <p id="tracker-subtitle" style="text-align: center; margin-top: -10px; margin-bottom: 20px; font-size: 1.1em; color: var(--text-color-light);"></p>
@@ -1023,7 +1023,7 @@
                         <thead>
                             <tr>
                                 <th>Employee</th>
-                                <th>Role</th>
+                                <th>Position</th>
                                 <th>Observations (Goal: 4)</th>
                                 <th>Coaching Sessions (Goal: 2)</th>
                                 <th>Status</th>
@@ -1036,7 +1036,7 @@
                 </div>
             </div>
             
-            <!-- NEW: PAGE 4: Store Goals -->
+            <!-- RESTORED: PAGE 4: Store Goals -->
             <div id="Goals" class="page-content">
                 <form id="goalsForm">
                     <h2>Store Monthly Goals</h2>
@@ -1114,8 +1114,8 @@
                             <input type="text" id="new-employee-name" placeholder="e.g., Rogers, Devin K" required>
                         </div>
                         <div>
-                            <label for="new-employee-role">Role:</label>
-                            <input type="text" id="new-employee-role" placeholder="e.g., Greeter, Sales Rep" required>
+                            <label for="new-employee-position">Position:</label>
+                            <input type="text" id="new-employee-position" placeholder="e.g., Greeter, Sales Rep" required>
                         </div>
                         <div class="grid-span-2">
                             <label for="new-employee-hire-date">Hire Date:</label>
@@ -1136,7 +1136,6 @@
 
     <!-- Edit Employee Modal -->
     <div id="editEmployeeModal" class="modal">
-        <!-- ... existing modal ... -->
         <div class="modal-content">
             <span class="close-btn" id="modal-close-btn">&times;</span>
             <form id="editEmployeeForm">
@@ -1149,8 +1148,8 @@
                         <input type="text" id="edit-employee-name" name="name" required>
                     </div>
                     <div>
-                        <label for="edit-employee-role">Role:</label>
-                        <input type="text" id="edit-employee-role" name="role">
+                        <label for="edit-employee-position">Position:</label>
+                        <input type="text" id="edit-employee-position" name="position">
                     </div>
                     <div>
                         <label for="edit-employee-hire-date">Hire Date:</label>
@@ -1163,6 +1162,10 @@
                     <div class="grid-span-2">
                         <label for="edit-employee-opportunities">Opportunities:</label>
                         <textarea id="edit-employee-opportunities" name="opportunities" class="profile-notes" placeholder="e.g., Needs to focus on..."></textarea>
+                    </div>
+                    <div class="grid-span-2">
+                        <label for="edit-employee-leader-notes">Leader Notes:</label>
+                        <textarea id="edit-employee-leader-notes" name="leaderNotes" class="profile-notes" placeholder="e.g., Responded well to feedback on..."></textarea>
                     </div>
                 </div>
                 <button type="submit">Save Changes</button>
@@ -1347,7 +1350,11 @@
             }
             employeeSelect.value = selectedValue;
         }
-        // ... populateEmployeeList function (unchanged) ...
+        
+        /**
+         * Fills the <ul> list on the "Manage Employees" tab.
+         * UPDATED: "Position"
+         */
         function populateEmployeeList() {
             const employeeList = document.getElementById('employee-list');
             employeeList.innerHTML = '';
@@ -1359,25 +1366,34 @@
                 nameSpan.className = 'employee-list-name';
                 nameSpan.textContent = profile.name;
                 infoDiv.appendChild(nameSpan);
-                if (profile.role) {
+                
+                // UPDATED: "position"
+                if (profile.position) {
                     const roleSpan = document.createElement('span');
                     roleSpan.className = 'employee-list-role';
-                    roleSpan.textContent = ` (${profile.role})`;
+                    roleSpan.textContent = ` (${profile.position})`;
                     infoDiv.appendChild(roleSpan);
                 }
+                
                 const tenureSpan = document.createElement('span');
                 tenureSpan.className = 'employee-list-tenure';
                 tenureSpan.textContent = calculateTenure(profile.hireDate);
                 infoDiv.appendChild(tenureSpan);
+
                 li.appendChild(infoDiv);
+                
                 li.addEventListener('click', () => {
                     openEditModal(id, profile);
                 });
+                
                 employeeList.appendChild(li);
             }
         }
         
-        // ... displayEmployeeLogs function (unchanged) ...
+        /**
+         * Displays the logs for the selected employee ID
+         * UPDATED to show who logged
+         */
         function displayEmployeeLogs(employeeId) {
             const logOutput = document.getElementById('log-output');
             const coachingOutput = document.getElementById('ai-coaching-output');
@@ -1561,7 +1577,7 @@
                 tr.appendChild(nameCell);
                 
                 const roleCell = document.createElement('td');
-                roleCell.textContent = profile.role;
+                roleCell.textContent = profile.position; // UPDATED
                 tr.appendChild(roleCell);
 
                 const obsCell = document.createElement('td');
@@ -1581,7 +1597,9 @@
             }
         }
         
-        // ... displayStoreGoals function (unchanged) ...
+        /**
+         * NEW: Populates the Store Goals form and calculated fields
+         */
         function displayStoreGoals() {
             const form = document.getElementById('goalsForm');
             form.xm.value = localStoreGoals.xm || '';
@@ -1590,10 +1608,13 @@
             form.cdv.value = localStoreGoals.cdv || '';
             form.xhs.value = localStoreGoals.xhs || '';
             form.upgrades.value = localStoreGoals.upgrades || '';
+            
             const total = (localStoreGoals.xm || 0) + (localStoreGoals.hsi || 0) + (localStoreGoals.video || 0) + (localStoreGoals.cdv || 0) + (localStoreGoals.xhs || 0) + (localStoreGoals.upgrades || 0);
             const bonus = Math.ceil(total * 1.2);
+            
             document.getElementById('total-goal-display').textContent = total;
             document.getElementById('bonus-goal-display').textContent = bonus;
+            
             if (localStoreGoals.lastUpdated) {
                 document.getElementById('goals-last-updated').textContent = `Last Updated: ${localStoreGoals.lastUpdated.toDate().toLocaleString()}`;
             } else {
@@ -1601,17 +1622,21 @@
             }
         }
         
-        // ... checkGoalDate function (unchanged) ...
+        /**
+         * NEW: Checks if goals are stale and shows warning
+         */
         function checkGoalDate() {
             const warningIcon = document.getElementById('nav-goals-warning');
             if (!localStoreGoals.lastUpdated) {
-                warningIcon.style.display = 'inline';
+                warningIcon.style.display = 'inline'; // No goals set
                 return;
             }
+            
             const fiscalMonth = getFiscalMonthInfo(new Date());
             const lastUpdatedDate = localStoreGoals.lastUpdated.toDate();
+            
             if (lastUpdatedDate < fiscalMonth.startDate) {
-                warningIcon.style.display = 'inline';
+                warningIcon.style.display = 'inline'; // Goals are from a previous fiscal month
             } else {
                 warningIcon.style.display = 'none';
             }
@@ -1622,40 +1647,56 @@
             populateEmployeeDropdown('log-employee-select'); // Log view
             populateEmployeeDropdown('coaching-employee-select'); // Coaching form
             populateEmployeeList(); // Manage employees
+            
+            // Re-display logs for the currently selected employee in the log tab
             displayEmployeeLogs(document.getElementById('log-employee-select').value);
             
+            // NEW: Refresh tracker tab if it's active
             if(document.getElementById('Tracker').classList.contains('active')) {
                 updateTrackerTab();
             }
+            // NEW: Refresh goals tab if it's active
             if(document.getElementById('Goals').classList.contains('active')) {
                 displayStoreGoals();
             }
+            // NEW: Check if goals are stale
             checkGoalDate();
         }
 
         
         // --- Event Handling Functions ---
         
-        // ... showToast function (unchanged) ...
+        /**
+         * NEW: Custom Toast (Alert)
+         * Replaces all alert() calls
+         */
         let toastTimeout;
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast-notification');
             const toastMessage = document.getElementById('toast-message');
+            
             toastMessage.textContent = message;
             toast.className = 'show';
             if (isError) {
                 toast.classList.add('error');
             }
+            
+            // Clear existing timeout if one exists
             if (toastTimeout) {
                 clearTimeout(toastTimeout);
             }
+
+            // Set new timeout to hide
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
                 toast.classList.remove('error');
-            }, 3000); 
+            }, 3000); // Hide after 3 seconds
         }
 
-        // ... showCustomPrompt function (unchanged) ...
+        /**
+         * NEW: Custom Prompt (replaces prompt())
+         * Returns a Promise that resolves with the input value or null
+         */
         function showCustomPrompt(message) {
             const modal = document.getElementById('custom-prompt-modal');
             const messageEl = document.getElementById('custom-prompt-message');
@@ -1663,10 +1704,12 @@
             const confirmBtn = document.getElementById('prompt-confirm-btn');
             const cancelBtn = document.getElementById('prompt-cancel-btn');
             const closeBtn = document.getElementById('prompt-close-btn');
+
             messageEl.textContent = message;
             inputEl.value = '';
             modal.style.display = 'block';
             inputEl.focus();
+
             return new Promise((resolve) => {
                 const close = (value) => {
                     modal.style.display = 'none';
@@ -1676,6 +1719,7 @@
                     inputEl.onkeydown = null;
                     resolve(value);
                 };
+
                 confirmBtn.onclick = () => close(inputEl.value);
                 cancelBtn.onclick = () => close(null);
                 closeBtn.onclick = () => close(null);
@@ -1689,61 +1733,87 @@
             });
         }
         
-        // ... showDeleteFailsafe function (unchanged) ...
+        /**
+         * NEW: Failsafe check for deletions
+         * Now async and uses custom prompt
+         */
         async function showDeleteFailsafe(actionName) {
             const message = `This action is permanent and cannot be undone.\n\nTo delete this ${actionName}, please type the failsafe code: ${DELETE_FAILSAFE_CODE}`;
             const userInput = await showCustomPrompt(message);
+            
             if (userInput === DELETE_FAILSAFE_CODE) {
                 return true;
-            } else if (userInput !== null) { 
+            } else if (userInput !== null) { // User typed something, but it was wrong
                 await showToast("Incorrect code. Deletion cancelled.", true);
             }
-            return false;
+            return false; // User cancelled or typed wrong code
         }
         
-        // ... addEmployee function (unchanged) ...
+        /**
+         * Adds a new employee to the list.
+         * UPDATED: "Position", "Leader Notes"
+         */
         async function addEmployee(event) {
             event.preventDefault();
             const nameInput = document.getElementById('new-employee-name');
-            const roleInput = document.getElementById('new-employee-role');
+            const positionInput = document.getElementById('new-employee-position');
             const hireDateInput = document.getElementById('new-employee-hire-date');
+            
             const newName = nameInput.value.trim();
-            const newRole = roleInput.value.trim();
+            const newPosition = positionInput.value.trim();
             const newHireDate = hireDateInput.value;
-            if (newName && newRole && newHireDate) {
+            
+            if (newName && newPosition && newHireDate) {
                 if (Object.values(localEmployees).find(emp => emp.name.toLowerCase() === newName.toLowerCase())) {
                     await showToast("An employee with this name already exists.", true);
                     return;
                 }
+
                 const newEmployee = {
                     name: newName,
-                    role: newRole,
+                    position: newPosition, // UPDATED
                     hireDate: newHireDate,
                     strengths: "",
-                    opportunities: ""
+                    opportunities: "",
+                    leaderNotes: "" // NEW
                 };
+                
                 try {
                     await addDoc(employeesRef, newEmployee);
                     await showToast("Employee added successfully!");
                     nameInput.value = '';
-                    roleInput.value = '';
+                    positionInput.value = '';
                     hireDateInput.value = '';
                 } catch (e) {
                     console.error("Error adding employee:", e);
                     await showToast("Failed to add employee. See console for details.", true);
                 }
+
             } else {
-                await showToast("Please fill out Name, Role, and Hire Date.", true);
+                await showToast("Please fill out Name, Position, and Hire Date.", true);
             }
         }
-        // ... deleteEmployee function (unchanged) ...
+
+        /**
+         * Deletes an employee from the list (called from modal).
+         * UPDATED with failsafe
+         */
         async function deleteEmployee(idToDelete) {
             const employeeName = localEmployees[idToDelete]?.name || "this employee";
+            
+            // NEW: Failsafe check
             if (!await showDeleteFailsafe(`employee (${employeeName}) and ALL their logs`)) {
                 return;
             }
+            
             try {
+                // First, delete the employee doc
                 await deleteDoc(doc(db, "artifacts", appId, "public", "data", "employees", idToDelete));
+                
+                // TODO: In a production app, you'd use a cloud function to delete
+                // associated logs. For now, we'll just delete the profile.
+                // The logs will be orphaned but won't be visible.
+                
                 await showToast("Employee deleted.");
                 closeEditModal();
             } catch (e) {
@@ -1751,11 +1821,16 @@
                 await showToast("Failed to delete employee. See console for details.", true);
             }
         }
-        // ... deleteLog function (unchanged) ...
+        
+        /**
+         * NEW: Deletes a single log
+         */
         async function deleteLog(logId, logType, logTypeName) {
+            // NEW: Failsafe check
             if (!await showDeleteFailsafe(logTypeName)) {
                 return;
             }
+            
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", logType, logId);
                 await deleteDoc(docRef);
@@ -1774,12 +1849,13 @@
         }
         
         /**
-         * UPDATED: Added loggedBy
+         * UPDATED: Added loggedBy, "Position", "Leader Notes"
          */
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
             const customerIntent = form.customerIntent.value.trim();
+            
             if (!employeeId) {
                 await showToast("Please select an employee first.", true);
                 return;
@@ -1788,6 +1864,7 @@
                 await showToast("Please enter the customer intent first.", true);
                 return;
             }
+            
             const profile = localEmployees[employeeId];
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
@@ -1796,6 +1873,7 @@
             if (recentCoaching && recentCoaching.actionPlan) {
                 coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
             }
+            
             const greatData = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
@@ -1823,11 +1901,14 @@
                     notes: form.notes_t.value.trim()
                 }
             };
+            
             let prompt = `Act as a sales manager for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${profile.name}.\n\n`;
             prompt += `Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 steps. **Use ${profile.name}'s name** where it feels natural to make it personal.\n\n`;
             prompt += `For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
+            
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n"; 
+            
             let goalsContext = "Monthly goals are not set.\n";
             if (localStoreGoals.totalGoal) {
                 goalsContext = `Current Monthly Goals:\n` +
@@ -1836,12 +1917,14 @@
             }
             prompt += `--- CURRENT STORE GOALS ---\n`;
             prompt += goalsContext + "\n\n";
+
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
-            prompt += `Role: ${profile.role}\n`;
+            prompt += `Position: ${profile.position}\n`; // UPDATED
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
             prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
-            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n`;
+            prompt += `Leader Notes: ${profile.leaderNotes || 'N/A'}\n\n`; // NEW
             prompt += `--- PREVIOUS COACHING SESSION (For Context) ---\n`;
             prompt += coachingContext;
             prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
@@ -1858,7 +1941,9 @@
             prompt += formatStep('A - Ask', greatData.ask);
             prompt += formatStep('T - Thank', greatData.thank);
             prompt += `\n--- GENERATE JSON OUTPUT ---`;
+            
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
+            
             try {
                 const generationConfig = {
                     responseMimeType: "application/json",
@@ -1888,17 +1973,23 @@
                     throw new Error(`API Error: ${response.status} ${response.statusText}`);
                 }
                 const result = await response.json();
+                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
+                
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
+
+                // Populate fields with AI notes
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
                 if (notesObject.relate_note) form.notes_r.value = notesObject.relate_note;
                 if (notesObject.explore_note) form.notes_e.value = notesObject.explore_note;
                 if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
                 if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
+                
+                // NOW, LOG IT AUTOMATICALLY
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -1906,6 +1997,7 @@
                     ask: { ...greatData.ask, notes: form.notes_a.value },
                     thank: { ...greatData.thank, notes: form.notes_t.value }
                 };
+
                 const newObservation = {
                     employeeId: employeeId,
                     date: Timestamp.now(),
@@ -1915,12 +2007,15 @@
                     loggedBy: currentUser.displayName || currentUser.email, // NEW
                     loggedByEmail: currentUser.email // NEW
                 };
+
                 await addDoc(observationsRef, newObservation);
+                
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI notes generated and observation logged for ${employeeName}!`);
                 form.reset();
                 form.employee.value = "";
                 form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+                
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
                 await showToast('AI generation or logging failed. Please check the console for errors.', true);
@@ -1929,7 +2024,9 @@
             }
         }
         
-        // ... generateAICoachingPlan function (unchanged) ...
+        /**
+         * UPDATED: Added "Position", "Leader Notes"
+         */
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
@@ -1961,10 +2058,11 @@
             prompt += goalsContext + "\n\n";
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
-            prompt += `Role: ${profile.role}\n`;
+            prompt += `Position: ${profile.position}\n`; // UPDATED
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
             prompt += `Manager-defined Strengths: ${profile.strengths || 'N/A'}\n`;
-            prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+            prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n`;
+            prompt += `Leader Notes: ${profile.leaderNotes || 'N/A'}\n\n`; // NEW
             prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n\n`;
             const recentObsHistory = obsHistory.slice(0, 3);
             if (recentObsHistory.length === 0) {
@@ -1973,7 +2071,7 @@
             for (let i = 0; i < recentObsHistory.length; i++) {
                 const log = recentObsHistory[i];
                 prompt += `--- Observation Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
-                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`; // NEW
+                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`;
                 prompt += `Customer Intent: ${log.customerIntent || 'N/A'}\n`;
                 if (log.greatAssessment) {
                     const formatStep = (name, data) => {
@@ -1999,7 +2097,7 @@
             for (let i = 0; i < recentCoachingHistory.length; i++) {
                 const log = recentCoachingHistory[i];
                 prompt += `--- Coaching Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
-                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`; // NEW
+                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`;
                 prompt += `Type: ${log.sessionType}\n`;
                 prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
                 prompt += `Progress Reported by Coachee: ${log.progress}\n`;
@@ -2046,7 +2144,7 @@
         }
 
         /**
-         * UPDATED: Added loggedBy
+         * UPDATED: Added "Position", "Leader Notes"
          */
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
@@ -2084,7 +2182,10 @@
             prompt += `--- CURRENT STORE GOALS ---\n`;
             prompt += goalsContext + "\n\n";
             prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
+            prompt += `Name: ${profile.name}, Position: ${profile.position}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
+            prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
+            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n`;
+            prompt += `Leader Notes: ${profile.leaderNotes || 'N/A'}\n\n`; // NEW
             prompt += `--- MANAGER'S RAW NOTES (INPUT) ---\n`;
             prompt += `Progress: ${rawProgress}\n`;
             prompt += `Obstacles: ${rawObstacles}\n`;
@@ -2224,32 +2325,44 @@
         }
 
         // --- MODAL Functions ---
-        // ... openEditModal, closeEditModal, saveEmployeeChanges (unchanged) ...
+        
         const modal = document.getElementById('editEmployeeModal');
         const editForm = document.getElementById('editEmployeeForm');
+        
+        /**
+         * UPDATED: "Position", "Leader Notes"
+         */
         function openEditModal(id, profile) {
             editForm.id.value = id;
             editForm.name.value = profile.name;
-            editForm.role.value = profile.role || '';
+            editForm.position.value = profile.position || ''; // UPDATED
             editForm.hireDate.value = profile.hireDate || '';
             editForm.strengths.value = profile.strengths || '';
             editForm.opportunities.value = profile.opportunities || '';
+            editForm.leaderNotes.value = profile.leaderNotes || ''; // NEW
             modal.style.display = 'block';
         }
         function closeEditModal() {
             modal.style.display = 'none';
             editForm.reset();
         }
+        
+        /**
+         * UPDATED: "Position", "Leader Notes"
+         */
         async function saveEmployeeChanges(event) {
             event.preventDefault();
             const id = editForm.id.value;
+            
             const updatedProfile = {
                 name: editForm.name.value.trim(),
-                role: editForm.role.value.trim(),
+                position: editForm.position.value.trim(), // UPDATED
                 hireDate: editForm.hireDate.value,
                 strengths: editForm.strengths.value.trim(),
-                opportunities: editForm.opportunities.value.trim()
+                opportunities: editForm.opportunities.value.trim(),
+                leaderNotes: editForm.leaderNotes.value.trim() // NEW
             };
+            
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", "employees", id);
                 await setDoc(docRef, updatedProfile, { merge: true });
@@ -2358,4 +2471,104 @@
             
             const appWrapper = document.getElementById('app-wrapper');
             const signInBtn = document.getElementById('sign-in-btn');
-What's next?
+            const signOutBtn = document.getElementById('sign-out-btn');
+            
+            try {
+                app = initializeApp(firebaseConfig);
+                analytics = getAnalytics(app);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                googleProvider = new GoogleAuthProvider(); 
+                setLogLevel('Debug');
+                
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                await showToast("FATAL ERROR: Could not connect to database.", true);
+                return;
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user; // NEW: Store user object globally
+                if (user) {
+                    console.log("Firebase: User authenticated:", user.uid);
+                    userId = user.uid;
+                    appWrapper.classList.remove('logged-out'); 
+                    
+                    // FIX: Hide sign-in button when logged in
+                    signInBtn.style.display = 'none';
+                    signOutBtn.style.display = 'block';
+                    signOutBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out (${user.displayName || user.email})`;
+                    
+                    setupFirestoreListeners();
+                } else {
+                    console.log("Firebase: User signed out.");
+                    userId = null;
+                    appWrapper.classList.add('logged-out'); 
+                    
+                    // FIX: Hide sign-out button when logged out
+                    signInBtn.style.display = 'block';
+                    signOutBtn.style.display = 'none';
+                    signOutBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+                    
+                    if (employeesListener) employeesListener();
+                    if (observationsListener) observationsListener();
+                    if (coachingsListener) coachingsListener();
+                    if (storeGoalsListener) storeGoalsListener();
+                }
+            });
+
+            // --- Add All UI Event Listeners ---
+            document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
+            document.getElementById('coachingForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                showToast("Please use the 'Generate AI Notes & Log Session' button to log this coaching.", true);
+            });
+            document.getElementById('goalsForm').addEventListener('submit', saveStoreGoals);
+            
+            document.getElementById('generate-and-log-ai-summary').addEventListener('click', generateAndLogObservation);
+            document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
+            document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
+
+            document.getElementById('employee').addEventListener('change', (event) => {
+                displayLastSMARTGoal(event.target.value);
+            });
+            
+            document.getElementById('log-employee-select').addEventListener('change', (event) => {
+                displayEmployeeLogs(event.target.value);
+            });
+            
+            document.getElementById('sign-in-btn').addEventListener('click', signInWithGoogle);
+            document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
+            
+            // Modal buttons
+            document.getElementById('modal-close-btn').addEventListener('click', closeEditModal);
+            document.getElementById('editEmployeeForm').addEventListener('submit', saveEmployeeChanges);
+            document.getElementById('delete-employee-btn').addEventListener('click', () => {
+                const id = document.getElementById('edit-employee-id').value;
+                deleteEmployee(id);
+            });
+            
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    closeEditModal();
+                }
+            });
+            
+            // Custom Prompt Modal buttons
+            document.getElementById('prompt-close-btn').addEventListener('click', () => {
+                document.getElementById('custom-prompt-modal').style.display = 'none';
+            });
+            document.getElementById('prompt-cancel-btn').addEventListener('click', () => {
+                document.getElementById('custom-prompt-modal').style.display = 'none';
+            });
+
+            
+            document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+            document.getElementById('coaching-date').valueAsDate = new Date();
+            
+            window.openPage = openPage;
+        });
+
+    </script>
+</body>
+</html>
