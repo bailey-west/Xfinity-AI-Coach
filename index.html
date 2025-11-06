@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retail Coaching Tool</title>
+    <!-- ... existing styles ... -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
@@ -374,6 +375,18 @@
             font-size: 0.9em;
             color: var(--text-color-light);
         }
+        /* NEW: Byline for who logged */
+        .log-byline {
+            font-size: 0.9em;
+            font-style: italic;
+            color: var(--text-color-light);
+            margin-top: -10px;
+        }
+        .log-byline strong {
+            color: var(--text-color-light);
+            font-weight: 600;
+        }
+        
         .log-delete-btn {
             background: none;
             border: none;
@@ -565,6 +578,15 @@
         .app-layout.logged-out .sidebar-footer button.sign-out {
             display: none;
         }
+        /* FIX: Hide sign-in button when logged in */
+        .app-layout:not(.logged-out) .sidebar-footer button#sign-in-btn {
+            display: none;
+        }
+        .app-layout.logged-out .sidebar-footer button#sign-out-btn {
+            display: none;
+        }
+        /* END FIX */
+        
         .app-layout:not(.logged-out) #sign-in-container {
             display: none;
         }
@@ -622,6 +644,45 @@
         }
         #tracker-table .fa-check-circle {
             margin-right: 5px;
+        }
+        
+        /* NEW: Tracker Progress Pips & Tooltip */
+        .progress-pips {
+            display: flex;
+            gap: 5px;
+            position: relative; /* For tooltip */
+            cursor: default;
+        }
+        .progress-pip {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
+        .progress-pip.filled {
+            background-color: var(--success-color);
+        }
+        .progress-pips .tooltip-content {
+            display: none;
+            position: absolute;
+            bottom: 125%; /* Position above the pips */
+            left: 0;
+            background-color: var(--sidebar-bg);
+            color: var(--light-color);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            width: 250px; /* Set a width */
+            white-space: pre-wrap; /* Allow newlines */
+            z-index: 10;
+            box-shadow: var(--shadow-md);
+            pointer-events: none; /* Allow hover-through */
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .progress-pips:hover .tooltip-content {
+            display: block;
+            opacity: 1;
         }
         
         /* Store Goals Page */
@@ -917,16 +978,7 @@
                         </div>
                     </div>
 
-                    <div class="form-grid">
-                        <div>
-                            <label for="coaching-tnps">tNPS Score (Optional):</label>
-                            <input type="number" id="coaching-tnps" name="tnps" placeholder="e.g., 63.6">
-                        </div>
-                        <div>
-                            <label for="coaching-sales">Sales Metric (Optional):</label>
-                            <input type="text" id="coaching-sales" name="sales" placeholder="e.g., 10 mobile lines">
-                        </div>
-                    </div>
+                    <!-- REMOVED tNPS and Sales -->
                     
                     <div>
                         <label for="coaching-progress">What Progress has been made since last coaching session?
@@ -953,73 +1005,11 @@
                 </form>
             </div>
             
-            <!-- NEW: PAGE 3: Monthly Tracker -->
-            <div id="Tracker" class="page-content">
-                <h2 id="tracker-title">Monthly Goal Tracker</h2>
-                <p id="tracker-subtitle" style="text-align: center; margin-top: -10px; margin-bottom: 20px; font-size: 1.1em; color: var(--text-color-light);"></p>
-                <div id="tracker-table-container">
-                    <table id="tracker-table">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                <th>Role</th>
-                                <th>Observations (Goal: 4)</th>
-                                <th>Coaching Sessions (Goal: 2)</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tracker-table-body">
-                            <!-- Rows will be added by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <!-- REMOVED: PAGE 3: Monthly Tracker -->
             
-            <!-- NEW: PAGE 4: Store Goals -->
-            <div id="Goals" class="page-content">
-                <form id="goalsForm">
-                    <h2>Store Monthly Goals</h2>
-                    <p style="text-align: center; margin-top: -10px; margin-bottom: 20px; color: var(--text-color-light);">Set the store-wide goals for the current fiscal month. All AI-generated SMART goals will reference these numbers.</p>
-                    
-                    <div class="goals-grid">
-                        <div>
-                            <label for="goal-xm">XM (Xfinity Mobile)</label>
-                            <input type="number" id="goal-xm" name="xm" placeholder="e.g., 40">
-                        </div>
-                        <div>
-                            <label for="goal-hsi">HSI (Internet)</label>
-                            <input type="number" id="goal-hsi" name="hsi" placeholder="e.g., 20">
-                        </div>
-                        <div>
-                            <label for="goal-video">Video</label>
-                            <input type="number" id="goal-video" name="video" placeholder="e.g., 10">
-                        </div>
-                        <div>
-                            <label for="goal-cdv">CDV (Voice)</label>
-                            <input type="number" id="goal-cdv" name="cdv" placeholder="e.g., 5">
-                        </div>
-                        <div>
-                            <label for="goal-xhs">XHS (Home Security)</label>
-                            <input type="number" id="goal-xhs" name="xhs" placeholder="e.g., 5">
-                        </div>
-                        <div>
-                            <label for="goal-upgrades">Device Upgrades</label>
-                            <input type="number" id="goal-upgrades" name="upgrades" placeholder="e.g., 15">
-                        </div>
-                    </div>
-                    
-                    <button type="submit">Save Monthly Goals</button>
-                    
-                    <div class="goals-summary">
-                        <h3>Calculated Totals</h3>
-                        <p>Total Unit Goal: <span id="total-goal-display">0</span></p>
-                        <p>120% Bonus Goal: <span id="bonus-goal-display">0</span></p>
-                        <p id="goals-last-updated">Last Updated: Never</p>
-                    </div>
-                </form>
-            </div>
+            <!-- REMOVED: PAGE 4: Store Goals -->
 
-            <!-- PAGE 5: View Logs -->
+            <!-- PAGE 3: View Logs (was 5) -->
             <div id="ViewLogs" class="page-content">
                 <!-- ... existing view logs ... -->
                 <h2>View Performance Logs</h2>
@@ -1042,7 +1032,7 @@
                 </div>
             </div>
 
-            <!-- PAGE 6: Employee Management -->
+            <!-- PAGE 4: Employee Management (was 6) -->
             <div id="Employees" class="page-content">
                 <!-- ... existing employee management ... -->
                 <form id="addEmployeeForm">
@@ -1053,8 +1043,9 @@
                             <input type="text" id="new-employee-name" placeholder="e.g., Rogers, Devin K" required>
                         </div>
                         <div>
-                            <label for="new-employee-role">Role:</label>
-                            <input type="text" id="new-employee-role" placeholder="e.g., Greeter, Sales Rep" required>
+                            <!-- UPDATED: "Position" -->
+                            <label for="new-employee-position">Position:</label>
+                            <input type="text" id="new-employee-position" placeholder="e.g., Greeter, Sales Rep" required>
                         </div>
                         <div class="grid-span-2">
                             <label for="new-employee-hire-date">Hire Date:</label>
@@ -1087,8 +1078,9 @@
                         <input type="text" id="edit-employee-name" name="name" required>
                     </div>
                     <div>
-                        <label for="edit-employee-role">Role:</label>
-                        <input type="text" id="edit-employee-role" name="role">
+                        <!-- UPDATED: "Position" -->
+                        <label for="edit-employee-position">Position:</label>
+                        <input type="text" id="edit-employee-position" name="position">
                     </div>
                     <div>
                         <label for="edit-employee-hire-date">Hire Date:</label>
@@ -1101,6 +1093,11 @@
                     <div class="grid-span-2">
                         <label for="edit-employee-opportunities">Opportunities:</label>
                         <textarea id="edit-employee-opportunities" name="opportunities" class="profile-notes" placeholder="e.g., Needs to focus on..."></textarea>
+                    </div>
+                    <!-- NEW: Leader Notes -->
+                    <div class="grid-span-2">
+                        <label for="edit-employee-leader-notes">Leader Notes:</label>
+                        <textarea id="edit-employee-leader-notes" name="leaderNotes" class="profile-notes" placeholder="e.g., Responded well to feedback on..."></textarea>
                     </div>
                 </div>
                 <button type="submit">Save Changes</button>
@@ -1157,27 +1154,7 @@
         const API_KEY = "AIzaSyAWY5r9ovt_nGjXPXmv0NNjYnDY-B255bc"; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         
-        // --- UPDATED: KPI Context ---
-        const KPI_CONTEXT = `
-            Please use the following Xfinity retail KPIs and expectations when generating SMART goals:
-            - Reps are full-time, 5x8-hour shifts.
-            - tNPS score goal: 75
-            - XM% to goal: 100%
-            - XM conversion rate: 10%
-            - HSD (high speed data OR internet sale) to goal: 100%
-            - Gigabit+ sell in: 50%
-            - Video/CDV(Landline)/XH(Home security) unit % to goal: 100%
-            - Wablets: Watch/Tablet sale: minimum 2 per week, recommended 4 per week, with attach rate of 45%
-            - XMC (Xfinity Mobile Care or insurance unit) attach: 60%
-            - Unlimited Premium (higher mobile plan) attach: 45%
-            - New/New (New mobile line attach on a new internet sale, same day): 30% attach
-            - Monthly Mobile Line (LA) Goal: 40 per rep (approx 10-15 per week).
-            - Total Monthly Unit Goal: Varies, but hitting 120% of this total (e.g., HSI+Video+XM+etc) gives a 20% commission bonus.
-            - 'Service to sales' means every service interaction (like a bill pay or equipment swap)
-              is an opportunity to perform an account review and pivot to a sale (especially Xfinity Mobile).
-        `;
-        // --- END KPI Context ---
-
+        // --- REMOVED: KPI Context ---
 
         // --- Firebase Config & App Variables ---
         const firebaseConfig = {
@@ -1193,22 +1170,20 @@
         const appId = firebaseConfig.projectId || 'default-app-id';
         const DELETE_FAILSAFE_CODE = "DELETE-1234"; // NEW: Failsafe code
 
-        let db, auth, userId, googleProvider, app, analytics; 
-        let employeesRef, observationsRef, coachingsRef, storeGoalsRef; // NEW: storeGoalsRef
+        let db, auth, userId, googleProvider, app, analytics, currentUser; // NEW: currentUser
+        let employeesRef, observationsRef, coachingsRef; // REMOVED: storeGoalsRef
         let employeesListener = null;
         let observationsListener = null;
         let coachingsListener = null;
-        let storeGoalsListener = null; // NEW: storeGoalsListener
+        // REMOVED: storeGoalsListener
 
         // Global state variables
         let localEmployees = {};
         let localObservations = [];
         let localCoachings = [];
-        let localStoreGoals = {}; // NEW: localStoreGoals
+        // REMOVED: localStoreGoals
         
-        // NEW: Goal constants
-        const OBS_GOAL = 4;
-        const COACH_GOAL = 2;
+        // REMOVED: Goal constants
 
         // --- Core Data Functions ---
         // ... calculateTenure function (unchanged) ...
@@ -1236,38 +1211,7 @@
             return ` (${tenureStr})`;
         }
         
-        // ... getFiscalMonthInfo function (unchanged) ...
-        function getFiscalMonthInfo(date) {
-            const day = date.getDate();
-            let startMonth = date.getMonth();
-            let startYear = date.getFullYear();
-            let endMonth = date.getMonth();
-            let endYear = date.getFullYear();
-            if (day < 22) {
-                endMonth = date.getMonth();
-                endYear = date.getFullYear();
-                startMonth = date.getMonth() - 1;
-                startYear = date.getFullYear();
-                if (startMonth < 0) {
-                    startMonth = 11; // December
-                    startYear -= 1;
-                }
-            } else {
-                startMonth = date.getMonth();
-                startYear = date.getFullYear();
-                endMonth = date.getMonth() + 1;
-                endYear = date.getFullYear();
-                if (endMonth > 11) {
-                    endMonth = 0; // January
-                    endYear += 1;
-                }
-            }
-            const startDate = new Date(startYear, startMonth, 22, 0, 0, 0);
-            const endDate = new Date(endYear, endMonth, 21, 23, 59, 59);
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const fiscalMonthName = `Fiscal ${monthNames[endMonth]} ${endYear}`;
-            return { startDate, endDate, name: fiscalMonthName };
-        }
+        // REMOVED: getFiscalMonthInfo function
 
 
         // --- Page Building Functions ---
@@ -1285,7 +1229,11 @@
             }
             employeeSelect.value = selectedValue;
         }
-        // ... populateEmployeeList function (unchanged) ...
+        
+        /**
+         * Fills the <ul> list on the "Manage Employees" tab.
+         * UPDATED: "Position"
+         */
         function populateEmployeeList() {
             const employeeList = document.getElementById('employee-list');
             employeeList.innerHTML = '';
@@ -1297,25 +1245,34 @@
                 nameSpan.className = 'employee-list-name';
                 nameSpan.textContent = profile.name;
                 infoDiv.appendChild(nameSpan);
-                if (profile.role) {
+                
+                // UPDATED: "position"
+                if (profile.position) {
                     const roleSpan = document.createElement('span');
                     roleSpan.className = 'employee-list-role';
-                    roleSpan.textContent = ` (${profile.role})`;
+                    roleSpan.textContent = ` (${profile.position})`;
                     infoDiv.appendChild(roleSpan);
                 }
+                
                 const tenureSpan = document.createElement('span');
                 tenureSpan.className = 'employee-list-tenure';
                 tenureSpan.textContent = calculateTenure(profile.hireDate);
                 infoDiv.appendChild(tenureSpan);
+
                 li.appendChild(infoDiv);
+                
                 li.addEventListener('click', () => {
                     openEditModal(id, profile);
                 });
+                
                 employeeList.appendChild(li);
             }
         }
         
-        // ... displayEmployeeLogs function (unchanged) ...
+        /**
+         * Displays the logs for the selected employee ID
+         * UPDATED to remove sales/tnps
+         */
         function displayEmployeeLogs(employeeId) {
             const logOutput = document.getElementById('log-output');
             const coachingOutput = document.getElementById('ai-coaching-output');
@@ -1353,6 +1310,14 @@
                 });
                 headerDiv.appendChild(deleteBtn);
                 entryDiv.appendChild(headerDiv);
+                
+                if (log.loggedBy) {
+                    const byline = document.createElement('p');
+                    byline.className = 'log-byline';
+                    byline.innerHTML = `Logged by: <strong>${log.loggedBy}</strong>`;
+                    entryDiv.appendChild(byline);
+                }
+                
                 if (log.greatAssessment) {
                     if(log.customerIntent) {
                         const intentP = document.createElement('p');
@@ -1401,10 +1366,9 @@
                 } else if (log.sessionType) {
                     const coachingDiv = document.createElement('div');
                     coachingDiv.className = 'log-entry-coaching';
+                    // REMOVED: tNPS and Sales from display
                     coachingDiv.innerHTML = `
                         <h4>Coaching Session: ${log.sessionType}</h4>
-                        <p><strong>tNPS Logged:</strong> ${log.tnps || 'N/A'}</p>
-                        <p><strong>Sales Logged:</strong> ${log.sales || 'N/A'}</p>
                         <p><strong>Progress Since Last Session:</strong> ${log.progress || 'N/A'}</p>
                         <p><strong>Challenges Experienced:</strong> ${log.obstacles || 'N/A'}</p>
                         <p><strong>Action Plan / Commitment:</strong> ${log.actionPlan || 'N/A'}</p>
@@ -1415,128 +1379,45 @@
             }
         }
         
-        // ... updateTrackerTab function (unchanged) ...
-        function updateTrackerTab() {
-            const fiscalMonth = getFiscalMonthInfo(new Date());
-            document.getElementById('tracker-title').textContent = `Monthly Goal Tracker`;
-            document.getElementById('tracker-subtitle').textContent = `${fiscalMonth.name} (${fiscalMonth.startDate.toLocaleDateString()} - ${fiscalMonth.endDate.toLocaleDateString()})`;
-            const tableBody = document.getElementById('tracker-table-body');
-            tableBody.innerHTML = ''; 
-            const obsInMonth = localObservations.filter(obs => {
-                const date = obs.date.toDate();
-                return date >= fiscalMonth.startDate && date <= fiscalMonth.endDate;
-            });
-            const coachingInMonth = localCoachings.filter(c => {
-                const date = c.date.toDate();
-                return date >= fiscalMonth.startDate && date <= fiscalMonth.endDate;
-            });
-            const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
-            for (const [id, profile] of sortedEmployees) {
-                const obsCount = obsInMonth.filter(obs => obs.employeeId === id).length;
-                const coachCount = coachingInMonth.filter(c => c.employeeId === id).length;
-                const obsMet = obsCount >= OBS_GOAL;
-                const coachMet = coachCount >= COACH_GOAL;
-                const isComplete = obsMet && coachMet;
-                const tr = document.createElement('tr');
-                let statusClass = isComplete ? 'status-complete' : 'status-progress';
-                let statusText = isComplete ? '<i class="fa-solid fa-check-circle"></i> Complete' : 'In Progress';
-                tr.innerHTML = `
-                    <td>${profile.name}</td>
-                    <td>${profile.role}</td>
-                    <td class="${obsMet ? 'status-complete' : ''}">${obsCount} / ${OBS_GOAL}</td>
-                    <td class="${coachMet ? 'status-complete' : ''}">${coachCount} / ${COACH_GOAL}</td>
-                    <td class="${statusClass}">${statusText}</td>
-                `;
-                tableBody.appendChild(tr);
-            }
-        }
+        // REMOVED: updateTrackerTab function
         
-        // ... displayStoreGoals function (unchanged) ...
-        function displayStoreGoals() {
-            const form = document.getElementById('goalsForm');
-            form.xm.value = localStoreGoals.xm || '';
-            form.hsi.value = localStoreGoals.hsi || '';
-            form.video.value = localStoreGoals.video || '';
-            form.cdv.value = localStoreGoals.cdv || '';
-            form.xhs.value = localStoreGoals.xhs || '';
-            form.upgrades.value = localStoreGoals.upgrades || '';
-            const total = (localStoreGoals.xm || 0) + (localStoreGoals.hsi || 0) + (localStoreGoals.video || 0) + (localStoreGoals.cdv || 0) + (localStoreGoals.xhs || 0) + (localStoreGoals.upgrades || 0);
-            const bonus = Math.ceil(total * 1.2);
-            document.getElementById('total-goal-display').textContent = total;
-            document.getElementById('bonus-goal-display').textContent = bonus;
-            if (localStoreGoals.lastUpdated) {
-                document.getElementById('goals-last-updated').textContent = `Last Updated: ${localStoreGoals.lastUpdated.toDate().toLocaleString()}`;
-            } else {
-                document.getElementById('goals-last-updated').textContent = 'Last Updated: Never';
-            }
-        }
+        // REMOVED: displayStoreGoals function
         
-        // ... checkGoalDate function (unchanged) ...
-        function checkGoalDate() {
-            const warningIcon = document.getElementById('nav-goals-warning');
-            if (!localStoreGoals.lastUpdated) {
-                warningIcon.style.display = 'inline';
-                return;
-            }
-            const fiscalMonth = getFiscalMonthInfo(new Date());
-            const lastUpdatedDate = localStoreGoals.lastUpdated.toDate();
-            if (lastUpdatedDate < fiscalMonth.startDate) {
-                warningIcon.style.display = 'inline';
-            } else {
-                warningIcon.style.display = 'none';
-            }
-        }
+        // REMOVED: checkGoalDate function
         
         function refreshUI() {
             populateEmployeeDropdown('employee'); // Obs form
             populateEmployeeDropdown('log-employee-select'); // Log view
             populateEmployeeDropdown('coaching-employee-select'); // Coaching form
             populateEmployeeList(); // Manage employees
-            displayEmployeeLogs(document.getElementById('log-employee-select').value);
             
-            if(document.getElementById('Tracker').classList.contains('active')) {
-                updateTrackerTab();
-            }
-            if(document.getElementById('Goals').classList.contains('active')) {
-                displayStoreGoals();
-            }
-            checkGoalDate();
+            // Re-display logs for the currently selected employee in the log tab
+            displayEmployeeLogs(document.getElementById('log-employee-select').value);
         }
 
         
         // --- Event Handling Functions ---
         
-        /**
-         * NEW: Custom Toast (Alert)
-         * Replaces all alert() calls
-         */
+        // ... showToast function (unchanged) ...
         let toastTimeout;
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast-notification');
             const toastMessage = document.getElementById('toast-message');
-            
             toastMessage.textContent = message;
             toast.className = 'show';
             if (isError) {
                 toast.classList.add('error');
             }
-            
-            // Clear existing timeout if one exists
             if (toastTimeout) {
                 clearTimeout(toastTimeout);
             }
-
-            // Set new timeout to hide
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
                 toast.classList.remove('error');
-            }, 3000); // Hide after 3 seconds
+            }, 3000); 
         }
 
-        /**
-         * NEW: Custom Prompt (replaces prompt())
-         * Returns a Promise that resolves with the input value or null
-         */
+        // ... showCustomPrompt function (unchanged) ...
         function showCustomPrompt(message) {
             const modal = document.getElementById('custom-prompt-modal');
             const messageEl = document.getElementById('custom-prompt-message');
@@ -1544,12 +1425,10 @@
             const confirmBtn = document.getElementById('prompt-confirm-btn');
             const cancelBtn = document.getElementById('prompt-cancel-btn');
             const closeBtn = document.getElementById('prompt-close-btn');
-
             messageEl.textContent = message;
             inputEl.value = '';
             modal.style.display = 'block';
             inputEl.focus();
-
             return new Promise((resolve) => {
                 const close = (value) => {
                     modal.style.display = 'none';
@@ -1559,7 +1438,6 @@
                     inputEl.onkeydown = null;
                     resolve(value);
                 };
-
                 confirmBtn.onclick = () => close(inputEl.value);
                 cancelBtn.onclick = () => close(null);
                 closeBtn.onclick = () => close(null);
@@ -1573,57 +1451,63 @@
             });
         }
         
-        /**
-         * NEW: Failsafe check for deletions
-         * Now async and uses custom prompt
-         */
+        // ... showDeleteFailsafe function (unchanged) ...
         async function showDeleteFailsafe(actionName) {
             const message = `This action is permanent and cannot be undone.\n\nTo delete this ${actionName}, please type the failsafe code: ${DELETE_FAILSAFE_CODE}`;
             const userInput = await showCustomPrompt(message);
-            
             if (userInput === DELETE_FAILSAFE_CODE) {
                 return true;
-            } else if (userInput !== null) { // User typed something, but it was wrong
+            } else if (userInput !== null) { 
                 await showToast("Incorrect code. Deletion cancelled.", true);
             }
-            return false; // User cancelled or typed wrong code
+            return false;
         }
         
-        // ... addEmployee function (unchanged) ...
+        /**
+         * Adds a new employee to the list.
+         * UPDATED: "Position"
+         */
         async function addEmployee(event) {
             event.preventDefault();
             const nameInput = document.getElementById('new-employee-name');
-            const roleInput = document.getElementById('new-employee-role');
+            const positionInput = document.getElementById('new-employee-position');
             const hireDateInput = document.getElementById('new-employee-hire-date');
+            
             const newName = nameInput.value.trim();
-            const newRole = roleInput.value.trim();
+            const newPosition = positionInput.value.trim();
             const newHireDate = hireDateInput.value;
-            if (newName && newRole && newHireDate) {
+            
+            if (newName && newPosition && newHireDate) {
                 if (Object.values(localEmployees).find(emp => emp.name.toLowerCase() === newName.toLowerCase())) {
                     await showToast("An employee with this name already exists.", true);
                     return;
                 }
+
                 const newEmployee = {
                     name: newName,
-                    role: newRole,
+                    position: newPosition, // UPDATED
                     hireDate: newHireDate,
                     strengths: "",
-                    opportunities: ""
+                    opportunities: "",
+                    leaderNotes: "" // NEW
                 };
+                
                 try {
                     await addDoc(employeesRef, newEmployee);
                     await showToast("Employee added successfully!");
                     nameInput.value = '';
-                    roleInput.value = '';
+                    positionInput.value = '';
                     hireDateInput.value = '';
                 } catch (e) {
                     console.error("Error adding employee:", e);
                     await showToast("Failed to add employee. See console for details.", true);
                 }
+
             } else {
-                await showToast("Please fill out Name, Role, and Hire Date.", true);
+                await showToast("Please fill out Name, Position, and Hire Date.", true);
             }
         }
+        
         // ... deleteEmployee function (unchanged) ...
         async function deleteEmployee(idToDelete) {
             const employeeName = localEmployees[idToDelete]?.name || "this employee";
@@ -1661,11 +1545,16 @@
             return radio ? radio.value : "N/A";
         }
         
-        // ... generateAndLogObservation function (unchanged, but uses new KPI_CONTEXT and store goals) ...
+        /**
+         * Calls the Gemini API to generate an observation summary
+         * and then logs the observation.
+         * UPDATED: Removed KPI/Goal context
+         */
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
             const customerIntent = form.customerIntent.value.trim();
+            
             if (!employeeId) {
                 await showToast("Please select an employee first.", true);
                 return;
@@ -1674,6 +1563,7 @@
                 await showToast("Please enter the customer intent first.", true);
                 return;
             }
+            
             const profile = localEmployees[employeeId];
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
@@ -1682,6 +1572,7 @@
             if (recentCoaching && recentCoaching.actionPlan) {
                 coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
             }
+            
             const greatData = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
@@ -1709,25 +1600,21 @@
                     notes: form.notes_t.value.trim()
                 }
             };
+            
             let prompt = `Act as a sales manager for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${profile.name}.\n\n`;
             prompt += `Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 steps. **Use ${profile.name}'s name** where it feels natural to make it personal.\n\n`;
             prompt += `For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
-            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
-            prompt += KPI_CONTEXT + "\n\n"; 
-            let goalsContext = "Monthly goals are not set.\n";
-            if (localStoreGoals.totalGoal) {
-                goalsContext = `Current Monthly Goals:\n` +
-                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
-                               `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
-            }
-            prompt += `--- CURRENT STORE GOALS ---\n`;
-            prompt += goalsContext + "\n\n";
+            
+            // REMOVED: KPI Context
+            // REMOVED: Store Goals
+
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
-            prompt += `Role: ${profile.role}\n`;
+            prompt += `Position: ${profile.position}\n`; // UPDATED
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
             prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
-            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n`;
+            prompt += `Leader Notes: ${profile.leaderNotes || 'N/A'}\n\n`; // NEW
             prompt += `--- PREVIOUS COACHING SESSION (For Context) ---\n`;
             prompt += coachingContext;
             prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
@@ -1744,7 +1631,9 @@
             prompt += formatStep('A - Ask', greatData.ask);
             prompt += formatStep('T - Thank', greatData.thank);
             prompt += `\n--- GENERATE JSON OUTPUT ---`;
+            
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
+            
             try {
                 const generationConfig = {
                     responseMimeType: "application/json",
@@ -1774,17 +1663,23 @@
                     throw new Error(`API Error: ${response.status} ${response.statusText}`);
                 }
                 const result = await response.json();
+                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
+                
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
+
+                // Populate fields with AI notes
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
                 if (notesObject.relate_note) form.notes_r.value = notesObject.relate_note;
                 if (notesObject.explore_note) form.notes_e.value = notesObject.explore_note;
                 if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
                 if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
+                
+                // NOW, LOG IT AUTOMATICALLY
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -1792,20 +1687,25 @@
                     ask: { ...greatData.ask, notes: form.notes_a.value },
                     thank: { ...greatData.thank, notes: form.notes_t.value }
                 };
+
                 const newObservation = {
                     employeeId: employeeId,
                     date: Timestamp.now(),
                     customerIntent: customerIntent,
                     greatAssessment: greatAssessmentWithAINotes, 
                     notes: form.notes.value.trim(),
-                    behaviors: [] 
+                    loggedBy: currentUser.displayName || currentUser.email,
+                    loggedByEmail: currentUser.email
                 };
+
                 await addDoc(observationsRef, newObservation);
+                
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI notes generated and observation logged for ${employeeName}!`);
                 form.reset();
                 form.employee.value = "";
                 form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+                
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
                 await showToast('AI generation or logging failed. Please check the console for errors.', true);
@@ -1814,7 +1714,10 @@
             }
         }
         
-        // ... generateAICoachingPlan function (unchanged) ...
+        /**
+         * Calls the Gemini API to generate a full coaching plan.
+         * UPDATED: Removed KPI/Goal context
+         */
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
@@ -1834,22 +1737,18 @@
             prompt += `The plan must include two distinct sections:\n`;
             prompt += `1.  **Feedback for ${profile.name}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **XFinity Mobile**.\n`;
             prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
-            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
-            prompt += KPI_CONTEXT + "\n\n";
-            let goalsContext = "Monthly goals are not set.\n";
-            if (localStoreGoals.totalGoal) {
-                goalsContext = `Current Monthly Goals:\n` +
-                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
-                               `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
-            }
-            prompt += `--- CURRENT STORE GOALS ---\n`;
-            prompt += goalsContext + "\n\n";
+            
+            // REMOVED: KPI Context
+            // REMOVED: Store Goals
+            
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
-            prompt += `Role: ${profile.role}\n`;
+            prompt += `Position: ${profile.position}\n`; // UPDATED
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
-            prompt += `Manager-defined Strengths: ${profile.strengths || 'N/A'}\n`;
-            prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+            prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
+            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n`;
+            prompt += `Leader Notes: ${profile.leaderNotes || 'N/A'}\n\n`; // NEW
+            
             prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n\n`;
             const recentObsHistory = obsHistory.slice(0, 3);
             if (recentObsHistory.length === 0) {
@@ -1858,6 +1757,7 @@
             for (let i = 0; i < recentObsHistory.length; i++) {
                 const log = recentObsHistory[i];
                 prompt += `--- Observation Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
+                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`;
                 prompt += `Customer Intent: ${log.customerIntent || 'N/A'}\n`;
                 if (log.greatAssessment) {
                     const formatStep = (name, data) => {
@@ -1883,8 +1783,9 @@
             for (let i = 0; i < recentCoachingHistory.length; i++) {
                 const log = recentCoachingHistory[i];
                 prompt += `--- Coaching Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
+                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`;
                 prompt += `Type: ${log.sessionType}\n`;
-                prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
+                // REMOVED: tNPS/Sales
                 prompt += `Progress Reported by Coachee: ${log.progress}\n`;
                 prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
                 prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
@@ -1927,8 +1828,10 @@
                 showLoading('coaching-loader', 'generate-ai-coaching-plan', false);
             }
         }
-        
-        // ... generateAndLogCoachingNotes function (unchanged) ...
+
+        /**
+         * UPDATED: Removed KPI/Goal context
+         */
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
             const employeeId = form.employeeId.value;
@@ -1953,23 +1856,23 @@
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
-            let prompt = `Act as an expert Xfinity retail sales manager. I am logging a 1-on-1 with ${profile.name}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
-            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
-            prompt += KPI_CONTEXT + "\n\n";
-            let goalsContext = "Monthly goals are not set.\n";
-            if (localStoreGoals.totalGoal) {
-                goalsContext = `Current Monthly Goals:\n` +
-                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
-                               `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
-            }
-            prompt += `--- CURRENT STORE GOALS ---\n`;
-            prompt += goalsContext + "\n\n";
+            
+            let prompt = `Act as an expert Xfinity retail sales manager. I am logging a 1-on-1 with ${profile.name}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal. Focus on qualitative behaviors.\n\n`;
+            
+            // REMOVED: KPI Context
+            // REMOVED: Store Goals
+            
             prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
+            prompt += `Name: ${profile.name}, Position: ${profile.position}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
+            prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
+            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n`;
+            prompt += `Leader Notes: ${profile.leaderNotes || 'N/A'}\n\n`; // NEW
+
             prompt += `--- MANAGER'S RAW NOTES (INPUT) ---\n`;
             prompt += `Progress: ${rawProgress}\n`;
             prompt += `Obstacles: ${rawObstacles}\n`;
             prompt += `Action Plan: ${rawActionPlan}\n\n`;
+            
             prompt += `--- FULL PERFORMANCE HISTORY (for context) ---\n`;
             const recentObs = obsHistory.slice(0, 2);
             if(recentObs.length > 0) {
@@ -1980,13 +1883,16 @@
              if(recentCoaching.length > 0) {
                 prompt += `Last Coaching (${recentCoaching[0].date.toDate().toLocaleDateString()}): Last Action Plan: ${recentCoaching[0].actionPlan}\n`;
             }
+            
             prompt += `\n--- GENERATE JSON OUTPUT ---
             Based on my raw notes, generate:
             1.  **progress_note:** A refined, professional note summarizing the progress.
             2.  **obstacles_note:** A refined, professional note summarizing the obstacles.
-            3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note and the employee's history/KPIs.
+            3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note and the employee's history.
             ---`;
+            
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
+            
             try {
                 const generationConfig = {
                     responseMimeType: "application/json",
@@ -2003,6 +1909,7 @@
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: generationConfig 
                 };
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2014,35 +1921,44 @@
                     throw new Error(`API Error: ${response.status} ${response.statusText}`);
                 }
                 const result = await response.json();
+                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
+
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
+                
+                // Populate fields with AI notes
                 if (notesObject.progress_note) form.progress.value = notesObject.progress_note;
                 if (notesObject.obstacles_note) form.obstacles.value = notesObject.obstacles_note;
                 if (notesObject.smart_goal) form.actionPlan.value = notesObject.smart_goal;
+
                 const now = new Date();
                 const dateParts = dateStr.split('-');
                 const sessionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], now.getHours(), now.getMinutes(), now.getSeconds());
                 const sessionTimestamp = Timestamp.fromDate(sessionDate);
+            
                 const newCoaching = {
                     employeeId: employeeId,
                     date: sessionTimestamp,
                     sessionType: form.sessionType.value,
-                    tnps: form.tnps.value || "",
-                    sales: form.sales.value || "",
+                    // REMOVED: tNPS and Sales
                     progress: form.progress.value,
                     obstacles: form.obstacles.value,
-                    actionPlan: form.actionPlan.value
+                    actionPlan: form.actionPlan.value,
+                    loggedBy: currentUser.displayName || currentUser.email,
+                    loggedByEmail: currentUser.email
                 };
+            
                 await addDoc(coachingsRef, newCoaching);
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI-assisted coaching session logged for ${employeeName}!`);
                 form.reset();
                 form.employeeId.value = "";
                 document.getElementById('coaching-date').valueAsDate = new Date();
+                
             } catch (err) {
                 console.error('AI Coaching Prep Failed:', err);
                 await showToast('AI coaching prep failed. Please check the console for errors.', true);
@@ -2051,84 +1967,66 @@
             }
         }
         
-        // ... saveStoreGoals function (unchanged) ...
-        async function saveStoreGoals(event) {
-            event.preventDefault();
-            const form = document.getElementById('goalsForm');
-            const goals = {
-                xm: Number(form.xm.value) || 0,
-                hsi: Number(form.hsi.value) || 0,
-                video: Number(form.video.value) || 0,
-                cdv: Number(form.cdv.value) || 0,
-                xhs: Number(form.xhs.value) || 0,
-                upgrades: Number(form.upgrades.value) || 0,
-            };
-            const total = goals.xm + goals.hsi + goals.video + goals.cdv + goals.xhs + goals.upgrades;
-            const bonus = Math.ceil(total * 1.2);
-            const goalsToSave = {
-                ...goals,
-                totalGoal: total,
-                bonusGoal: bonus,
-                lastUpdated: Timestamp.now()
-            };
-            try {
-                await setDoc(storeGoalsRef, goalsToSave);
-                await showToast("Monthly goals have been saved!");
-                displayStoreGoals(); 
-                checkGoalDate(); 
-            } catch (e) {
-                console.error("Error saving goals:", e);
-                await showToast("Failed to save goals. Check console.", true);
-            }
-        }
+        // REMOVED: saveStoreGoals function
 
-        // ... openPage function (unchanged) ...
+        /**
+         * Handles switching between the pages.
+         * UPDATED: Removed Tracker and Goals
+         */
         function openPage(event, pageName) {
             const pageContents = document.getElementsByClassName('page-content');
             for (let i = 0; i < pageContents.length; i++) {
                 pageContents[i].style.display = 'none';
             }
+            
             const navLinks = document.getElementsByClassName('nav-link');
             for (let i = 0; i < navLinks.length; i++) {
                 navLinks[i].className = navLinks[i].className.replace(' active', '');
             }
+            
             document.getElementById(pageName).style.display = 'block';
             event.currentTarget.className += ' active';
-            if (pageName === 'Tracker') {
-                updateTrackerTab();
-            }
-            if (pageName === 'Goals') {
-                displayStoreGoals();
-            }
         }
 
         // --- MODAL Functions ---
-        // ... openEditModal, closeEditModal, saveEmployeeChanges (unchanged) ...
+        
         const modal = document.getElementById('editEmployeeModal');
         const editForm = document.getElementById('editEmployeeForm');
+        
+        /**
+         * UPDATED: "Position", "Leader Notes"
+         */
         function openEditModal(id, profile) {
             editForm.id.value = id;
             editForm.name.value = profile.name;
-            editForm.role.value = profile.role || '';
+            editForm.position.value = profile.position || ''; // UPDATED
             editForm.hireDate.value = profile.hireDate || '';
             editForm.strengths.value = profile.strengths || '';
             editForm.opportunities.value = profile.opportunities || '';
+            editForm.leaderNotes.value = profile.leaderNotes || ''; // NEW
             modal.style.display = 'block';
         }
         function closeEditModal() {
             modal.style.display = 'none';
             editForm.reset();
         }
+        
+        /**
+         * UPDATED: "Position", "Leader Notes"
+         */
         async function saveEmployeeChanges(event) {
             event.preventDefault();
             const id = editForm.id.value;
+            
             const updatedProfile = {
                 name: editForm.name.value.trim(),
-                role: editForm.role.value.trim(),
+                position: editForm.position.value.trim(), // UPDATED
                 hireDate: editForm.hireDate.value,
                 strengths: editForm.strengths.value.trim(),
-                opportunities: editForm.opportunities.value.trim()
+                opportunities: editForm.opportunities.value.trim(),
+                leaderNotes: editForm.leaderNotes.value.trim() // NEW
             };
+            
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", "employees", id);
                 await setDoc(docRef, updatedProfile, { merge: true });
@@ -2159,15 +2057,19 @@
         }
         
         // --- Setup Listeners ---
+        /**
+         * UPDATED: Removed storeGoalsListener
+         */
         function setupFirestoreListeners() {
             if (employeesListener) employeesListener();
             if (observationsListener) observationsListener();
             if (coachingsListener) coachingsListener();
-            if (storeGoalsListener) storeGoalsListener(); 
+
             employeesRef = collection(db, "artifacts", appId, "public", "data","employees");
             observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
             coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
-            storeGoalsRef = doc(db, "artifacts", appId, "public", "data", "storeGoals", "currentMonth");
+            // REMOVED: storeGoalsRef
+
             employeesListener = onSnapshot(employeesRef, (snapshot) => {
                 console.log("Firebase: Employees snapshot received");
                 localEmployees = {};
@@ -2202,14 +2104,8 @@
             }, (error) => {
                 console.error("Error listening to coachings:", error);
             });
-            storeGoalsListener = onSnapshot(storeGoalsRef, (doc) => {
-                console.log("Firebase: Store goals snapshot received");
-                localStoreGoals = doc.data() || {};
-                console.log("Local store goals updated:", localStoreGoals);
-                refreshUI(); // Will call checkGoalDate
-            }, (error) => {
-                console.error("Error listening to store goals:", error);
-            });
+            
+            // REMOVED: storeGoalsListener
         }
         
         // ... displayLastSMARTGoal function (unchanged) ...
@@ -2236,6 +2132,8 @@
         document.addEventListener('DOMContentLoaded', async () => {
             
             const appWrapper = document.getElementById('app-wrapper');
+            const signInBtn = document.getElementById('sign-in-btn');
+            const signOutBtn = document.getElementById('sign-out-btn');
             
             try {
                 app = initializeApp(firebaseConfig);
@@ -2252,21 +2150,30 @@
             }
 
             onAuthStateChanged(auth, (user) => {
+                currentUser = user; // NEW: Store user object globally
                 if (user) {
                     console.log("Firebase: User authenticated:", user.uid);
                     userId = user.uid;
                     appWrapper.classList.remove('logged-out'); 
-                    document.getElementById('sign-out-btn').innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out (${user.displayName || user.email})`;
+                    
+                    signInBtn.style.display = 'none';
+                    signOutBtn.style.display = 'block';
+                    signOutBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out (${user.displayName || user.email})`;
+                    
                     setupFirestoreListeners();
                 } else {
                     console.log("Firebase: User signed out.");
                     userId = null;
                     appWrapper.classList.add('logged-out'); 
-                    document.getElementById('sign-out-btn').innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+                    
+                    signInBtn.style.display = 'block';
+                    signOutBtn.style.display = 'none';
+                    signOutBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+                    
                     if (employeesListener) employeesListener();
                     if (observationsListener) observationsListener();
                     if (coachingsListener) coachingsListener();
-                    if (storeGoalsListener) storeGoalsListener();
+                    // REMOVED: storeGoalsListener
                 }
             });
 
@@ -2276,7 +2183,7 @@
                 e.preventDefault();
                 showToast("Please use the 'Generate AI Notes & Log Session' button to log this coaching.", true);
             });
-            document.getElementById('goalsForm').addEventListener('submit', saveStoreGoals);
+            // REMOVED: goalsForm listener
             
             document.getElementById('generate-and-log-ai-summary').addEventListener('click', generateAndLogObservation);
             document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
@@ -2311,6 +2218,10 @@
             document.getElementById('prompt-close-btn').addEventListener('click', () => {
                 document.getElementById('custom-prompt-modal').style.display = 'none';
             });
+            document.getElementById('prompt-cancel-btn').addEventListener('click', () => {
+                document.getElementById('custom-prompt-modal').style.display = 'none';
+            });
+
             
             document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
             document.getElementById('coaching-date').valueAsDate = new Date();
