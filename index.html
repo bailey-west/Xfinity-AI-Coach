@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retail Coaching Tool</title>
-    <!-- ADDED: Font Awesome for icons -->
+    <!-- ... existing styles ... -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
@@ -26,7 +26,7 @@
             color: var(--text-color);
         }
         
-        /* NEW: App Layout */
+        /* App Layout */
         .app-layout {
             display: grid;
             grid-template-columns: var(--sidebar-width) 1fr;
@@ -34,7 +34,7 @@
             min-height: 100vh;
         }
 
-        /* NEW: Sidebar Navigation */
+        /* Sidebar Navigation */
         .sidebar-nav {
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border-color);
@@ -76,15 +76,46 @@
             background-color: var(--primary-color);
             color: var(--light-color);
         }
+        
+        /* Sign-in / Sign-out Button */
+        .sidebar-footer {
+            margin-top: auto; /* Pushes to the bottom */
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .auth-button {
+            display: block;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--light-color);
+            font-weight: 500;
+            border-radius: 6px;
+            margin: 5px;
+            transition: background-color 0.2s, color 0.2s;
+            background-color: #007a4a;
+            border: none;
+            width: calc(100% - 10px);
+            cursor: pointer;
+            font-size: 15px;
+            text-align: left;
+        }
+        .auth-button.sign-out {
+            background-color: #c0392b;
+        }
+        .auth-button:hover {
+            background-color: #00633b;
+        }
+        .auth-button.sign-out:hover {
+            background-color: #a03023;
+        }
 
-        /* NEW: Main Content Area */
+        /* Main Content Area */
         .main-content {
             background-color: var(--bg-color);
             padding: 20px 30px;
             overflow-y: auto; /* Ensures content scrolls, not sidebar */
         }
         
-        /* Renamed from .tab-content */
         .page-content {
             display: none; /* Hidden by default */
         }
@@ -410,19 +441,47 @@
         .grid-span-2 {
             grid-column: span 2;
         }
+        
+        /* NEW: Sign-in container */
+        #sign-in-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            flex-direction: column;
+            text-align: center;
+        }
+        #sign-in-container h2 {
+            color: var(--text-color-light);
+        }
+        
+        /* NEW: Hide app when logged out */
+        .app-layout.logged-out .main-content {
+            display: none;
+        }
+        .app-layout.logged-out .sidebar-nav a,
+        .app-layout.logged-out .sidebar-footer button.sign-out {
+            display: none;
+        }
+        .app-layout:not(.logged-out) #sign-in-container {
+            display: none;
+        }
+
 
     </style>
 </head>
 <body>
 
-    <!-- NEW LAYOUT WRAPPER -->
-    <div class="app-layout">
+    <!-- App wrapper, starts as logged-out -->
+    <div class="app-layout logged-out" id="app-wrapper">
         
-        <!-- NEW Sidebar Navigation -->
+        <!-- Sidebar Navigation -->
         <nav class="sidebar-nav">
             <div class="sidebar-header">
                 <i class="fa-solid fa-store"></i> Retail Coach
             </div>
+            
+            <!-- These are hidden when logged out -->
             <a href="#" class="nav-link active" onclick="openPage(event, 'Observation')">
                 <i class="fa-solid fa-magnifying-glass-chart"></i> Log Observation
             </a>
@@ -435,14 +494,31 @@
             <a href="#" class="nav-link" onclick="openPage(event, 'Employees')">
                 <i class="fa-solid fa-users"></i> Manage Employees
             </a>
+            
+            <!-- Sign in/out buttons -->
+            <div class="sidebar-footer">
+                <button class="auth-button" id="sign-in-btn">
+                    <i class="fa-brands fa-google"></i> Sign In with Google
+                </button>
+                <button class="auth-button sign-out" id="sign-out-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                </button>
+            </div>
         </nav>
 
-        <!-- NEW Main Content Area -->
+        <!-- Main Content Area -->
         <main class="main-content">
+        
+            <!-- NEW: Sign-in splash screen -->
+            <div id="sign-in-container">
+                <h2>Welcome to the Retail Coaching Tool</h2>
+                <p>Please sign in with Google to continue.</p>
+            </div>
 
             <!-- PAGE 1: Observation Form -->
             <div id="Observation" class="page-content active">
                 <form id="obsForm">
+                    <!-- ... existing observation form ... -->
                     <h2>New Observation</h2>
                     <!-- Employee Selection -->
                     <div>
@@ -549,6 +625,7 @@
             <!-- PAGE 2: Log Coaching -->
             <div id="Coaching" class="page-content">
                 <form id="coachingForm">
+                    <!-- ... existing coaching form ... -->
                     <h2>Log Coaching Session</h2>
                     <div>
                         <label for="coaching-employee-select">Employee:</label>
@@ -611,6 +688,7 @@
 
             <!-- PAGE 3: View Logs -->
             <div id="ViewLogs" class="page-content">
+                <!-- ... existing view logs ... -->
                 <h2>View Performance Logs</h2>
                 <div>
                     <label for="log-employee-select">Select Employee:</label>
@@ -633,6 +711,7 @@
 
             <!-- PAGE 4: Employee Management -->
             <div id="Employees" class="page-content">
+                <!-- ... existing employee management ... -->
                 <form id="addEmployeeForm">
                     <h2>Add New Employee</h2>
                     <div class="form-grid">
@@ -663,6 +742,7 @@
 
     <!-- Edit Employee Modal -->
     <div id="editEmployeeModal" class="modal">
+        <!-- ... existing modal ... -->
         <div class="modal-content">
             <span class="close-btn" id="modal-close-btn">&times;</span>
             <form id="editEmployeeForm">
@@ -702,10 +782,13 @@
     <script type="module">
         // --- Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // ADDED: getAnalytics
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { 
             getAuth, 
-            signInAnonymously, 
-            signInWithCustomToken, 
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut,
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
@@ -725,11 +808,22 @@
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
 
         // --- Firebase Config & App Variables ---
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // REPLACED: Placeholder config with your provided config
+        const firebaseConfig = {
+          apiKey: "AIzaSyDaRTH_-SrDMlKePFfKUaUa0FeGDD1-KIA",
+          authDomain: "retail-coaching-tool.firebaseapp.com",
+          projectId: "retail-coaching-tool",
+          storageBucket: "retail-coaching-tool.firebasestorage.app",
+          messagingSenderId: "321362459125",
+          appId: "1:321362459125:web:b35448ac90801a5e0388bc",
+          measurementId: "G-K8RYLXRG5H"
+        };
+        // END REPLACEMENT
+        
+        const appId = firebaseConfig.projectId || 'default-app-id';
 
-        let db, auth, userId;
+        let db, auth, userId, googleProvider, app, analytics; // Added app and analytics
         let employeesRef, observationsRef, coachingsRef;
         let employeesListener = null;
         let observationsListener = null;
@@ -741,27 +835,20 @@
         let localCoachings = [];
 
         // --- Core Data Functions ---
-        
+        // ... calculateTenure function (unchanged) ...
         function calculateTenure(hireDate) {
             if (!hireDate) return "";
-            
             const start = hireDate.toDate ? hireDate.toDate() : new Date(hireDate);
             const end = new Date();
-            
             end.setMinutes(end.getMinutes() - end.getTimezoneOffset());
-            
             let years = end.getFullYear() - start.getFullYear();
             let months = end.getMonth() - start.getMonth();
-            
             if (months < 0) {
                 years--;
                 months += 12;
             }
-            
             let tenureStr = "";
-            if (years > 0) {
-                tenureStr += `${years} yr${years > 1 ? 's' : ''}`;
-            }
+            if (years > 0) tenureStr += `${years} yr${years > 1 ? 's' : ''}`;
             if (months > 0) {
                 if (tenureStr) tenureStr += ", ";
                 tenureStr += `${months} mo${months > 1 ? 's' : ''}`;
@@ -770,123 +857,97 @@
                 const days = Math.floor((end - start) / (1000 * 60 * 60 * 24));
                 return ` (${days} days)`;
             }
-
             return ` (${tenureStr})`;
         }
 
 
         // --- Page Building Functions ---
-
+        // ... populateEmployeeDropdown function (unchanged) ...
         function populateEmployeeDropdown(selectId) {
             const employeeSelect = document.getElementById(selectId);
             const selectedValue = employeeSelect.value;
-            
             employeeSelect.innerHTML = '<option value="">-- Select a Rep --</option>';
-            
             const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
-
             for (const [id, profile] of sortedEmployees) {
                 const option = document.createElement('option');
                 option.value = id;
                 option.textContent = profile.name;
                 employeeSelect.appendChild(option);
             }
-            
             employeeSelect.value = selectedValue;
         }
-
+        // ... populateEmployeeList function (unchanged) ...
         function populateEmployeeList() {
             const employeeList = document.getElementById('employee-list');
             employeeList.innerHTML = '';
-            
             const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
-
             for (const [id, profile] of sortedEmployees) {
                 const li = document.createElement('li');
-                
                 const infoDiv = document.createElement('div');
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'employee-list-name';
                 nameSpan.textContent = profile.name;
                 infoDiv.appendChild(nameSpan);
-                
                 if (profile.role) {
                     const roleSpan = document.createElement('span');
                     roleSpan.className = 'employee-list-role';
                     roleSpan.textContent = ` (${profile.role})`;
                     infoDiv.appendChild(roleSpan);
                 }
-                
                 const tenureSpan = document.createElement('span');
                 tenureSpan.className = 'employee-list-tenure';
                 tenureSpan.textContent = calculateTenure(profile.hireDate);
                 infoDiv.appendChild(tenureSpan);
-
                 li.appendChild(infoDiv);
-                
                 li.addEventListener('click', () => {
                     openEditModal(id, profile);
                 });
-                
                 employeeList.appendChild(li);
             }
         }
-        
+        // ... displayEmployeeLogs function (unchanged) ...
         function displayEmployeeLogs(employeeId) {
             const logOutput = document.getElementById('log-output');
             const coachingOutput = document.getElementById('ai-coaching-output');
             logOutput.innerHTML = ''; 
             coachingOutput.style.display = 'none';
             coachingOutput.innerHTML = '';
-
             if (!employeeId) {
                 logOutput.innerHTML = '<p>Please select an employee to view their logs.</p>';
                 return;
             }
-
             const employeeLogs = localObservations.filter(obs => obs.employeeId === employeeId);
             const employeeCoachings = localCoachings.filter(c => c.employeeId === employeeId);
-
             const combinedLogs = [...employeeLogs, ...employeeCoachings];
             combinedLogs.sort((a, b) => b.date.toDate() - a.date.toDate());
-
-
             const employeeName = localEmployees[employeeId]?.name || "Unknown Employee";
-
             if (combinedLogs.length === 0) {
                 logOutput.innerHTML = `<p>No observations or coaching logs found for ${employeeName}.</p>`;
                 return;
             }
-
             for (const log of combinedLogs) { 
                 const entryDiv = document.createElement('div');
                 entryDiv.className = 'log-entry';
-
                 const dateP = document.createElement('p');
                 dateP.className = 'log-entry-date';
                 dateP.textContent = log.date.toDate().toLocaleString();
                 entryDiv.appendChild(dateP);
-                
                 if (log.greatAssessment) {
                     const greatDiv = document.createElement('div');
                     greatDiv.className = 'log-entry-great';
-                    
                     const steps = ['greet', 'relate', 'explore', 'ask', 'thank'];
                     for (const step of steps) {
                         const data = log.greatAssessment[step];
                         if (!data) continue;
-
                         const title = step.charAt(0).toUpperCase() + step.slice(1);
                         const p = document.createElement('p');
                         p.innerHTML = `<strong>${title}</strong>`;
-                        
                         if (data.measurement) {
                             const measureSpan = document.createElement('span');
                             measureSpan.className = 'log-step-measurement';
                             measureSpan.textContent = ` (${data.measurement})`;
                             p.appendChild(measureSpan);
                         }
-                        
                         if (data.behaviors && data.behaviors.length > 0) {
                             const ul = document.createElement('ul');
                             for (const val of data.behaviors) {
@@ -896,28 +957,23 @@
                             }
                             p.appendChild(ul);
                         }
-
                         if (data.notes && data.notes.trim() !== "") {
                             const notesDiv = document.createElement('div');
                             notesDiv.className = 'log-step-notes';
                             notesDiv.textContent = data.notes;
                             p.appendChild(notesDiv);
                         }
-                        
                         greatDiv.appendChild(p);
                     }
                     entryDiv.appendChild(greatDiv);
-                
                     const notesP = document.createElement('p');
                     if (log.notes && log.notes.trim() !== "") {
                         notesP.innerHTML = `<strong>Overall Notes:</strong> ${log.notes}`;
                     }
                     entryDiv.appendChild(notesP);
-                
                 } else if (log.sessionType) {
                     const coachingDiv = document.createElement('div');
                     coachingDiv.className = 'log-entry-coaching';
-                    
                     coachingDiv.innerHTML = `
                         <h4>Coaching Session: ${log.sessionType}</h4>
                         <p><strong>tNPS Logged:</strong> ${log.tnps || 'N/A'}</p>
@@ -928,11 +984,10 @@
                     `;
                     entryDiv.appendChild(coachingDiv);
                 }
-                
                 logOutput.appendChild(entryDiv);
             }
         }
-
+        
         function refreshUI() {
             populateEmployeeDropdown('employee'); // Obs form
             populateEmployeeDropdown('log-employee-select'); // Log view
@@ -944,23 +999,20 @@
 
         
         // --- Event Handling Functions ---
-
+        // ... addEmployee function (unchanged) ...
         async function addEmployee(event) {
             event.preventDefault();
             const nameInput = document.getElementById('new-employee-name');
             const roleInput = document.getElementById('new-employee-role');
             const hireDateInput = document.getElementById('new-employee-hire-date');
-            
             const newName = nameInput.value.trim();
             const newRole = roleInput.value.trim();
             const newHireDate = hireDateInput.value;
-            
             if (newName && newRole && newHireDate) {
                 if (Object.values(localEmployees).find(emp => emp.name.toLowerCase() === newName.toLowerCase())) {
                     alert("An employee with this name already exists.");
                     return;
                 }
-
                 const newEmployee = {
                     name: newName,
                     role: newRole,
@@ -968,10 +1020,8 @@
                     strengths: "",
                     opportunities: ""
                 };
-                
                 try {
                     await addDoc(employeesRef, newEmployee);
-                    
                     nameInput.value = '';
                     roleInput.value = '';
                     hireDateInput.value = '';
@@ -979,19 +1029,16 @@
                     console.error("Error adding employee:", e);
                     alert("Failed to add employee. See console for details.");
                 }
-
             } else {
                 alert("Please fill out Name, Role, and Hire Date.");
             }
         }
-
+        // ... deleteEmployee function (unchanged) ...
         async function deleteEmployee(idToDelete) {
             const employeeName = localEmployees[idToDelete]?.name || "this employee";
-
             if (!confirm(`Are you sure you want to delete ${employeeName}? This will also delete all their observations and coaching logs.`)) {
                 return;
             }
-            
             try {
                 await deleteDoc(doc(db, "artifacts", appId, "public", "data", "employees", idToDelete));
                 closeEditModal();
@@ -1000,23 +1047,21 @@
                 alert("Failed to delete employee. See console for details.");
             }
         }
-        
+        // ... getRadioValue function (unchanged) ...
         function getRadioValue(form, name) {
             const radio = form.querySelector(`input[name="${name}"]:checked`);
             return radio ? radio.value : "N/A";
         }
-
+        // ... logObservation function (unchanged) ...
         async function logObservation(event) {
             event.preventDefault();
             const form = event.target;
             const employeeId = form.employee.value;
             const overallNotes = form.notes.value.trim();
-            
             if (!employeeId) {
                 alert("Please select an employee.");
                 return;
             }
-            
             const greatAssessment = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
@@ -1044,16 +1089,13 @@
                     notes: form.notes_t.value.trim()
                 }
             };
-
             const isGreatEmpty = Object.values(greatAssessment).every(
                 step => step.behaviors.length === 0 && step.notes === ""
             );
-            
             if (isGreatEmpty && overallNotes === "") {
                 alert("Please check at least one behavior or add some notes.");
                 return;
             }
-
             const newObservation = {
                 employeeId: employeeId,
                 date: Timestamp.now(),
@@ -1061,7 +1103,6 @@
                 notes: overallNotes,
                 behaviors: []
             };
-
             try {
                 await addDoc(observationsRef, newObservation);
                 const employeeName = localEmployees[employeeId].name;
@@ -1074,24 +1115,21 @@
                 alert("Failed to log observation. See console for details.");
             }
         }
-        
+        // ... logCoachingSession function (unchanged) ...
         async function logCoachingSession(event) {
             event.preventDefault();
             const form = document.getElementById('coachingForm');
             const employeeId = form.employeeId.value;
-            
             if (!employeeId) {
                 alert("Please select an employee.");
                 return;
             }
-            
             const dateStr = form.date.value;
             if (!dateStr) {
                 alert("Please select a session date.");
                 return;
             }
             const sessionDate = Timestamp.fromDate(new Date(dateStr + "T12:00:00"));
-            
             const newCoaching = {
                 employeeId: employeeId,
                 date: sessionDate,
@@ -1102,7 +1140,6 @@
                 obstacles: form.obstacles.value.trim(),
                 actionPlan: form.actionPlan.value.trim()
             };
-            
             try {
                 await addDoc(coachingsRef, newCoaching);
                 const employeeName = localEmployees[employeeId].name;
@@ -1118,7 +1155,7 @@
 
         
         // --- AI Generation Functions ---
-
+        // ... showLoading function (unchanged) ...
         function showLoading(loaderId, buttonId, isLoading) {
             const loader = document.getElementById(loaderId);
             const button = document.getElementById(buttonId);
@@ -1132,29 +1169,22 @@
                 button.textContent = buttonId.includes('summary') ? 'Generate AI Notes for GREAT Steps' : 'Generate AI Coaching Plan';
             }
         }
-        
+        // ... generateAISummary function (unchanged) ...
         async function generateAISummary() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
-            
             if (!employeeId) {
                 alert("Please select an employee first.");
                 return;
             }
-
             const profile = localEmployees[employeeId];
-            
-            // UPDATED: Find most recent coaching log
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId)
-                .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; // Get the newest one
-
+                .sort((a, b) => b.date.toDate() - a.date.toDate())[0];
             let coachingContext = "No recent coaching session on file.\n";
             if (recentCoaching && recentCoaching.actionPlan) {
                 coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
             }
-            // END UPDATE
-            
             const greatData = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
@@ -1182,7 +1212,6 @@
                     notes: form.notes_t.value.trim()
                 }
             };
-            
             let prompt = `Act as a retail sales manager. Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, 1-2 sentence observation note for EACH of the 5 steps. Focus only on the data for that specific step.\n\n`;
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
@@ -1190,10 +1219,8 @@
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
             prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
             prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
-            
             prompt += `--- PREVIOUS COACHING SESSION (For Context) ---\n`;
             prompt += coachingContext;
-            
             prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
             const formatStep = (name, data) => {
                 let stepStr = `${name}: (${data.measurement})\n`;
@@ -1206,11 +1233,8 @@
             prompt += formatStep('E - Explore', greatData.explore);
             prompt += formatStep('A - Ask', greatData.ask);
             prompt += formatStep('T - Thank', greatData.thank);
-
             prompt += `\n--- GENERATE JSON OUTPUT ---`;
-
             showLoading('summary-loader', 'generate-ai-summary', true);
-
             try {
                 const generationConfig = {
                     responseMimeType: "application/json",
@@ -1225,36 +1249,28 @@
                         }
                     }
                 };
-
                 const payload = {
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: generationConfig 
                 };
-                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.statusText}`);
                 }
-
                 const result = await response.json();
-                
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
-
                 if (notesObject.greet_note) document.getElementById('notes_g').value = notesObject.greet_note;
                 if (notesObject.relate_note) document.getElementById('notes_r').value = notesObject.relate_note;
                 if (notesObject.explore_note) document.getElementById('notes_e').value = notesObject.explore_note;
                 if (notesObject.ask_note) document.getElementById('notes_a').value = notesObject.ask_note;
                 if (notesObject.thank_note) document.getElementById('notes_t').value = notesObject.thank_note;
-                
                 document.getElementById('notes').value = "";
                 alert("AI notes generated and filled in for each 'GREAT' step.");
-                
             } catch (err) {
                 console.error('AI Generation Failed:', err);
                 alert('AI summary generation failed. Please check the console for errors.');
@@ -1262,43 +1278,34 @@
                 showLoading('summary-loader', 'generate-ai-summary', false);
             }
         }
-        
+        // ... generateAICoachingPlan function (unchanged) ...
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
-            
             if (!employeeId) {
                 alert("Please select an employee from the dropdown first.");
                 return;
             }
-
             const profile = localEmployees[employeeId];
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
-            
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
-
-
             if (obsHistory.length === 0 && coachingHistory.length === 0) {
                 alert("This employee has no observations or coaching logs. Please log one first.");
                 return;
             }
-            
             let prompt = `Act as an expert retail sales coach. I will provide an employee's profile, their complete observation history, and their coaching history. Please generate a detailed coaching plan.\n\n`;
             prompt += `The plan must include two distinct sections:\n`;
             prompt += `1.  **Feedback for Employee:** A concise summary for the employee, highlighting one key strength and one specific, actionable opportunity for improvement, referencing the "GREAT" process.\n`;
             prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
-
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
             prompt += `Manager-defined Strengths: ${profile.strengths || 'N/A'}\n`;
             prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
-
             prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n\n`;
-            
-            const recentObsHistory = obsHistory.slice(0, 3); // Take up to 3 recent logs
+            const recentObsHistory = obsHistory.slice(0, 3);
             if (recentObsHistory.length === 0) {
                 prompt += "No recent observations found.\n\n";
             }
@@ -1321,10 +1328,8 @@
                 }
                 prompt += `Overall Notes: ${log.notes || 'N/A'}\n\n`;
             }
-
-            // UPDATED: Use new coaching fields in prompt
             prompt += `--- COACHING HISTORY (Newest to Oldest) ---\n\n`;
-            const recentCoachingHistory = coachingHistory.slice(0, 2); // Take up to 2 recent logs
+            const recentCoachingHistory = coachingHistory.slice(0, 2);
             if (recentCoachingHistory.length === 0) {
                 prompt += "No recent coaching sessions found.\n\n";
             }
@@ -1337,39 +1342,30 @@
                 prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
                 prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
             }
-            
             prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now.`;
-            
             showLoading('coaching-loader', 'generate-ai-coaching', true);
             const coachingOutput = document.getElementById('ai-coaching-output');
             coachingOutput.style.display = 'none';
             coachingOutput.innerHTML = '';
-
             try {
                 const payload = {
                     contents: [{ parts: [{ text: prompt }] }]
                 };
-                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.statusText}`);
                 }
-
                 const result = await response.json();
                 let responseText = result.candidates[0].content.parts[0].text;
-                
                 responseText = responseText
                     .replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>') 
                     .replace(/\* (.*?)(?=\n\*|\n\n|$)/g, '<li>$1</li>'); 
-                
                 coachingOutput.innerHTML = responseText.replace(/<li>/g, '<ul><li>').replace(/<\/li>/g, '</li></ul>').replace(/<\/ul><ul>/g, '');
                 coachingOutput.style.display = 'block';
-                
             } catch (err) {
                 console.error('AI Coaching Failed:', err);
                 coachingOutput.innerHTML = `<p style="color: red;">AI coaching plan generation failed. Please check the console for errors.</p>`;
@@ -1399,9 +1395,9 @@
         }
 
         // --- MODAL Functions ---
+        // ... openEditModal, closeEditModal, saveEmployeeChanges (unchanged) ...
         const modal = document.getElementById('editEmployeeModal');
         const editForm = document.getElementById('editEmployeeForm');
-
         function openEditModal(id, profile) {
             editForm.id.value = id;
             editForm.name.value = profile.name;
@@ -1411,16 +1407,13 @@
             editForm.opportunities.value = profile.opportunities || '';
             modal.style.display = 'block';
         }
-
         function closeEditModal() {
             modal.style.display = 'none';
             editForm.reset();
         }
-
         async function saveEmployeeChanges(event) {
             event.preventDefault();
             const id = editForm.id.value;
-            
             const updatedProfile = {
                 name: editForm.name.value.trim(),
                 role: editForm.role.value.trim(),
@@ -1428,7 +1421,6 @@
                 strengths: editForm.strengths.value.trim(),
                 opportunities: editForm.opportunities.value.trim()
             };
-            
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", "employees", id);
                 await setDoc(docRef, updatedProfile, { merge: true });
@@ -1439,16 +1431,35 @@
             }
         }
         
+        // --- NEW: Auth Functions ---
+        async function signInWithGoogle() {
+            try {
+                await signInWithPopup(auth, googleProvider);
+                // onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error("Google Sign-in Error:", error);
+                alert("Could not sign in with Google. Check console for details.");
+            }
+        }
+        
+        async function signOutUser() {
+            try {
+                await signOut(auth);
+                // onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error("Sign-out Error:", error);
+            }
+        }
+        
         // --- Setup Listeners ---
         function setupFirestoreListeners() {
+            // ... (rest of setupFirestoreListeners function is unchanged) ...
             if (employeesListener) employeesListener();
             if (observationsListener) observationsListener();
             if (coachingsListener) coachingsListener();
-
             employeesRef = collection(db, "artifacts", appId, "public", "data", "employees");
             observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
             coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
-
             employeesListener = onSnapshot(employeesRef, (snapshot) => {
                 console.log("Firebase: Employees snapshot received");
                 localEmployees = {};
@@ -1461,7 +1472,6 @@
                 console.error("Error listening to employees:", error);
                 alert("Error: Could not load employees. Check console.");
             });
-            
             observationsListener = onSnapshot(observationsRef, (snapshot) => {
                 console.log("Firebase: Observations snapshot received");
                 localObservations = [];
@@ -1474,7 +1484,6 @@
                 console.error("Error listening to observations:", error);
                 alert("Error: Could not load observations. Check console.");
             });
-            
             coachingsListener = onSnapshot(coachingsRef, (snapshot) => {
                 console.log("Firebase: Coachings snapshot received");
                 localCoachings = [];
@@ -1493,18 +1502,19 @@
         // --- Page Load ---
         document.addEventListener('DOMContentLoaded', async () => {
             
+            const appWrapper = document.getElementById('app-wrapper');
+            
             try {
-                const app = initializeApp(firebaseConfig);
+                // UPDATED: Initialize app and analytics
+                app = initializeApp(firebaseConfig);
+                analytics = getAnalytics(app);
+                // END UPDATE
+                
                 db = getFirestore(app);
                 auth = getAuth(app);
+                googleProvider = new GoogleAuthProvider(); // NEW: Init Google provider
                 setLogLevel('Debug');
                 
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
                 alert("FATAL ERROR: Could not connect to database. App will not function.");
@@ -1513,18 +1523,30 @@
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    // User is signed in
                     console.log("Firebase: User authenticated:", user.uid);
                     userId = user.uid;
+                    appWrapper.classList.remove('logged-out'); // Show the app
+                    
+                    // Set user name/email in sidebar (optional, but nice)
+                    document.getElementById('sign-out-btn').innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out (${user.displayName || user.email})`;
+                    
                     setupFirestoreListeners();
                 } else {
+                    // User is signed out
                     console.log("Firebase: User signed out.");
                     userId = null;
+                    appWrapper.classList.add('logged-out'); // Hide the app
+                    document.getElementById('sign-out-btn').innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+
+                    // Unsubscribe from listeners
                     if (employeesListener) employeesListener();
                     if (observationsListener) observationsListener();
                     if (coachingsListener) coachingsListener();
                 }
             });
 
+            // --- Add All UI Event Listeners ---
             document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
             document.getElementById('obsForm').addEventListener('submit', logObservation);
             document.getElementById('coachingForm').addEventListener('submit', logCoachingSession);
@@ -1536,6 +1558,11 @@
                 displayEmployeeLogs(event.target.value);
             });
             
+            // Auth buttons
+            document.getElementById('sign-in-btn').addEventListener('click', signInWithGoogle);
+            document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
+            
+            // Modal buttons
             document.getElementById('modal-close-btn').addEventListener('click', closeEditModal);
             document.getElementById('editEmployeeForm').addEventListener('submit', saveEmployeeChanges);
             document.getElementById('delete-employee-btn').addEventListener('click', () => {
