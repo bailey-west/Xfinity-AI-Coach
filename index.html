@@ -4,25 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retail Coaching Tool</title>
-    <!-- ... existing styles ... -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --primary-color: #005a9c;
+            /* NEW: Xfinity-inspired Colors */
+            --primary-color: #0061a6; /* Xfinity Blue */
             --primary-color-dark: #004a80;
+            --gradient-primary: linear-gradient(90deg, #0061a6, #007bff);
             --light-color: #fff;
-            --text-color: #333;
-            --text-color-light: #555;
-            --bg-color: #f4f4f9;
-            --border-color: #ddd;
-            --sidebar-bg: #fff;
-            --sidebar-width: 240px;
+            --text-color: #18181b; /* Darker text */
+            --text-color-light: #a1a1aa; /* Light gray for sidebar */
+            --bg-color: #f4f7fa;     /* Lighter, cooler background */
+            --border-color: #e4e4e7;
+            --sidebar-bg: #18181b; /* Dark sidebar */
+            --card-bg: #ffffff;
             --danger-color: #e74c3c;
             --danger-color-dark: #c0392b;
             --success-color: #007a4a;
             --success-bg: #f0fff8;
             --warn-bg: #fdfae7;
             --warn-border: #fbf0b5;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07);
         }
 
         body { 
@@ -30,6 +34,8 @@
             margin: 0; 
             background-color: var(--bg-color); 
             color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         /* App Layout */
@@ -47,30 +53,32 @@
             padding: 20px 10px;
             display: flex;
             flex-direction: column;
+            box-shadow: var(--shadow-md);
         }
         .sidebar-header {
             padding: 0 10px 20px 10px;
             font-size: 1.5em;
             font-weight: bold;
-            color: var(--primary-color);
-            border-bottom: 1px solid #eee;
+            color: var(--light-color); /* White text */
+            border-bottom: 1px solid #3f3f46; /* Dark border */
             margin-bottom: 20px;
         }
         .sidebar-header .fa-solid {
             margin-right: 10px;
+            color: var(--primary-color);
         }
 
         .sidebar-nav a {
-            display: flex; /* Use flex for alignment */
-            justify-content: space-between; /* Pushes icon to right */
-            align-items: center; /* Vertical alignment */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 12px 15px;
             text-decoration: none;
-            color: var(--text-color-light);
+            color: var(--text-color-light); /* Light gray */
             font-weight: 500;
             border-radius: 6px;
             margin-bottom: 5px;
-            transition: background-color 0.2s, color 0.2s;
+            transition: background-color 0.2s, color 0.2s, transform 0.2s;
         }
         .sidebar-nav a .nav-text-group {
             display: flex;
@@ -78,26 +86,31 @@
         }
         .sidebar-nav a i {
             margin-right: 12px;
-            width: 20px; /* Aligns text */
+            width: 20px;
             text-align: center;
+            transition: color 0.2s;
         }
         .sidebar-nav a:hover {
-            background-color: #f0f0f0;
+            background-color: #27272a; /* Slightly lighter dark */
+            color: var(--light-color);
+            transform: translateX(3px); /* Hover animation */
         }
         .sidebar-nav a.active {
             background-color: var(--primary-color);
             color: var(--light-color);
         }
+        .sidebar-nav a.active i {
+            color: var(--light-color);
+        }
         
-        /* NEW: Warning icon for goals */
         .nav-warning-icon {
-            display: none; /* Hidden by default */
-            color: var(--danger-color);
+            display: none;
+            color: #facc15; /* Yellow */
             font-size: 0.9em;
             animation: blink 1.5s linear infinite;
         }
         .sidebar-nav a.active .nav-warning-icon {
-            color: var(--light-color); /* Make visible on active tab */
+            color: var(--light-color);
         }
         @keyframes blink {
             50% { opacity: 0.2; }
@@ -105,9 +118,9 @@
         
         /* Sign-in / Sign-out Button */
         .sidebar-footer {
-            margin-top: auto; /* Pushes to the bottom */
+            margin-top: auto;
             padding-top: 15px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #3f3f46;
         }
         .auth-button {
             display: block;
@@ -117,8 +130,8 @@
             font-weight: 500;
             border-radius: 6px;
             margin: 5px;
-            transition: background-color 0.2s, color 0.2s;
-            background-color: #007a4a;
+            transition: background-image 0.3s, background-color 0.3s, transform 0.2s;
+            background: var(--gradient-primary); /* Gradient */
             border: none;
             width: calc(100% - 10px);
             cursor: pointer;
@@ -127,34 +140,44 @@
         }
         .auth-button.sign-out {
             background-color: var(--danger-color);
+            background-image: none;
         }
         .auth-button:hover {
-            background-color: #00633b;
+            transform: scale(1.02);
+            box-shadow: var(--shadow-md);
         }
         .auth-button.sign-out:hover {
             background-color: var(--danger-color-dark);
+            transform: scale(1.02);
         }
 
         /* Main Content Area */
         .main-content {
             background-color: var(--bg-color);
             padding: 20px 30px;
-            overflow-y: auto; /* Ensures content scrolls, not sidebar */
+            overflow-y: auto;
         }
         
+        /* NEW: Fade-in animation for pages */
         .page-content {
-            display: none; /* Hidden by default */
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .page-content.active {
-            display: block; /* Shown when active */
+            display: block;
         }
         
         /* Form Styles */
         form { 
-            padding: 20px; 
-            background-color: var(--light-color); 
-            border-radius: 8px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            padding: 25px; /* More padding */
+            background-color: var(--card-bg); 
+            border-radius: 12px; /* Softer corners */
+            box-shadow: var(--shadow-lg); 
+            border: 1px solid var(--border-color);
         }
         h2 {
             text-align: center;
@@ -167,7 +190,7 @@
         label { 
             display: block; 
             margin-bottom: 5px; 
-            font-weight: bold; 
+            font-weight: 600; /* Bolder */
         }
         label .label-hint {
             font-weight: normal;
@@ -180,12 +203,19 @@
 
         select, textarea, input[type="text"], input[type="number"], input[type="date"] { 
             width: 100%; 
-            padding: 8px; 
+            padding: 10px; /* Taller inputs */
             border: 1px solid var(--border-color); 
-            border-radius: 4px; 
+            border-radius: 6px; /* Softer */
             box-sizing: border-box;
             font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 97, 166, 0.1);
+        }
+        
         .step-notes {
             min-height: 50px;
             font-size: 13px;
@@ -198,12 +228,12 @@
 
         fieldset { 
             border: 1px solid var(--border-color); 
-            border-radius: 4px;
+            border-radius: 8px;
             padding: 10px 15px 15px 15px;
             margin-bottom: 20px;
         }
         legend { 
-            font-weight: bold; 
+            font-weight: 600; 
             padding: 0 10px;
             font-size: 1.2em;
             color: var(--primary-color);
@@ -241,29 +271,36 @@
         }
 
         button { 
-            background-color: var(--primary-color); 
+            background: var(--gradient-primary); /* Gradient */
             color: var(--light-color); 
             padding: 12px 20px; 
             border: none; 
-            border-radius: 4px; 
+            border-radius: 6px; 
             cursor: pointer; 
             font-size: 16px; 
+            font-weight: 600;
             width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         button:hover { 
-            background-color: var(--primary-color-dark); 
+            transform: scale(1.02);
+            box-shadow: var(--shadow-md);
         }
         button:disabled {
-            background-color: #999;
+            background: #999;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .ai-button {
             background-color: var(--success-color);
+            background-image: none;
             margin-top: 10px;
         }
         .ai-button:hover {
             background-color: #00633b;
+            transform: scale(1.02);
         }
         .ai-button:disabled {
             background-color: #999;
@@ -273,9 +310,10 @@
         #employee-list {
             list-style: none;
             padding: 0;
-            background: var(--light-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
         }
         #employee-list li {
             padding: 12px 15px;
@@ -293,7 +331,7 @@
             border-bottom: none;
         }
         .employee-list-name {
-            font-weight: bold;
+            font-weight: 600;
         }
         .employee-list-role {
             font-size: 0.9em;
@@ -307,13 +345,14 @@
         
         /* Observation Log Styles */
         #log-output {
-            background-color: var(--light-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
             margin-top: 20px;
             padding: 10px 20px;
             max-height: 500px;
             overflow-y: auto;
+            border: 1px solid var(--border-color);
         }
         .log-entry {
             border-bottom: 1px dashed var(--border-color);
@@ -335,7 +374,6 @@
             font-size: 0.9em;
             color: var(--text-color-light);
         }
-        /* NEW: Log Delete Button */
         .log-delete-btn {
             background: none;
             border: none;
@@ -344,6 +382,7 @@
             font-size: 0.9em;
             padding: 5px;
             width: auto;
+            border-radius: 4px;
         }
         .log-delete-btn:hover {
             color: var(--danger-color);
@@ -400,7 +439,7 @@
             margin-top: 8px;
         }
         .log-customer-intent {
-            font-weight: bold;
+            font-weight: 600;
             background-color: var(--warn-bg);
             border: 1px solid var(--warn-border);
             padding: 8px 12px;
@@ -409,12 +448,12 @@
 
         /* AI Coaching Plan Output */
         #ai-coaching-output {
-            background-color: var(--light-color);
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 0 20px 20px 20px;
             margin-top: 20px;
-            display: none; /* Hidden by default */
+            box-shadow: var(--shadow-md);
         }
         #ai-coaching-output h3 {
             color: var(--primary-color);
@@ -427,7 +466,7 @@
         
         /* Simple Loading Spinner */
         .loader {
-            display: none; /* Hidden by default */
+            display: none;
             font-size: 10px;
             margin: 10px auto;
             text-indent: -9999em;
@@ -456,34 +495,45 @@
             height: 100%; 
             overflow: auto; 
             background-color: rgba(0,0,0,0.4); 
+            backdrop-filter: blur(3px); /* Blur background */
+            animation: fadeIn 0.3s ease;
         }
         .modal-content {
             background-color: #fefefe;
-            margin: 5% auto; /* Reduced margin */
-            padding: 20px;
+            margin: 10% auto; /* Centered */
+            padding: 25px;
             border: 1px solid #888;
-            border-radius: 8px;
+            border-radius: 12px;
             width: 90%;
-            max-width: 600px; /* Increased max-width */
+            max-width: 500px; /* Base modal width */
+            box-shadow: var(--shadow-lg);
         }
+        /* Make Edit Employee modal wider */
+        #editEmployeeModal .modal-content {
+            max-width: 600px;
+        }
+        
         .close-btn {
             color: #aaa;
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            line-height: 1;
         }
         .close-btn:hover,
         .close-btn:focus {
             color: black;
         }
         .delete-btn {
-            background-color: var(--danger-color);
+            background: var(--danger-color);
+            background-image: none;
             margin-top: 15px;
             width: auto;
         }
         .delete-btn:hover {
             background-color: var(--danger-color-dark);
+            transform: scale(1.02);
         }
         .form-grid {
             display: grid;
@@ -539,12 +589,13 @@
             color: var(--text-color-light);
         }
         
-        /* NEW: Tracker Table */
+        /* Tracker Table */
         #tracker-table-container {
             background-color: var(--light-color);
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
             overflow: hidden;
+            border: 1px solid var(--border-color);
         }
         #tracker-table {
             width: 100%;
@@ -573,7 +624,7 @@
             margin-right: 5px;
         }
         
-        /* NEW: Store Goals Page */
+        /* Store Goals Page */
         .goals-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -600,6 +651,74 @@
             color: var(--text-color-light);
             font-style: italic;
         }
+        
+        /* NEW: Custom Toast (Alert) Notification */
+        #toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            z-index: 9999;
+            font-weight: 500;
+            display: none;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s ease;
+        }
+        #toast-notification.show {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        #toast-notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        /* NEW: Custom Prompt Modal */
+        #custom-prompt-modal .modal-content {
+            max-width: 450px;
+        }
+        #custom-prompt-modal p {
+            font-size: 1.1em;
+            line-height: 1.5;
+            margin-top: 0;
+        }
+        #custom-prompt-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            width: auto;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        .modal-buttons .confirm-btn {
+            background: var(--danger-color);
+        }
+        .modal-buttons .confirm-btn:hover {
+            background: var(--danger-color-dark);
+        }
+        .modal-buttons .cancel-btn {
+            background: #aaa;
+        }
+        .modal-buttons .cancel-btn:hover {
+            background: #888;
+        }
 
     </style>
 </head>
@@ -614,18 +733,15 @@
                 <i class="fa-solid fa-store"></i> Retail Coach
             </div>
             
-            <!-- These are hidden when logged out -->
             <a href="#" class="nav-link active" onclick="openPage(event, 'Observation')">
                 <span class="nav-text-group"><i class="fa-solid fa-magnifying-glass-chart"></i> Log Observation</span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'Coaching')">
                 <span class="nav-text-group"><i class="fa-solid fa-bullhorn"></i> Log Coaching</span>
             </a>
-            <!-- NEW: Monthly Tracker Link -->
             <a href="#" class="nav-link" onclick="openPage(event, 'Tracker')">
                 <span class="nav-text-group"><i class="fa-solid fa-calendar-check"></i> Monthly Tracker</span>
             </a>
-            <!-- NEW: Store Goals Link -->
             <a href="#" class="nav-link" id="nav-goals" onclick="openPage(event, 'Goals')">
                 <span class="nav-text-group"><i class="fa-solid fa-bullseye"></i> Store Goals</span>
                 <span class="nav-warning-icon" id="nav-goals-warning"><i class="fa-solid fa-exclamation-circle"></i></span>
@@ -766,7 +882,7 @@
                     </div>
                     <div>
                         <!-- MODIFIED: This is now the only button -->
-                        <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background-color: #007a4a; width: 100%; margin-top: 0;">Generate AI Notes & Log Observation</button>
+                        <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background: var(--gradient-primary); width: 100%; margin-top: 0; font-size: 1.1em; padding: 14px;">Generate AI Notes & Log Observation</button>
                         <div class="loader" id="summary-loader"></div>
                     </div>
                 </form>
@@ -832,7 +948,7 @@
                     </div>
 
                     <!-- MODIFIED: Renamed button and text -->
-                    <button type="button" class="ai-button" id="generate-ai-coaching-notes" style="margin-top: 0; margin-bottom: 20px;">Generate AI-Assisted Notes & Log Session</button>
+                    <button type="button" class="ai-button" id="generate-ai-coaching-notes" style="background: var(--gradient-primary); margin-top: 0; margin-bottom: 20px; font-size: 1.1em; padding: 14px;">Generate AI-Assisted Notes & Log Session</button>
                     <div class="loader" id="coaching-notes-loader"></div>
                 </form>
             </div>
@@ -959,7 +1075,6 @@
 
     <!-- Edit Employee Modal -->
     <div id="editEmployeeModal" class="modal">
-        <!-- ... existing modal ... -->
         <div class="modal-content">
             <span class="close-btn" id="modal-close-btn">&times;</span>
             <form id="editEmployeeForm">
@@ -991,6 +1106,24 @@
                 <button type="submit">Save Changes</button>
                 <button type="button" class="delete-btn" id="delete-employee-btn">Delete Employee</button>
             </form>
+        </div>
+    </div>
+    
+    <!-- NEW: Custom Toast Notification -->
+    <div id="toast-notification">
+        <span id="toast-message"></span>
+    </div>
+    
+    <!-- NEW: Custom Prompt Modal (for delete failsafe) -->
+    <div id="custom-prompt-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="prompt-close-btn">&times;</span>
+            <p id="custom-prompt-message"></p>
+            <input type="text" id="custom-prompt-input" />
+            <div class="modal-buttons">
+                <button type="button" class="cancel-btn" id="prompt-cancel-btn">Cancel</button>
+                <button type="button" class="confirm-btn" id="prompt-confirm-btn">Confirm</button>
+            </div>
         </div>
     </div>
 
@@ -1318,9 +1451,7 @@
             }
         }
         
-        /**
-         * NEW: Populates the Store Goals form and calculated fields
-         */
+        // ... displayStoreGoals function (unchanged) ...
         function displayStoreGoals() {
             const form = document.getElementById('goalsForm');
             form.xm.value = localStoreGoals.xm || '';
@@ -1329,13 +1460,10 @@
             form.cdv.value = localStoreGoals.cdv || '';
             form.xhs.value = localStoreGoals.xhs || '';
             form.upgrades.value = localStoreGoals.upgrades || '';
-            
             const total = (localStoreGoals.xm || 0) + (localStoreGoals.hsi || 0) + (localStoreGoals.video || 0) + (localStoreGoals.cdv || 0) + (localStoreGoals.xhs || 0) + (localStoreGoals.upgrades || 0);
             const bonus = Math.ceil(total * 1.2);
-            
             document.getElementById('total-goal-display').textContent = total;
             document.getElementById('bonus-goal-display').textContent = bonus;
-            
             if (localStoreGoals.lastUpdated) {
                 document.getElementById('goals-last-updated').textContent = `Last Updated: ${localStoreGoals.lastUpdated.toDate().toLocaleString()}`;
             } else {
@@ -1343,21 +1471,17 @@
             }
         }
         
-        /**
-         * NEW: Checks if goals are stale and shows warning
-         */
+        // ... checkGoalDate function (unchanged) ...
         function checkGoalDate() {
             const warningIcon = document.getElementById('nav-goals-warning');
             if (!localStoreGoals.lastUpdated) {
-                warningIcon.style.display = 'inline'; // No goals set
+                warningIcon.style.display = 'inline';
                 return;
             }
-            
             const fiscalMonth = getFiscalMonthInfo(new Date());
             const lastUpdatedDate = localStoreGoals.lastUpdated.toDate();
-            
             if (lastUpdatedDate < fiscalMonth.startDate) {
-                warningIcon.style.display = 'inline'; // Goals are from a previous fiscal month
+                warningIcon.style.display = 'inline';
             } else {
                 warningIcon.style.display = 'none';
             }
@@ -1368,35 +1492,103 @@
             populateEmployeeDropdown('log-employee-select'); // Log view
             populateEmployeeDropdown('coaching-employee-select'); // Coaching form
             populateEmployeeList(); // Manage employees
-            
-            // Re-display logs for the currently selected employee in the log tab
             displayEmployeeLogs(document.getElementById('log-employee-select').value);
             
-            // Refresh tracker tab if it's active
             if(document.getElementById('Tracker').classList.contains('active')) {
                 updateTrackerTab();
             }
-            // Refresh goals tab if it's active
             if(document.getElementById('Goals').classList.contains('active')) {
                 displayStoreGoals();
             }
-            // Check if goals are stale
             checkGoalDate();
         }
 
         
         // --- Event Handling Functions ---
         
-        // ... showDeleteFailsafe function (unchanged) ...
-        function showDeleteFailsafe(actionName) {
-            const userInput = prompt(`This action is permanent and cannot be undone.\n\nTo delete this ${actionName}, please type the failsafe code: ${DELETE_FAILSAFE_CODE}`);
+        /**
+         * NEW: Custom Toast (Alert)
+         * Replaces all alert() calls
+         */
+        let toastTimeout;
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast-notification');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.className = 'show';
+            if (isError) {
+                toast.classList.add('error');
+            }
+            
+            // Clear existing timeout if one exists
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+            }
+
+            // Set new timeout to hide
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.remove('error');
+            }, 3000); // Hide after 3 seconds
+        }
+
+        /**
+         * NEW: Custom Prompt (replaces prompt())
+         * Returns a Promise that resolves with the input value or null
+         */
+        function showCustomPrompt(message) {
+            const modal = document.getElementById('custom-prompt-modal');
+            const messageEl = document.getElementById('custom-prompt-message');
+            const inputEl = document.getElementById('custom-prompt-input');
+            const confirmBtn = document.getElementById('prompt-confirm-btn');
+            const cancelBtn = document.getElementById('prompt-cancel-btn');
+            const closeBtn = document.getElementById('prompt-close-btn');
+
+            messageEl.textContent = message;
+            inputEl.value = '';
+            modal.style.display = 'block';
+            inputEl.focus();
+
+            return new Promise((resolve) => {
+                const close = (value) => {
+                    modal.style.display = 'none';
+                    confirmBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    closeBtn.onclick = null;
+                    inputEl.onkeydown = null;
+                    resolve(value);
+                };
+
+                confirmBtn.onclick = () => close(inputEl.value);
+                cancelBtn.onclick = () => close(null);
+                closeBtn.onclick = () => close(null);
+                inputEl.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        close(inputEl.value);
+                    } else if (e.key === 'Escape') {
+                        close(null);
+                    }
+                };
+            });
+        }
+        
+        /**
+         * NEW: Failsafe check for deletions
+         * Now async and uses custom prompt
+         */
+        async function showDeleteFailsafe(actionName) {
+            const message = `This action is permanent and cannot be undone.\n\nTo delete this ${actionName}, please type the failsafe code: ${DELETE_FAILSAFE_CODE}`;
+            const userInput = await showCustomPrompt(message);
+            
             if (userInput === DELETE_FAILSAFE_CODE) {
                 return true;
-            } else if (userInput !== null) { 
-                alert("Incorrect code. Deletion cancelled.");
+            } else if (userInput !== null) { // User typed something, but it was wrong
+                await showToast("Incorrect code. Deletion cancelled.", true);
             }
-            return false;
+            return false; // User cancelled or typed wrong code
         }
+        
         // ... addEmployee function (unchanged) ...
         async function addEmployee(event) {
             event.preventDefault();
@@ -1408,7 +1600,7 @@
             const newHireDate = hireDateInput.value;
             if (newName && newRole && newHireDate) {
                 if (Object.values(localEmployees).find(emp => emp.name.toLowerCase() === newName.toLowerCase())) {
-                    alert("An employee with this name already exists.");
+                    await showToast("An employee with this name already exists.", true);
                     return;
                 }
                 const newEmployee = {
@@ -1420,43 +1612,46 @@
                 };
                 try {
                     await addDoc(employeesRef, newEmployee);
+                    await showToast("Employee added successfully!");
                     nameInput.value = '';
                     roleInput.value = '';
                     hireDateInput.value = '';
                 } catch (e) {
                     console.error("Error adding employee:", e);
-                    alert("Failed to add employee. See console for details.");
+                    await showToast("Failed to add employee. See console for details.", true);
                 }
             } else {
-                alert("Please fill out Name, Role, and Hire Date.");
+                await showToast("Please fill out Name, Role, and Hire Date.", true);
             }
         }
         // ... deleteEmployee function (unchanged) ...
         async function deleteEmployee(idToDelete) {
             const employeeName = localEmployees[idToDelete]?.name || "this employee";
-            if (!showDeleteFailsafe(`employee (${employeeName}) and ALL their logs`)) {
+            if (!await showDeleteFailsafe(`employee (${employeeName}) and ALL their logs`)) {
                 return;
             }
             try {
                 await deleteDoc(doc(db, "artifacts", appId, "public", "data", "employees", idToDelete));
+                await showToast("Employee deleted.");
                 closeEditModal();
             } catch (e) {
                 console.error("Error deleting employee:", e);
-                alert("Failed to delete employee. See console for details.");
+                await showToast("Failed to delete employee. See console for details.", true);
             }
         }
         // ... deleteLog function (unchanged) ...
         async function deleteLog(logId, logType, logTypeName) {
-            if (!showDeleteFailsafe(logTypeName)) {
+            if (!await showDeleteFailsafe(logTypeName)) {
                 return;
             }
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", logType, logId);
                 await deleteDoc(docRef);
+                await showToast(`${logTypeName} deleted.`);
                 console.log(`${logTypeName} deleted: ${logId}`);
             } catch(e) {
                 console.error(`Error deleting ${logTypeName}:`, e);
-                alert(`Failed to delete ${logTypeName}. See console for details.`);
+                await showToast(`Failed to delete ${logTypeName}. See console for details.`, true);
             }
         }
         
@@ -1466,25 +1661,19 @@
             return radio ? radio.value : "N/A";
         }
         
-        /**
-         * Calls the Gemini API to generate an observation summary
-         * and then logs the observation.
-         * UPDATED to include KPI_CONTEXT and store goals
-         */
+        // ... generateAndLogObservation function (unchanged, but uses new KPI_CONTEXT and store goals) ...
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
             const customerIntent = form.customerIntent.value.trim();
-            
             if (!employeeId) {
-                alert("Please select an employee first.");
+                await showToast("Please select an employee first.", true);
                 return;
             }
             if (!customerIntent) {
-                alert("Please enter the customer intent first.");
+                await showToast("Please enter the customer intent first.", true);
                 return;
             }
-            
             const profile = localEmployees[employeeId];
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
@@ -1493,7 +1682,6 @@
             if (recentCoaching && recentCoaching.actionPlan) {
                 coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
             }
-            
             const greatData = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
@@ -1521,15 +1709,11 @@
                     notes: form.notes_t.value.trim()
                 }
             };
-            
             let prompt = `Act as a sales manager for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${profile.name}.\n\n`;
             prompt += `Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 steps. **Use ${profile.name}'s name** where it feels natural to make it personal.\n\n`;
             prompt += `For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
-            
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n"; 
-            
-            // NEW: Add current store goals
             let goalsContext = "Monthly goals are not set.\n";
             if (localStoreGoals.totalGoal) {
                 goalsContext = `Current Monthly Goals:\n` +
@@ -1538,7 +1722,6 @@
             }
             prompt += `--- CURRENT STORE GOALS ---\n`;
             prompt += goalsContext + "\n\n";
-
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
@@ -1561,9 +1744,7 @@
             prompt += formatStep('A - Ask', greatData.ask);
             prompt += formatStep('T - Thank', greatData.thank);
             prompt += `\n--- GENERATE JSON OUTPUT ---`;
-            
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
-            
             try {
                 const generationConfig = {
                     responseMimeType: "application/json",
@@ -1593,23 +1774,17 @@
                     throw new Error(`API Error: ${response.status} ${response.statusText}`);
                 }
                 const result = await response.json();
-                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
-                
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
-
-                // Populate fields with AI notes
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
                 if (notesObject.relate_note) form.notes_r.value = notesObject.relate_note;
                 if (notesObject.explore_note) form.notes_e.value = notesObject.explore_note;
                 if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
                 if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
-                
-                // NOW, LOG IT AUTOMATICALLY
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -1617,37 +1792,33 @@
                     ask: { ...greatData.ask, notes: form.notes_a.value },
                     thank: { ...greatData.thank, notes: form.notes_t.value }
                 };
-
                 const newObservation = {
                     employeeId: employeeId,
                     date: Timestamp.now(),
                     customerIntent: customerIntent,
                     greatAssessment: greatAssessmentWithAINotes, 
-                    notes: form.notes.value.trim(), // Include overall notes
+                    notes: form.notes.value.trim(),
                     behaviors: [] 
                 };
-
                 await addDoc(observationsRef, newObservation);
-                
                 const employeeName = localEmployees[employeeId].name;
-                alert(`AI notes generated and observation logged for ${employeeName}!`);
+                await showToast(`AI notes generated and observation logged for ${employeeName}!`);
                 form.reset();
                 form.employee.value = "";
                 form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
-                
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
-                alert('AI generation or logging failed. Please check the console for errors.');
+                await showToast('AI generation or logging failed. Please check the console for errors.', true);
             } finally {
                 showLoading('summary-loader', 'generate-and-log-ai-summary', false);
             }
         }
         
-        // ... generateAICoachingPlan function (unchanged, but uses new KPI_CONTEXT and store goals) ...
+        // ... generateAICoachingPlan function (unchanged) ...
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
-                alert("Please select an employee from the dropdown first.");
+                await showToast("Please select an employee from the dropdown first.", true);
                 return;
             }
             const profile = localEmployees[employeeId];
@@ -1656,7 +1827,7 @@
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
             if (obsHistory.length === 0 && coachingHistory.length === 0) {
-                alert("This employee has no observations or coaching logs. Please log one first.");
+                await showToast("This employee has no observations or coaching logs. Please log one first.", true);
                 return;
             }
             let prompt = `Act as an expert retail sales coach for an **Xfinity store**. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${profile.name}**.\n\n`;
@@ -1665,7 +1836,6 @@
             prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n";
-            // NEW: Add current store goals
             let goalsContext = "Monthly goals are not set.\n";
             if (localStoreGoals.totalGoal) {
                 goalsContext = `Current Monthly Goals:\n` +
@@ -1757,48 +1927,35 @@
                 showLoading('coaching-loader', 'generate-ai-coaching-plan', false);
             }
         }
-
-        /**
-         * MODIFIED: Generates AI coaching notes based on manager's raw notes
-         * and then logs the session.
-         */
+        
+        // ... generateAndLogCoachingNotes function (unchanged) ...
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
             const employeeId = form.employeeId.value;
-            
             if (!employeeId) {
-                alert("Please select an employee first.");
+                await showToast("Please select an employee first.", true);
                 return;
             }
-            
             const dateStr = form.date.value;
             if (!dateStr) {
-                alert("Please select a session date.");
+                await showToast("Please select a session date.", true);
                 return;
             }
-            
-            // Get raw notes from user
             const rawProgress = form.progress.value.trim();
             const rawObstacles = form.obstacles.value.trim();
             const rawActionPlan = form.actionPlan.value.trim();
-
             if (!rawProgress || !rawObstacles || !rawActionPlan) {
-                alert("Please fill in your raw notes for Progress, Obstacles, and Action Plan before generating.");
+                await showToast("Please fill in your raw notes for Progress, Obstacles, and Action Plan before generating.", true);
                 return;
             }
-
             const profile = localEmployees[employeeId];
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                           .sort((a, b) => b.date.toDate() - a.date.toDate());
-            
             let prompt = `Act as an expert Xfinity retail sales manager. I am logging a 1-on-1 with ${profile.name}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
-            
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n";
-            
-            // NEW: Add current store goals
             let goalsContext = "Monthly goals are not set.\n";
             if (localStoreGoals.totalGoal) {
                 goalsContext = `Current Monthly Goals:\n` +
@@ -1807,15 +1964,12 @@
             }
             prompt += `--- CURRENT STORE GOALS ---\n`;
             prompt += goalsContext + "\n\n";
-            
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
-
             prompt += `--- MANAGER'S RAW NOTES (INPUT) ---\n`;
             prompt += `Progress: ${rawProgress}\n`;
             prompt += `Obstacles: ${rawObstacles}\n`;
             prompt += `Action Plan: ${rawActionPlan}\n\n`;
-            
             prompt += `--- FULL PERFORMANCE HISTORY (for context) ---\n`;
             const recentObs = obsHistory.slice(0, 2);
             if(recentObs.length > 0) {
@@ -1826,16 +1980,13 @@
              if(recentCoaching.length > 0) {
                 prompt += `Last Coaching (${recentCoaching[0].date.toDate().toLocaleDateString()}): Last Action Plan: ${recentCoaching[0].actionPlan}\n`;
             }
-            
             prompt += `\n--- GENERATE JSON OUTPUT ---
             Based on my raw notes, generate:
             1.  **progress_note:** A refined, professional note summarizing the progress.
             2.  **obstacles_note:** A refined, professional note summarizing the obstacles.
             3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note and the employee's history/KPIs.
             ---`;
-            
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
-            
             try {
                 const generationConfig = {
                     responseMimeType: "application/json",
@@ -1852,7 +2003,6 @@
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: generationConfig 
                 };
-
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1864,61 +2014,47 @@
                     throw new Error(`API Error: ${response.status} ${response.statusText}`);
                 }
                 const result = await response.json();
-                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
-
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
-                
-                // Populate fields with AI notes
                 if (notesObject.progress_note) form.progress.value = notesObject.progress_note;
                 if (notesObject.obstacles_note) form.obstacles.value = notesObject.obstacles_note;
                 if (notesObject.smart_goal) form.actionPlan.value = notesObject.smart_goal;
-
-                // Auto-log the coaching session
-                // MODIFIED: Fixed timestamp logic
                 const now = new Date();
-                const dateParts = dateStr.split('-'); // [YYYY, MM, DD]
-                // Create date object from date input, then set the time to now
+                const dateParts = dateStr.split('-');
                 const sessionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], now.getHours(), now.getMinutes(), now.getSeconds());
                 const sessionTimestamp = Timestamp.fromDate(sessionDate);
-            
                 const newCoaching = {
                     employeeId: employeeId,
-                    date: sessionTimestamp, // Use new timestamp
+                    date: sessionTimestamp,
                     sessionType: form.sessionType.value,
                     tnps: form.tnps.value || "",
                     sales: form.sales.value || "",
-                    progress: form.progress.value, // Use the new AI-generated note
-                    obstacles: form.obstacles.value, // Use the new AI-generated note
-                    actionPlan: form.actionPlan.value // Use the new AI-generated note
+                    progress: form.progress.value,
+                    obstacles: form.obstacles.value,
+                    actionPlan: form.actionPlan.value
                 };
-            
                 await addDoc(coachingsRef, newCoaching);
                 const employeeName = localEmployees[employeeId].name;
-                alert(`AI-assisted coaching session logged for ${employeeName}!`);
+                await showToast(`AI-assisted coaching session logged for ${employeeName}!`);
                 form.reset();
                 form.employeeId.value = "";
                 document.getElementById('coaching-date').valueAsDate = new Date();
-                
             } catch (err) {
                 console.error('AI Coaching Prep Failed:', err);
-                alert('AI coaching prep failed. Please check the console for errors.');
+                await showToast('AI coaching prep failed. Please check the console for errors.', true);
             } finally {
                 showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             }
         }
         
-        /**
-         * NEW: Saves the monthly store goals
-         */
+        // ... saveStoreGoals function (unchanged) ...
         async function saveStoreGoals(event) {
             event.preventDefault();
             const form = document.getElementById('goalsForm');
-            
             const goals = {
                 xm: Number(form.xm.value) || 0,
                 hsi: Number(form.hsi.value) || 0,
@@ -1927,51 +2063,40 @@
                 xhs: Number(form.xhs.value) || 0,
                 upgrades: Number(form.upgrades.value) || 0,
             };
-            
             const total = goals.xm + goals.hsi + goals.video + goals.cdv + goals.xhs + goals.upgrades;
             const bonus = Math.ceil(total * 1.2);
-            
             const goalsToSave = {
                 ...goals,
                 totalGoal: total,
                 bonusGoal: bonus,
                 lastUpdated: Timestamp.now()
             };
-            
             try {
                 await setDoc(storeGoalsRef, goalsToSave);
-                alert("Monthly goals have been saved!");
-                displayStoreGoals(); // Refresh the displayed totals
-                checkGoalDate(); // Hide the warning icon
+                await showToast("Monthly goals have been saved!");
+                displayStoreGoals(); 
+                checkGoalDate(); 
             } catch (e) {
                 console.error("Error saving goals:", e);
-                alert("Failed to save goals. Check console.");
+                await showToast("Failed to save goals. Check console.", true);
             }
         }
 
-
-        /**
-         * Handles switching between the pages.
-         */
+        // ... openPage function (unchanged) ...
         function openPage(event, pageName) {
             const pageContents = document.getElementsByClassName('page-content');
             for (let i = 0; i < pageContents.length; i++) {
                 pageContents[i].style.display = 'none';
             }
-            
             const navLinks = document.getElementsByClassName('nav-link');
             for (let i = 0; i < navLinks.length; i++) {
                 navLinks[i].className = navLinks[i].className.replace(' active', '');
             }
-            
             document.getElementById(pageName).style.display = 'block';
             event.currentTarget.className += ' active';
-            
-            // NEW: Update tracker tab when it's clicked
             if (pageName === 'Tracker') {
                 updateTrackerTab();
             }
-            // NEW: Update goals tab when it's clicked
             if (pageName === 'Goals') {
                 displayStoreGoals();
             }
@@ -2007,28 +2132,27 @@
             try {
                 const docRef = doc(db, "artifacts", appId, "public", "data", "employees", id);
                 await setDoc(docRef, updatedProfile, { merge: true });
+                await showToast("Employee details saved!");
                 closeEditModal();
             } catch (e) {
                 console.error("Error saving changes:", e);
-                alert("Failed to save changes. See console for details.");
+                await showToast("Failed to save changes. See console for details.", true);
             }
         }
         
-        // --- NEW: Auth Functions ---
+        // --- Auth Functions ---
+        // ... signInWithGoogle, signOutUser (unchanged) ...
         async function signInWithGoogle() {
             try {
                 await signInWithPopup(auth, googleProvider);
-                // onAuthStateChanged will handle the rest
             } catch (error) {
                 console.error("Google Sign-in Error:", error);
-                alert("Could not sign in with Google. Check console for details.");
+                await showToast("Could not sign in with Google. Check console.", true);
             }
         }
-        
         async function signOutUser() {
             try {
                 await signOut(auth);
-                // onAuthStateChanged will handle the rest
             } catch (error) {
                 console.error("Sign-out Error:", error);
             }
@@ -2036,18 +2160,14 @@
         
         // --- Setup Listeners ---
         function setupFirestoreListeners() {
-            // ... (rest of setupFirestoreListeners function is unchanged) ...
             if (employeesListener) employeesListener();
             if (observationsListener) observationsListener();
             if (coachingsListener) coachingsListener();
-            if (storeGoalsListener) storeGoalsListener(); // NEW
-
+            if (storeGoalsListener) storeGoalsListener(); 
             employeesRef = collection(db, "artifacts", appId, "public", "data","employees");
             observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
             coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
-            // NEW: Reference to a single doc
             storeGoalsRef = doc(db, "artifacts", appId, "public", "data", "storeGoals", "currentMonth");
-
             employeesListener = onSnapshot(employeesRef, (snapshot) => {
                 console.log("Firebase: Employees snapshot received");
                 localEmployees = {};
@@ -2058,7 +2178,6 @@
                 refreshUI();
             }, (error) => {
                 console.error("Error listening to employees:", error);
-                alert("Error: Could not load employees. Check console.");
             });
             observationsListener = onSnapshot(observationsRef, (snapshot) => {
                 console.log("Firebase: Observations snapshot received");
@@ -2070,7 +2189,6 @@
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
             }, (error) => {
                 console.error("Error listening to observations:", error);
-                alert("Error: Could not load observations. Check console.");
             });
             coachingsListener = onSnapshot(coachingsRef, (snapshot) => {
                 console.log("Firebase: Coachings snapshot received");
@@ -2083,10 +2201,7 @@
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
             }, (error) => {
                 console.error("Error listening to coachings:", error);
-                alert("Error: Could not load coaching logs. Check console.");
             });
-            
-            // NEW: Listener for store goals
             storeGoalsListener = onSnapshot(storeGoalsRef, (doc) => {
                 console.log("Firebase: Store goals snapshot received");
                 localStoreGoals = doc.data() || {};
@@ -2094,7 +2209,6 @@
                 refreshUI(); // Will call checkGoalDate
             }, (error) => {
                 console.error("Error listening to store goals:", error);
-                alert("Error: Could not load store goals. Check console.");
             });
         }
         
@@ -2133,7 +2247,7 @@
                 
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
-                alert("FATAL ERROR: Could not connect to database. App will not function.");
+                await showToast("FATAL ERROR: Could not connect to database.", true);
                 return;
             }
 
@@ -2152,7 +2266,7 @@
                     if (employeesListener) employeesListener();
                     if (observationsListener) observationsListener();
                     if (coachingsListener) coachingsListener();
-                    if (storeGoalsListener) storeGoalsListener(); // NEW
+                    if (storeGoalsListener) storeGoalsListener();
                 }
             });
 
@@ -2160,9 +2274,8 @@
             document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
             document.getElementById('coachingForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                alert("Please use the 'Generate AI Notes & Log Session' button to log this coaching.");
+                showToast("Please use the 'Generate AI Notes & Log Session' button to log this coaching.", true);
             });
-            // NEW: Listener for goals form
             document.getElementById('goalsForm').addEventListener('submit', saveStoreGoals);
             
             document.getElementById('generate-and-log-ai-summary').addEventListener('click', generateAndLogObservation);
@@ -2180,6 +2293,7 @@
             document.getElementById('sign-in-btn').addEventListener('click', signInWithGoogle);
             document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
             
+            // Modal buttons
             document.getElementById('modal-close-btn').addEventListener('click', closeEditModal);
             document.getElementById('editEmployeeForm').addEventListener('submit', saveEmployeeChanges);
             document.getElementById('delete-employee-btn').addEventListener('click', () => {
@@ -2191,6 +2305,11 @@
                 if (event.target == modal) {
                     closeEditModal();
                 }
+            });
+            
+            // Custom Prompt Modal buttons
+            document.getElementById('prompt-close-btn').addEventListener('click', () => {
+                document.getElementById('custom-prompt-modal').style.display = 'none';
             });
             
             document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
