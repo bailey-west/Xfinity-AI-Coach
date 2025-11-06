@@ -61,7 +61,9 @@
         }
 
         .sidebar-nav a {
-            display: block;
+            display: flex; /* Use flex for alignment */
+            justify-content: space-between; /* Pushes icon to right */
+            align-items: center; /* Vertical alignment */
             padding: 12px 15px;
             text-decoration: none;
             color: var(--text-color-light);
@@ -69,6 +71,10 @@
             border-radius: 6px;
             margin-bottom: 5px;
             transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-nav a .nav-text-group {
+            display: flex;
+            align-items: center;
         }
         .sidebar-nav a i {
             margin-right: 12px;
@@ -81,6 +87,20 @@
         .sidebar-nav a.active {
             background-color: var(--primary-color);
             color: var(--light-color);
+        }
+        
+        /* NEW: Warning icon for goals */
+        .nav-warning-icon {
+            display: none; /* Hidden by default */
+            color: var(--danger-color);
+            font-size: 0.9em;
+            animation: blink 1.5s linear infinite;
+        }
+        .sidebar-nav a.active .nav-warning-icon {
+            color: var(--light-color); /* Make visible on active tab */
+        }
+        @keyframes blink {
+            50% { opacity: 0.2; }
         }
         
         /* Sign-in / Sign-out Button */
@@ -552,6 +572,34 @@
         #tracker-table .fa-check-circle {
             margin-right: 5px;
         }
+        
+        /* NEW: Store Goals Page */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .goals-summary {
+            background-color: #f9f9f9;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .goals-summary h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .goals-summary p {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        #goals-last-updated {
+            font-size: 0.9em;
+            color: var(--text-color-light);
+            font-style: italic;
+        }
 
     </style>
 </head>
@@ -568,20 +616,25 @@
             
             <!-- These are hidden when logged out -->
             <a href="#" class="nav-link active" onclick="openPage(event, 'Observation')">
-                <i class="fa-solid fa-magnifying-glass-chart"></i> Log Observation
+                <span class="nav-text-group"><i class="fa-solid fa-magnifying-glass-chart"></i> Log Observation</span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'Coaching')">
-                <i class="fa-solid fa-bullhorn"></i> Log Coaching
+                <span class="nav-text-group"><i class="fa-solid fa-bullhorn"></i> Log Coaching</span>
             </a>
             <!-- NEW: Monthly Tracker Link -->
             <a href="#" class="nav-link" onclick="openPage(event, 'Tracker')">
-                <i class="fa-solid fa-calendar-check"></i> Monthly Tracker
+                <span class="nav-text-group"><i class="fa-solid fa-calendar-check"></i> Monthly Tracker</span>
+            </a>
+            <!-- NEW: Store Goals Link -->
+            <a href="#" class="nav-link" id="nav-goals" onclick="openPage(event, 'Goals')">
+                <span class="nav-text-group"><i class="fa-solid fa-bullseye"></i> Store Goals</span>
+                <span class="nav-warning-icon" id="nav-goals-warning"><i class="fa-solid fa-exclamation-circle"></i></span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'ViewLogs')">
-                <i class="fa-solid fa-list-alt"></i> View Logs
+                <span class="nav-text-group"><i class="fa-solid fa-list-alt"></i> View Logs</span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'Employees')">
-                <i class="fa-solid fa-users"></i> Manage Employees
+                <span class="nav-text-group"><i class="fa-solid fa-users"></i> Manage Employees</span>
             </a>
             
             <!-- Sign in/out buttons -->
@@ -805,8 +858,52 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- NEW: PAGE 4: Store Goals -->
+            <div id="Goals" class="page-content">
+                <form id="goalsForm">
+                    <h2>Store Monthly Goals</h2>
+                    <p style="text-align: center; margin-top: -10px; margin-bottom: 20px; color: var(--text-color-light);">Set the store-wide goals for the current fiscal month. All AI-generated SMART goals will reference these numbers.</p>
+                    
+                    <div class="goals-grid">
+                        <div>
+                            <label for="goal-xm">XM (Xfinity Mobile)</label>
+                            <input type="number" id="goal-xm" name="xm" placeholder="e.g., 40">
+                        </div>
+                        <div>
+                            <label for="goal-hsi">HSI (Internet)</label>
+                            <input type="number" id="goal-hsi" name="hsi" placeholder="e.g., 20">
+                        </div>
+                        <div>
+                            <label for="goal-video">Video</label>
+                            <input type="number" id="goal-video" name="video" placeholder="e.g., 10">
+                        </div>
+                        <div>
+                            <label for="goal-cdv">CDV (Voice)</label>
+                            <input type="number" id="goal-cdv" name="cdv" placeholder="e.g., 5">
+                        </div>
+                        <div>
+                            <label for="goal-xhs">XHS (Home Security)</label>
+                            <input type="number" id="goal-xhs" name="xhs" placeholder="e.g., 5">
+                        </div>
+                        <div>
+                            <label for="goal-upgrades">Device Upgrades</label>
+                            <input type="number" id="goal-upgrades" name="upgrades" placeholder="e.g., 15">
+                        </div>
+                    </div>
+                    
+                    <button type="submit">Save Monthly Goals</button>
+                    
+                    <div class="goals-summary">
+                        <h3>Calculated Totals</h3>
+                        <p>Total Unit Goal: <span id="total-goal-display">0</span></p>
+                        <p>120% Bonus Goal: <span id="bonus-goal-display">0</span></p>
+                        <p id="goals-last-updated">Last Updated: Never</p>
+                    </div>
+                </form>
+            </div>
 
-            <!-- PAGE 4: View Logs -->
+            <!-- PAGE 5: View Logs -->
             <div id="ViewLogs" class="page-content">
                 <!-- ... existing view logs ... -->
                 <h2>View Performance Logs</h2>
@@ -829,7 +926,7 @@
                 </div>
             </div>
 
-            <!-- PAGE 5: Employee Management -->
+            <!-- PAGE 6: Employee Management -->
             <div id="Employees" class="page-content">
                 <!-- ... existing employee management ... -->
                 <form id="addEmployeeForm">
@@ -930,6 +1027,7 @@
         // --- UPDATED: KPI Context ---
         const KPI_CONTEXT = `
             Please use the following Xfinity retail KPIs and expectations when generating SMART goals:
+            - Reps are full-time, 5x8-hour shifts.
             - tNPS score goal: 75
             - XM% to goal: 100%
             - XM conversion rate: 10%
@@ -940,7 +1038,8 @@
             - XMC (Xfinity Mobile Care or insurance unit) attach: 60%
             - Unlimited Premium (higher mobile plan) attach: 45%
             - New/New (New mobile line attach on a new internet sale, same day): 30% attach
-            - Monthly Mobile Line (LA) Goal: 40 per rep (approx 10-15 per week)
+            - Monthly Mobile Line (LA) Goal: 40 per rep (approx 10-15 per week).
+            - Total Monthly Unit Goal: Varies, but hitting 120% of this total (e.g., HSI+Video+XM+etc) gives a 20% commission bonus.
             - 'Service to sales' means every service interaction (like a bill pay or equipment swap)
               is an opportunity to perform an account review and pivot to a sale (especially Xfinity Mobile).
         `;
@@ -962,15 +1061,17 @@
         const DELETE_FAILSAFE_CODE = "DELETE-1234"; // NEW: Failsafe code
 
         let db, auth, userId, googleProvider, app, analytics; 
-        let employeesRef, observationsRef, coachingsRef;
+        let employeesRef, observationsRef, coachingsRef, storeGoalsRef; // NEW: storeGoalsRef
         let employeesListener = null;
         let observationsListener = null;
         let coachingsListener = null;
+        let storeGoalsListener = null; // NEW: storeGoalsListener
 
         // Global state variables
         let localEmployees = {};
         let localObservations = [];
         let localCoachings = [];
+        let localStoreGoals = {}; // NEW: localStoreGoals
         
         // NEW: Goal constants
         const OBS_GOAL = 4;
@@ -1002,22 +1103,16 @@
             return ` (${tenureStr})`;
         }
         
-        /**
-         * NEW: Fiscal Month Calculator
-         * Returns an object { startDate, endDate, name }
-         */
+        // ... getFiscalMonthInfo function (unchanged) ...
         function getFiscalMonthInfo(date) {
             const day = date.getDate();
             let startMonth = date.getMonth();
             let startYear = date.getFullYear();
             let endMonth = date.getMonth();
             let endYear = date.getFullYear();
-
             if (day < 22) {
-                // We are in the fiscal month that started *last* month
                 endMonth = date.getMonth();
                 endYear = date.getFullYear();
-                
                 startMonth = date.getMonth() - 1;
                 startYear = date.getFullYear();
                 if (startMonth < 0) {
@@ -1025,10 +1120,8 @@
                     startYear -= 1;
                 }
             } else {
-                // We are in the fiscal month that started *this* month
                 startMonth = date.getMonth();
                 startYear = date.getFullYear();
-
                 endMonth = date.getMonth() + 1;
                 endYear = date.getFullYear();
                 if (endMonth > 11) {
@@ -1036,13 +1129,10 @@
                     endYear += 1;
                 }
             }
-            
             const startDate = new Date(startYear, startMonth, 22, 0, 0, 0);
             const endDate = new Date(endYear, endMonth, 21, 23, 59, 59);
-            
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const fiscalMonthName = `Fiscal ${monthNames[endMonth]} ${endYear}`;
-
             return { startDate, endDate, name: fiscalMonthName };
         }
 
@@ -1192,18 +1282,13 @@
             }
         }
         
-        /**
-         * NEW: Updates the Monthly Tracker tab
-         */
+        // ... updateTrackerTab function (unchanged) ...
         function updateTrackerTab() {
             const fiscalMonth = getFiscalMonthInfo(new Date());
             document.getElementById('tracker-title').textContent = `Monthly Goal Tracker`;
             document.getElementById('tracker-subtitle').textContent = `${fiscalMonth.name} (${fiscalMonth.startDate.toLocaleDateString()} - ${fiscalMonth.endDate.toLocaleDateString()})`;
-            
             const tableBody = document.getElementById('tracker-table-body');
-            tableBody.innerHTML = ''; // Clear old data
-
-            // Filter logs by current fiscal month
+            tableBody.innerHTML = ''; 
             const obsInMonth = localObservations.filter(obs => {
                 const date = obs.date.toDate();
                 return date >= fiscalMonth.startDate && date <= fiscalMonth.endDate;
@@ -1212,22 +1297,16 @@
                 const date = c.date.toDate();
                 return date >= fiscalMonth.startDate && date <= fiscalMonth.endDate;
             });
-
             const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
-
             for (const [id, profile] of sortedEmployees) {
                 const obsCount = obsInMonth.filter(obs => obs.employeeId === id).length;
                 const coachCount = coachingInMonth.filter(c => c.employeeId === id).length;
-                
                 const obsMet = obsCount >= OBS_GOAL;
                 const coachMet = coachCount >= COACH_GOAL;
                 const isComplete = obsMet && coachMet;
-                
                 const tr = document.createElement('tr');
-                
                 let statusClass = isComplete ? 'status-complete' : 'status-progress';
                 let statusText = isComplete ? '<i class="fa-solid fa-check-circle"></i> Complete' : 'In Progress';
-                
                 tr.innerHTML = `
                     <td>${profile.name}</td>
                     <td>${profile.role}</td>
@@ -1239,6 +1318,51 @@
             }
         }
         
+        /**
+         * NEW: Populates the Store Goals form and calculated fields
+         */
+        function displayStoreGoals() {
+            const form = document.getElementById('goalsForm');
+            form.xm.value = localStoreGoals.xm || '';
+            form.hsi.value = localStoreGoals.hsi || '';
+            form.video.value = localStoreGoals.video || '';
+            form.cdv.value = localStoreGoals.cdv || '';
+            form.xhs.value = localStoreGoals.xhs || '';
+            form.upgrades.value = localStoreGoals.upgrades || '';
+            
+            const total = (localStoreGoals.xm || 0) + (localStoreGoals.hsi || 0) + (localStoreGoals.video || 0) + (localStoreGoals.cdv || 0) + (localStoreGoals.xhs || 0) + (localStoreGoals.upgrades || 0);
+            const bonus = Math.ceil(total * 1.2);
+            
+            document.getElementById('total-goal-display').textContent = total;
+            document.getElementById('bonus-goal-display').textContent = bonus;
+            
+            if (localStoreGoals.lastUpdated) {
+                document.getElementById('goals-last-updated').textContent = `Last Updated: ${localStoreGoals.lastUpdated.toDate().toLocaleString()}`;
+            } else {
+                document.getElementById('goals-last-updated').textContent = 'Last Updated: Never';
+            }
+        }
+        
+        /**
+         * NEW: Checks if goals are stale and shows warning
+         */
+        function checkGoalDate() {
+            const warningIcon = document.getElementById('nav-goals-warning');
+            if (!localStoreGoals.lastUpdated) {
+                warningIcon.style.display = 'inline'; // No goals set
+                return;
+            }
+            
+            const fiscalMonth = getFiscalMonthInfo(new Date());
+            const lastUpdatedDate = localStoreGoals.lastUpdated.toDate();
+            
+            if (lastUpdatedDate < fiscalMonth.startDate) {
+                warningIcon.style.display = 'inline'; // Goals are from a previous fiscal month
+            } else {
+                warningIcon.style.display = 'none';
+            }
+        }
+        
         function refreshUI() {
             populateEmployeeDropdown('employee'); // Obs form
             populateEmployeeDropdown('log-employee-select'); // Log view
@@ -1247,10 +1371,17 @@
             
             // Re-display logs for the currently selected employee in the log tab
             displayEmployeeLogs(document.getElementById('log-employee-select').value);
-            // NEW: Refresh tracker tab if it's active
+            
+            // Refresh tracker tab if it's active
             if(document.getElementById('Tracker').classList.contains('active')) {
                 updateTrackerTab();
             }
+            // Refresh goals tab if it's active
+            if(document.getElementById('Goals').classList.contains('active')) {
+                displayStoreGoals();
+            }
+            // Check if goals are stale
+            checkGoalDate();
         }
 
         
@@ -1338,7 +1469,7 @@
         /**
          * Calls the Gemini API to generate an observation summary
          * and then logs the observation.
-         * UPDATED to include KPI_CONTEXT
+         * UPDATED to include KPI_CONTEXT and store goals
          */
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
@@ -1395,9 +1526,19 @@
             prompt += `Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 steps. **Use ${profile.name}'s name** where it feels natural to make it personal.\n\n`;
             prompt += `For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
             
-            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`; // NEW
-            prompt += KPI_CONTEXT + "\n\n"; // NEW
+            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
+            prompt += KPI_CONTEXT + "\n\n"; 
             
+            // NEW: Add current store goals
+            let goalsContext = "Monthly goals are not set.\n";
+            if (localStoreGoals.totalGoal) {
+                goalsContext = `Current Monthly Goals:\n` +
+                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
+                               `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
+            }
+            prompt += `--- CURRENT STORE GOALS ---\n`;
+            prompt += goalsContext + "\n\n";
+
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
@@ -1502,7 +1643,7 @@
             }
         }
         
-        // ... generateAICoachingPlan function (unchanged, but uses new KPI_CONTEXT) ...
+        // ... generateAICoachingPlan function (unchanged, but uses new KPI_CONTEXT and store goals) ...
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
@@ -1524,6 +1665,15 @@
             prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n";
+            // NEW: Add current store goals
+            let goalsContext = "Monthly goals are not set.\n";
+            if (localStoreGoals.totalGoal) {
+                goalsContext = `Current Monthly Goals:\n` +
+                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
+                               `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
+            }
+            prompt += `--- CURRENT STORE GOALS ---\n`;
+            prompt += goalsContext + "\n\n";
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
@@ -1645,8 +1795,18 @@
             
             let prompt = `Act as an expert Xfinity retail sales manager. I am logging a 1-on-1 with ${profile.name}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
             
-            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`; // NEW
-            prompt += KPI_CONTEXT + "\n\n"; // NEW
+            prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
+            prompt += KPI_CONTEXT + "\n\n";
+            
+            // NEW: Add current store goals
+            let goalsContext = "Monthly goals are not set.\n";
+            if (localStoreGoals.totalGoal) {
+                goalsContext = `Current Monthly Goals:\n` +
+                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
+                               `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
+            }
+            prompt += `--- CURRENT STORE GOALS ---\n`;
+            prompt += goalsContext + "\n\n";
             
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
@@ -1751,6 +1911,43 @@
                 showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             }
         }
+        
+        /**
+         * NEW: Saves the monthly store goals
+         */
+        async function saveStoreGoals(event) {
+            event.preventDefault();
+            const form = document.getElementById('goalsForm');
+            
+            const goals = {
+                xm: Number(form.xm.value) || 0,
+                hsi: Number(form.hsi.value) || 0,
+                video: Number(form.video.value) || 0,
+                cdv: Number(form.cdv.value) || 0,
+                xhs: Number(form.xhs.value) || 0,
+                upgrades: Number(form.upgrades.value) || 0,
+            };
+            
+            const total = goals.xm + goals.hsi + goals.video + goals.cdv + goals.xhs + goals.upgrades;
+            const bonus = Math.ceil(total * 1.2);
+            
+            const goalsToSave = {
+                ...goals,
+                totalGoal: total,
+                bonusGoal: bonus,
+                lastUpdated: Timestamp.now()
+            };
+            
+            try {
+                await setDoc(storeGoalsRef, goalsToSave);
+                alert("Monthly goals have been saved!");
+                displayStoreGoals(); // Refresh the displayed totals
+                checkGoalDate(); // Hide the warning icon
+            } catch (e) {
+                console.error("Error saving goals:", e);
+                alert("Failed to save goals. Check console.");
+            }
+        }
 
 
         /**
@@ -1773,6 +1970,10 @@
             // NEW: Update tracker tab when it's clicked
             if (pageName === 'Tracker') {
                 updateTrackerTab();
+            }
+            // NEW: Update goals tab when it's clicked
+            if (pageName === 'Goals') {
+                displayStoreGoals();
             }
         }
 
@@ -1839,9 +2040,14 @@
             if (employeesListener) employeesListener();
             if (observationsListener) observationsListener();
             if (coachingsListener) coachingsListener();
+            if (storeGoalsListener) storeGoalsListener(); // NEW
+
             employeesRef = collection(db, "artifacts", appId, "public", "data","employees");
             observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
             coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
+            // NEW: Reference to a single doc
+            storeGoalsRef = doc(db, "artifacts", appId, "public", "data", "storeGoals", "currentMonth");
+
             employeesListener = onSnapshot(employeesRef, (snapshot) => {
                 console.log("Firebase: Employees snapshot received");
                 localEmployees = {};
@@ -1878,6 +2084,17 @@
             }, (error) => {
                 console.error("Error listening to coachings:", error);
                 alert("Error: Could not load coaching logs. Check console.");
+            });
+            
+            // NEW: Listener for store goals
+            storeGoalsListener = onSnapshot(storeGoalsRef, (doc) => {
+                console.log("Firebase: Store goals snapshot received");
+                localStoreGoals = doc.data() || {};
+                console.log("Local store goals updated:", localStoreGoals);
+                refreshUI(); // Will call checkGoalDate
+            }, (error) => {
+                console.error("Error listening to store goals:", error);
+                alert("Error: Could not load store goals. Check console.");
             });
         }
         
@@ -1935,20 +2152,21 @@
                     if (employeesListener) employeesListener();
                     if (observationsListener) observationsListener();
                     if (coachingsListener) coachingsListener();
+                    if (storeGoalsListener) storeGoalsListener(); // NEW
                 }
             });
 
             // --- Add All UI Event Listeners ---
             document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
-            // MODIFIED: This is now an AI-driven log
             document.getElementById('coachingForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 alert("Please use the 'Generate AI Notes & Log Session' button to log this coaching.");
             });
+            // NEW: Listener for goals form
+            document.getElementById('goalsForm').addEventListener('submit', saveStoreGoals);
             
             document.getElementById('generate-and-log-ai-summary').addEventListener('click', generateAndLogObservation);
             document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
-            // MODIFIED: Renamed ID and function
             document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
 
             document.getElementById('employee').addEventListener('change', (event) => {
