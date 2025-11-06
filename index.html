@@ -354,7 +354,6 @@
             font-style: italic;
             margin-top: 8px;
         }
-        /* NEW: Style for log customer intent */
         .log-customer-intent {
             font-weight: bold;
             background-color: #fdfae7;
@@ -475,7 +474,7 @@
             display: none;
         }
         
-        /* NEW: Last SMART Goal Callout */
+        /* Last SMART Goal Callout */
         .last-goal-callout {
             display: none; /* Hidden by default */
             padding: 10px 15px;
@@ -548,13 +547,11 @@
                 <form id="obsForm">
                     <h2>New Observation</h2>
                     
-                    <!-- NEW: Customer Intent -->
                     <div>
                         <label for="customer-intent">Customer Intent:</label>
                         <input type="text" id="customer-intent" name="customerIntent" placeholder="e.g., Pay bill, new mobile line, equipment swap..." required>
                     </div>
                     
-                    <!-- Employee Selection -->
                     <div>
                         <label for="employee">Employee:</label>
                         <select id="employee" name="employee" required>
@@ -562,7 +559,6 @@
                         </select>
                     </div>
                     
-                    <!-- NEW: Last SMART Goal Display -->
                     <div id="last-goal-display" class="last-goal-callout">
                         <!-- Content will be added by JavaScript -->
                     </div>
@@ -654,8 +650,8 @@
                         <textarea id="notes" name="notes" rows="5" placeholder="Overall strengths, opportunities, or AI-generated note..."></textarea>
                     </div>
                     <div>
-                        <button type="submit">Log Observation</button>
-                        <button type="button" class="ai-button" id="generate-ai-summary">Generate AI Notes for GREAT Steps</button>
+                        <!-- MODIFIED: This is now the only button -->
+                        <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background-color: #007a4a; width: 100%; margin-top: 0;">Generate AI Notes & Log Observation</button>
                         <div class="loader" id="summary-loader"></div>
                     </div>
                 </form>
@@ -664,7 +660,6 @@
             <!-- PAGE 2: Log Coaching -->
             <div id="Coaching" class="page-content">
                 <form id="coachingForm">
-                    <!-- ... existing coaching form ... -->
                     <h2>Log Coaching Session</h2>
                     <div>
                         <label for="coaching-employee-select">Employee:</label>
@@ -702,6 +697,12 @@
                         </div>
                     </div>
 
+                    <!-- NEW: AI Button for Coaching -->
+                    <div>
+                        <button type="button" class="ai-button" id="generate-ai-coaching-notes" style="margin-top: 0; margin-bottom: 20px;">Generate AI Coaching Prep</button>
+                        <div class="loader" id="coaching-notes-loader"></div>
+                    </div>
+                    
                     <div>
                         <label for="coaching-progress">What Progress has been made since last coaching session?
                             <span class="label-hint">Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)</span>
@@ -737,7 +738,7 @@
                 </div>
                 
                 <div>
-                    <button type="button" class="ai-button" id="generate-ai-coaching" style="width: 100%; margin-top: 0;">Generate AI Coaching Plan</button>
+                    <button type="button" class="ai-button" id="generate-ai-coaching-plan" style="width: 100%; margin-top: 0;">Generate AI Coaching Plan</button>
                     <div class="loader" id="coaching-loader"></div>
                 </div>
                 <div id="ai-coaching-output" class="ai-coaching-output">
@@ -945,10 +946,7 @@
             }
         }
         
-        /**
-         * Displays the logs for the selected employee ID
-         * UPDATED to show customerIntent
-         */
+        // ... displayEmployeeLogs function (unchanged) ...
         function displayEmployeeLogs(employeeId) {
             const logOutput = document.getElementById('log-output');
             const coachingOutput = document.getElementById('ai-coaching-output');
@@ -975,17 +973,13 @@
                 dateP.className = 'log-entry-date';
                 dateP.textContent = log.date.toDate().toLocaleString();
                 entryDiv.appendChild(dateP);
-                
-                // Check if it's an observation (has greatAssessment)
                 if (log.greatAssessment) {
-                    // NEW: Display Customer Intent
                     if(log.customerIntent) {
                         const intentP = document.createElement('p');
                         intentP.className = 'log-customer-intent';
                         intentP.innerHTML = `Customer Intent: <span>${log.customerIntent}</span>`;
                         entryDiv.appendChild(intentP);
                     }
-                
                     const greatDiv = document.createElement('div');
                     greatDiv.className = 'log-entry-great';
                     const steps = ['greet', 'relate', 'explore', 'ask', 'thank'];
@@ -1024,7 +1018,6 @@
                         notesP.innerHTML = `<strong>Overall Notes:</strong> ${log.notes}`;
                     }
                     entryDiv.appendChild(notesP);
-                // Check if it's a coaching log
                 } else if (log.sessionType) {
                     const coachingDiv = document.createElement('div');
                     coachingDiv.className = 'log-entry-coaching';
@@ -1107,82 +1100,6 @@
             return radio ? radio.value : "N/A";
         }
         
-        /**
-         * Logs the observation form data
-         * UPDATED to save customerIntent
-         */
-        async function logObservation(event) {
-            event.preventDefault();
-            const form = event.target;
-            const employeeId = form.employee.value;
-            const customerIntent = form.customerIntent.value.trim(); // NEW
-            const overallNotes = form.notes.value.trim();
-            
-            if (!employeeId) {
-                alert("Please select an employee.");
-                return;
-            }
-            if (!customerIntent) { // NEW Check
-                alert("Please enter the customer intent.");
-                return;
-            }
-            
-            const greatAssessment = {
-                greet: {
-                    measurement: getRadioValue(form, 'great_g_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
-                    notes: form.notes_g.value.trim()
-                },
-                relate: {
-                    measurement: getRadioValue(form, 'great_r_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
-                    notes: form.notes_r.value.trim()
-                },
-                explore: {
-                    measurement: getRadioValue(form, 'great_e_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
-                    notes: form.notes_e.value.trim()
-                },
-                ask: {
-                    measurement: getRadioValue(form, 'great_a_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
-                    notes: form.notes_a.value.trim()
-                },
-                thank: {
-                    measurement: getRadioValue(form, 'great_t_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
-                    notes: form.notes_t.value.trim()
-                }
-            };
-            const isGreatEmpty = Object.values(greatAssessment).every(
-                step => step.behaviors.length === 0 && step.notes === ""
-            );
-            if (isGreatEmpty && overallNotes === "") {
-                alert("Please check at least one behavior or add some notes.");
-                return;
-            }
-
-            const newObservation = {
-                employeeId: employeeId,
-                date: Timestamp.now(),
-                customerIntent: customerIntent, // NEW
-                greatAssessment: greatAssessment, 
-                notes: overallNotes,
-                behaviors: [] // This is a legacy field
-            };
-
-            try {
-                await addDoc(observationsRef, newObservation);
-                const employeeName = localEmployees[employeeId].name;
-                alert(`Observation logged for ${employeeName}!`);
-                form.reset();
-                form.employee.value = "";
-                form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
-            } catch (e) {
-                console.error("Error logging observation:", e);
-                alert("Failed to log observation. See console for details.");
-            }
-        }
         // ... logCoachingSession function (unchanged) ...
         async function logCoachingSession(event) {
             event.preventDefault();
@@ -1224,46 +1141,54 @@
         
         // --- AI Generation Functions ---
         // ... showLoading function (unchanged) ...
-        function showLoading(loaderId, buttonId, isLoading) {
+        function showLoading(loaderId, buttonId, isLoading, buttonText = "Generating...") {
             const loader = document.getElementById(loaderId);
             const button = document.getElementById(buttonId);
             if (isLoading) {
                 loader.style.display = 'block';
                 button.disabled = true;
-                button.textContent = 'Generating...';
+                button.textContent = buttonText;
             } else {
                 loader.style.display = 'none';
                 button.disabled = false;
-                button.textContent = buttonId.includes('summary') ? 'Generate AI Notes for GREAT Steps' : 'Generate AI Coaching Plan';
+                // Determine original text
+                if (buttonId.includes('summary')) {
+                    button.textContent = 'Generate AI Notes & Log Observation';
+                } else if (buttonId.includes('coaching-notes')) {
+                    button.textContent = 'Generate AI Coaching Prep';
+                } else if (buttonId.includes('coaching-plan')) {
+                     button.textContent = 'Generate AI Coaching Plan';
+                }
             }
         }
         
         /**
-         * Calls the Gemini API to generate an observation summary.
-         * UPDATED with customerIntent
+         * Calls the Gemini API to generate an observation summary
+         * and then logs the observation.
          */
-        async function generateAISummary() {
+        async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
-            const customerIntent = form.customerIntent.value.trim(); // NEW
+            const customerIntent = form.customerIntent.value.trim();
             
             if (!employeeId) {
                 alert("Please select an employee first.");
                 return;
             }
-            if (!customerIntent) { // NEW Check
+            if (!customerIntent) {
                 alert("Please enter the customer intent first.");
                 return;
             }
             
             const profile = localEmployees[employeeId];
             const recentCoaching = localCoachings
-                .filter(c => c.employeeId === employeeId)
+                .filter(c => c.employeeId === employeeId && c.actionPlan)
                 .sort((a, b) => b.date.toDate() - a.date.toDate())[0];
             let coachingContext = "No recent coaching session on file.\n";
             if (recentCoaching && recentCoaching.actionPlan) {
                 coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
             }
+            
             const greatData = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
@@ -1295,7 +1220,6 @@
             let prompt = `Act as a sales manager for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${profile.name}.\n\n`;
             prompt += `Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 steps. **Use ${profile.name}'s name** where it feels natural to make it personal.\n\n`;
             prompt += `For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
-            
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
@@ -1304,10 +1228,8 @@
             prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
             prompt += `--- PREVIOUS COACHING SESSION (For Context) ---\n`;
             prompt += coachingContext;
-            
             prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
-            prompt += `Customer Intent: ${customerIntent}\n\n`; // NEW
-            
+            prompt += `Customer Intent: ${customerIntent}\n\n`;
             const formatStep = (name, data) => {
                 let stepStr = `${name}: (${data.measurement})\n`;
                 if (data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
@@ -1321,7 +1243,8 @@
             prompt += formatStep('T - Thank', greatData.thank);
             prompt += `\n--- GENERATE JSON OUTPUT ---`;
             
-            showLoading('summary-loader', 'generate-ai-summary', true);
+            showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
+            
             try {
                 const generationConfig = {
                     responseMimeType: "application/json",
@@ -1359,26 +1282,53 @@
                 
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
-                if (notesObject.greet_note) document.getElementById('notes_g').value = notesObject.greet_note;
-                if (notesObject.relate_note) document.getElementById('notes_r').value = notesObject.relate_note;
-                if (notesObject.explore_note) document.getElementById('notes_e').value = notesObject.explore_note;
-                if (notesObject.ask_note) document.getElementById('notes_a').value = notesObject.ask_note;
-                if (notesObject.thank_note) document.getElementById('notes_t').value = notesObject.thank_note;
-                document.getElementById('notes').value = "";
-                alert("AI notes generated and filled in for each 'GREAT' step.");
+
+                // Populate fields with AI notes
+                if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
+                if (notesObject.relate_note) form.notes_r.value = notesObject.relate_note;
+                if (notesObject.explore_note) form.notes_e.value = notesObject.explore_note;
+                if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
+                if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
+                
+                // NOW, LOG IT AUTOMATICALLY
+                const greatAssessmentWithAINotes = {
+                    greet: { ...greatData.greet, notes: form.notes_g.value },
+                    relate: { ...greatData.relate, notes: form.notes_r.value },
+                    explore: { ...greatData.explore, notes: form.notes_e.value },
+                    ask: { ...greatData.ask, notes: form.notes_a.value },
+                    thank: { ...greatData.thank, notes: form.notes_t.value }
+                };
+
+                const newObservation = {
+                    employeeId: employeeId,
+                    date: Timestamp.now(),
+                    customerIntent: customerIntent,
+                    greatAssessment: greatAssessmentWithAINotes, 
+                    notes: form.notes.value.trim(), // Include overall notes
+                    behaviors: [] 
+                };
+
+                await addDoc(observationsRef, newObservation);
+                
+                const employeeName = localEmployees[employeeId].name;
+                alert(`AI notes generated and observation logged for ${employeeName}!`);
+                form.reset();
+                form.employee.value = "";
+                form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+                
             } catch (err) {
-                console.error('AI Generation Failed:', err);
-                alert('AI summary generation failed. Please check the console for errors.');
+                console.error('AI Generation or Logging Failed:', err);
+                alert('AI generation or logging failed. Please check the console for errors.');
             } finally {
-                showLoading('summary-loader', 'generate-ai-summary', false);
+                showLoading('summary-loader', 'generate-and-log-ai-summary', false);
             }
         }
         
         /**
          * Calls the Gemini API to generate a full coaching plan.
-         * UPDATED with customerIntent
          */
         async function generateAICoachingPlan() {
+            // ... (this function remains unchanged from the previous version) ...
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
                 alert("Please select an employee from the dropdown first.");
@@ -1393,12 +1343,10 @@
                 alert("This employee has no observations or coaching logs. Please log one first.");
                 return;
             }
-            
             let prompt = `Act as an expert retail sales coach for an **Xfinity store**. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${profile.name}**.\n\n`;
             prompt += `The plan must include two distinct sections:\n`;
             prompt += `1.  **Feedback for ${profile.name}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **XFinity Mobile**.\n`;
             prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
-
             prompt += `--- EMPLOYEE PROFILE ---\n`;
             prompt += `Name: ${profile.name}\n`;
             prompt += `Role: ${profile.role}\n`;
@@ -1406,7 +1354,6 @@
             prompt += `Manager-defined Strengths: ${profile.strengths || 'N/A'}\n`;
             prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
             prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n\n`;
-            
             const recentObsHistory = obsHistory.slice(0, 3);
             if (recentObsHistory.length === 0) {
                 prompt += "No recent observations found.\n\n";
@@ -1414,7 +1361,7 @@
             for (let i = 0; i < recentObsHistory.length; i++) {
                 const log = recentObsHistory[i];
                 prompt += `--- Observation Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
-                prompt += `Customer Intent: ${log.customerIntent || 'N/A'}\n`; // NEW
+                prompt += `Customer Intent: ${log.customerIntent || 'N/A'}\n`;
                 if (log.greatAssessment) {
                     const formatStep = (name, data) => {
                         if (!data) return "";
@@ -1446,8 +1393,7 @@
                 prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
             }
             prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now.`;
-            
-            showLoading('coaching-loader', 'generate-ai-coaching', true);
+            showLoading('coaching-loader', 'generate-ai-coaching-plan', true);
             const coachingOutput = document.getElementById('ai-coaching-output');
             coachingOutput.style.display = 'none';
             coachingOutput.innerHTML = '';
@@ -1465,14 +1411,11 @@
                     console.error('API Error Body:', errorBody);
                     throw new Error(`API Error: ${response.status} ${response.statusText}`);
                 }
-
                 const result = await response.json();
-                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
-
                 let responseText = result.candidates[0].content.parts[0].text;
                 responseText = responseText
                     .replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>') 
@@ -1484,7 +1427,108 @@
                 coachingOutput.innerHTML = `<p style="color: red;">AI coaching plan generation failed. Please check the console for errors.</p>`;
                 coachingOutput.style.display = 'block';
             } finally {
-                showLoading('coaching-loader', 'generate-ai-coaching', false);
+                showLoading('coaching-loader', 'generate-ai-coaching-plan', false);
+            }
+        }
+
+        /**
+         * NEW: Calls the Gemini API to generate coaching session prep notes.
+         */
+        async function generateAICoachingNotes() {
+            const form = document.getElementById('coachingForm');
+            const employeeId = form.employeeId.value;
+            
+            if (!employeeId) {
+                alert("Please select an employee first.");
+                return;
+            }
+
+            const profile = localEmployees[employeeId];
+            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
+                                          .sort((a, b) => b.date.toDate() - a.date.toDate());
+            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
+                                          .sort((a, b) => b.date.toDate() - a.date.toDate());
+
+            let prompt = `Act as an expert Xfinity retail sales manager preparing for a 1-on-1 with ${profile.name}. Our store is 'service to sales' focused on Xfinity Mobile.\n\n`;
+            prompt += `Based on their profile and all past observations/coaching logs, generate notes for me to use *during* the session. I need:\n`;
+            prompt += `1.  **progress_notes:** A 1-2 sentence prompt for me to ask ${profile.name} about their progress since the last session. Reference the last 'Action Plan' if available.\n`;
+            prompt += `2.  **obstacles_notes:** A 1-2 sentence prompt for me to ask about challenges, based on trends from their observation logs (e.g., "I see we're still missing opportunities in the Explore step...").\n`;
+            prompt += `3.  **smart_goal:** A full, specific SMART goal for ${profile.name} to commit to, focusing on their biggest opportunity (likely related to 'service to sales' or 'Xfinity Mobile').\n\n`;
+
+            prompt += `--- EMPLOYEE PROFILE ---\n`;
+            prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
+            prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
+            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+
+            // Include full history for this request
+            prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n`;
+            if(obsHistory.length === 0) prompt += "No observations on file.\n\n";
+            obsHistory.slice(0, 5).forEach((log, i) => { // Send up to 5
+                prompt += `Log ${i+1} (${log.date.toDate().toLocaleDateString()}): Customer Intent: ${log.customerIntent}\n`;
+                if(log.greatAssessment) {
+                    prompt += `  Explore: (${log.greatAssessment.explore?.measurement}), Behaviors: ${log.greatAssessment.explore?.behaviors.join(', ') || 'none'}\n`;
+                    prompt += `  Ask: (${log.greatAssessment.ask?.measurement}), Behaviors: ${log.greatAssessment.ask?.behaviors.join(', ') || 'none'}\n`;
+                }
+            });
+
+            prompt += `\n--- COACHING HISTORY (Newest to Oldest) ---\n`;
+            if(coachingHistory.length === 0) prompt += "No coaching on file.\n\n";
+            coachingHistory.slice(0, 3).forEach((log, i) => { // Send up to 3
+                prompt += `Log ${i+1} (${log.date.toDate().toLocaleDateString()}): Action Plan: ${log.actionPlan}\n`;
+            });
+
+            prompt += `\n--- GENERATE JSON OUTPUT ---`;
+            
+            showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Prepping...');
+            
+            try {
+                const generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "progress_notes": { "type": "STRING" },
+                            "obstacles_notes": { "type": "STRING" },
+                            "smart_goal": { "type": "STRING" }
+                        }
+                    }
+                };
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: generationConfig 
+                };
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    console.error('API Error Body:', errorBody);
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+                const result = await response.json();
+                
+                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
+                    console.error("Invalid AI response structure:", result);
+                    throw new Error("AI returned an invalid response.");
+                }
+
+                const responseText = result.candidates[0].content.parts[0].text;
+                const notesObject = JSON.parse(responseText);
+
+                if (notesObject.progress_notes) document.getElementById('coaching-progress').value = notesObject.progress_notes;
+                if (notesObject.obstacles_notes) document.getElementById('coaching-obstacles').value = notesObject.obstacles_notes;
+                if (notesObject.smart_goal) document.getElementById('coaching-actionplan').value = notesObject.smart_goal;
+
+                alert("AI coaching prep notes have been generated!");
+                
+            } catch (err) {
+                console.error('AI Coaching Prep Failed:', err);
+                alert('AI coaching prep failed. Please check the console for errors.');
+            } finally {
+                showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             }
         }
 
@@ -1570,7 +1614,7 @@
             if (employeesListener) employeesListener();
             if (observationsListener) observationsListener();
             if (coachingsListener) coachingsListener();
-            employeesRef = collection(db, "artifacts", appId, "public", "data", "employees");
+            employeesRef = collection(db, "artifacts", appId, "public", "data","employees");
             observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
             coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
             employeesListener = onSnapshot(employeesRef, (snapshot) => {
@@ -1604,7 +1648,6 @@
                     localCoachings.push({ ...doc.data(), id: doc.id });
                 });
                 console.log("Local coachings updated:", localCoachings.length);
-                // NEW: Also refresh the last goal display if the employee is already selected
                 displayLastSMARTGoal(document.getElementById('employee').value);
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
             }, (error) => {
@@ -1613,18 +1656,16 @@
             });
         }
         
-        // --- NEW: Function to display last SMART goal ---
+        // ... displayLastSMARTGoal function (unchanged) ...
         function displayLastSMARTGoal(employeeId) {
             const goalDisplay = document.getElementById('last-goal-display');
             if (!employeeId) {
                 goalDisplay.style.display = 'none';
                 return;
             }
-            
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
-                .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; // Get the newest one with an action plan
-
+                .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; 
             if (recentCoaching) {
                 goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toDate().toLocaleDateString()}):</strong> ${recentCoaching.actionPlan}`;
                 goalDisplay.style.display = 'block';
@@ -1641,14 +1682,11 @@
             const appWrapper = document.getElementById('app-wrapper');
             
             try {
-                // UPDATED: Initialize app and analytics
                 app = initializeApp(firebaseConfig);
                 analytics = getAnalytics(app);
-                // END UPDATE
-                
                 db = getFirestore(app);
                 auth = getAuth(app);
-                googleProvider = new GoogleAuthProvider(); // NEW: Init Google provider
+                googleProvider = new GoogleAuthProvider(); 
                 setLogLevel('Debug');
                 
             } catch (e) {
@@ -1659,23 +1697,16 @@
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // User is signed in
                     console.log("Firebase: User authenticated:", user.uid);
                     userId = user.uid;
-                    appWrapper.classList.remove('logged-out'); // Show the app
-                    
-                    // Set user name/email in sidebar (optional, but nice)
+                    appWrapper.classList.remove('logged-out'); 
                     document.getElementById('sign-out-btn').innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out (${user.displayName || user.email})`;
-                    
                     setupFirestoreListeners();
                 } else {
-                    // User is signed out
                     console.log("Firebase: User signed out.");
                     userId = null;
-                    appWrapper.classList.add('logged-out'); // Hide the app
+                    appWrapper.classList.add('logged-out'); 
                     document.getElementById('sign-out-btn').innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
-
-                    // Unsubscribe from listeners
                     if (employeesListener) employeesListener();
                     if (observationsListener) observationsListener();
                     if (coachingsListener) coachingsListener();
@@ -1684,13 +1715,15 @@
 
             // --- Add All UI Event Listeners ---
             document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
-            document.getElementById('obsForm').addEventListener('submit', logObservation);
+            // REMOVED: obsForm listener, as it's now handled by the AI button
             document.getElementById('coachingForm').addEventListener('submit', logCoachingSession);
             
-            document.getElementById('generate-ai-summary').addEventListener('click', generateAISummary);
-            document.getElementById('generate-ai-coaching').addEventListener('click', generateAICoachingPlan);
+            // MODIFIED: Renamed ID and function
+            document.getElementById('generate-and-log-ai-summary').addEventListener('click', generateAndLogObservation);
+            document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
+            // NEW: Listener for new coaching prep button
+            document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAICoachingNotes);
 
-            // NEW: Listener for employee dropdown in obs form
             document.getElementById('employee').addEventListener('change', (event) => {
                 displayLastSMARTGoal(event.target.value);
             });
@@ -1699,11 +1732,9 @@
                 displayEmployeeLogs(event.target.value);
             });
             
-            // Auth buttons
             document.getElementById('sign-in-btn').addEventListener('click', signInWithGoogle);
             document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
             
-            // Modal buttons
             document.getElementById('modal-close-btn').addEventListener('click', closeEditModal);
             document.getElementById('editEmployeeForm').addEventListener('submit', saveEmployeeChanges);
             document.getElementById('delete-employee-btn').addEventListener('click', () => {
