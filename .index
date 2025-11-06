@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Coaching Tool</title>
+    <!-- ADDED: Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #005a9c;
+            --primary-color-dark: #004a80;
+            --light-color: #fff;
+            --text-color: #333;
+            --text-color-light: #555;
+            --bg-color: #f4f4f9;
+            --border-color: #ddd;
+            --sidebar-bg: #fff;
+            --sidebar-width: 240px;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+        }
+        
+        /* NEW: App Layout */
+        .app-layout {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: 1fr;
+            min-height: 100vh;
+        }
+
+        /* NEW: Sidebar Navigation */
+        .sidebar-nav {
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 0 10px 20px 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .sidebar-header .fa-solid {
+            margin-right: 10px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--text-color-light);
+            font-weight: 500;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-nav a i {
+            margin-right: 12px;
+            width: 20px; /* Aligns text */
+            text-align: center;
+        }
+        .sidebar-nav a:hover {
+            background-color: #f0f0f0;
+        }
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+        }
+
+        /* NEW: Main Content Area */
+        .main-content {
+            background-color: var(--bg-color);
+            padding: 20px 30px;
+            overflow-y: auto; /* Ensures content scrolls, not sidebar */
+        }
+        
+        /* Renamed from .tab-content */
+        .page-content {
+            display: none; /* Hidden by default */
+        }
+        .page-content.active {
+            display: block; /* Shown when active */
+        }
+        
+        /* Form Styles */
+        form { 
+            padding: 20px; 
+            background-color: var(--light-color); 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        div { 
+            margin-bottom: 15px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+        }
+        label .label-hint {
+            font-weight: normal;
+            font-style: italic;
+            color: var(--text-color-light);
+            font-size: 0.9em;
+            display: block;
+            margin-top: 2px;
+        }
+
+        select, textarea, input[type="text"], input[type="number"], input[type="date"] { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .step-notes {
+            min-height: 50px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .profile-notes {
+            min-height: 80px;
+            font-size: 14px;
+        }
+
+        fieldset { 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px;
+            padding: 10px 15px 15px 15px;
+            margin-bottom: 20px;
+        }
+        legend { 
+            font-weight: bold; 
+            padding: 0 10px;
+            font-size: 1.2em;
+            color: var(--primary-color);
+        }
+        
+        .measurement-group {
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+            margin-bottom: 10px;
+        }
+        .measurement-group label {
+            display: inline-block;
+            font-weight: normal;
+            margin-right: 15px;
+        }
+        .measurement-group input {
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .checkbox-group label { 
+            display: block;
+            font-weight: normal; 
+            margin-top: 10px; 
+            line-height: 1.4;
+        }
+        .checkbox-group input {
+            margin-right: 8px;
+            vertical-align: top;
+        }
+        .checkbox-group label {
+            display: inline-block;
+            vertical-align: middle;
+            width: calc(100% - 25px);
+        }
+
+        button { 
+            background-color: var(--primary-color); 
+            color: var(--light-color); 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            width: 100%;
+        }
+        button:hover { 
+            background-color: var(--primary-color-dark); 
+        }
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .ai-button {
+            background-color: #007a4a;
+            margin-top: 10px;
+        }
+        .ai-button:hover {
+            background-color: #00633b;
+        }
+        .ai-button:disabled {
+            background-color: #999;
+        }
+        
+        /* Employee Management List */
+        #employee-list {
+            list-style: none;
+            padding: 0;
+            background: var(--light-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #employee-list li {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #employee-list li:hover {
+            background-color: #f9f9f9;
+        }
+        #employee-list li:last-child {
+            border-bottom: none;
+        }
+        .employee-list-name {
+            font-weight: bold;
+        }
+        .employee-list-role {
+            font-size: 0.9em;
+            color: var(--text-color-light);
+        }
+        .employee-list-tenure {
+            font-size: 0.9em;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* Observation Log Styles */
+        #log-output {
+            background-color: var(--light-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            padding: 10px 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            border-bottom: 1px dashed var(--border-color);
+            padding: 15px 0;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-entry p, .log-entry ul {
+            margin: 5px 0;
+        }
+        .log-entry-date {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: var(--text-color-light);
+        }
+        
+        .log-entry-coaching {
+            background-color: #f0f8ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 4px;
+        }
+        .log-entry-coaching h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+        }
+        .log-entry-coaching p {
+            margin: 8px 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        .log-entry-coaching strong {
+            color: var(--text-color);
+        }
+
+        .log-entry-great {
+            margin-top: 10px;
+        }
+        .log-entry-great strong {
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+        .log-entry-great ul {
+            list-style-type: disc;
+            margin: 5px 0 5px 25px;
+            padding: 0;
+        }
+        .log-entry-great li {
+            font-style: italic;
+            color: var(--text-color);
+            margin-bottom: 3px;
+        }
+        .log-step-measurement {
+            font-weight: bold;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+        .log-step-notes {
+            background: #f9f9f9;
+            border-left: 3px solid #eee;
+            padding: 5px 10px;
+            font-size: 0.95em;
+            font-style: italic;
+            margin-top: 8px;
+        }
+
+        /* AI Coaching Plan Output */
+        #ai-coaching-output {
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0 20px 20px 20px;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+        }
+        #ai-coaching-output h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #f4f4f9;
+            padding-bottom: 10px;
+        }
+        #ai-coaching-output p, #ai-coaching-output li {
+            line-height: 1.6;
+        }
+        
+        /* Simple Loading Spinner */
+        .loader {
+            display: none; /* Hidden by default */
+            font-size: 10px;
+            margin: 10px auto;
+            text-indent: -9999em;
+            width: 3em;
+            height: 3em;
+            border-radius: 50%;
+            background: var(--primary-color);
+            background: linear-gradient(to right, var(--primary-color) 10%, rgba(255, 255, 255, 0) 42%);
+            position: relative;
+            animation: load-spinner 1.4s infinite linear;
+            transform: translateZ(0);
+        }
+        @keyframes load-spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* MODAL (POP-UP) STYLES */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* Reduced margin */
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px; /* Increased max-width */
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            margin-top: 15px;
+            width: auto;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .grid-span-2 {
+            grid-column: span 2;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- NEW LAYOUT WRAPPER -->
+    <div class="app-layout">
+        
+        <!-- NEW Sidebar Navigation -->
+        <nav class="sidebar-nav">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-store"></i> Retail Coach
+            </div>
+            <a href="#" class="nav-link active" onclick="openPage(event, 'Observation')">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> Log Observation
+            </a>
+            <a href="#" class="nav-link" onclick="openPage(event, 'Coaching')">
+                <i class="fa-solid fa-bullhorn"></i> Log Coaching
+            </a>
+            <a href="#" class="nav-link" onclick="openPage(event, 'ViewLogs')">
+                <i class="fa-solid fa-list-alt"></i> View Logs
+            </a>
+            <a href="#" class="nav-link" onclick="openPage(event, 'Employees')">
+                <i class="fa-solid fa-users"></i> Manage Employees
+            </a>
+        </nav>
+
+        <!-- NEW Main Content Area -->
+        <main class="main-content">
+
+            <!-- PAGE 1: Observation Form -->
+            <div id="Observation" class="page-content active">
+                <form id="obsForm">
+                    <h2>New Observation</h2>
+                    <!-- Employee Selection -->
+                    <div>
+                        <label for="employee">Employee:</label>
+                        <select id="employee" name="employee" required>
+                            <option value="">-- Select a Rep --</option>
+                        </select>
+                    </div>
+                    
+                    <!-- GREAT Process Form -->
+                    <fieldset>
+                        <legend>G - Greet</legend>
+                        <div class="measurement-group">
+                            <label><input type="radio" name="great_g_measure" value="Effective"> Effective</label>
+                            <label><input type="radio" name="great_g_measure" value="Partial" checked> Partial</label>
+                            <label><input type="radio" name="great_g_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="g1" name="great_g" value="EA: Be personable, introduce yourself, exchange names and make a positive connection."><label for="g1">EA: Be personable, introduce yourself, exchange names and make a positive connection.</label>
+                            <input type="checkbox" id="g2" name="great_g" value="EA: Acknowledge every customer within 6 feet of you."><label for="g2">EA: Acknowledge every customer within 6 feet of you.</label>
+                            <input type="checkbox" id="g3" name="great_g" value="EA: Smile, make eye contact, and say 'Welcome to Xfinity!'"><label for="g3">EA: Smile, make eye contact, and say "Welcome to Xfinity!"</label>
+                            <input type="checkbox" id="g4" name="great_g" value="ME: Introduce relevant self-service options to improve the experience."><label for="g4">ME: Introduce relevant self-service options to improve the experience.</label>
+                            <input type="checkbox" id="g5" name="great_g" value="SA: Introduce Xfinity Rewards or acknowledge existing enrollment."><label for="g5">SA: Introduce Xfinity Rewards or acknowledge existing enrollment.</label>
+                        </div>
+                        <textarea id="notes_g" name="notes_g" class="step-notes" placeholder="Notes for Greet..."></textarea>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>R - Relate</legend>
+                         <div class="measurement-group">
+                            <label><input type="radio" name="great_r_measure" value="Effective"> Effective</label>
+                            <label><input type="radio" name="great_r_measure" value="Partial" checked> Partial</label>
+                            <label><input type="radio" name="great_r_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="r1" name="great_r" value="EA: Build rapport by sharing your own similar experiences."><label for="r1">EA: Build rapport by sharing your own similar experiences.</label>
+                            <input type="checkbox" id="r2" name="great_r" value="OI: Take ownership of the situation to ensure you understand the intent of the customer's visit."><label for="r2">OI: Take ownership of the situation to ensure you understand the intent of the customer's visit.</label>
+                            <input type="checkbox" id="r3" name="great_r" value="DN: Learn what products and experiences are most valuable to the customer by asking 'tell me more' questions."><label for="r3">DN: Learn what products and experiences are most valuable to the customer by asking "tell me more" questions.</label>
+                            <input type="checkbox" id="r4" name="great_r" value="ME: Provide information in a simple, relevant and easy to understand way."><label for="r4">ME: Provide information in a simple, relevant and easy to understand way.</label>
+                        </div>
+                        <textarea id="notes_r" name="notes_r" class="step-notes" placeholder="Notes for Relate..."></textarea>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>E - Explore</legend>
+                         <div class="measurement-group">
+                            <label><input type="radio" name="great_e_measure" value="Effective"> Effective</label>
+                            <label><input type="radio" name="great_e_measure" value="Partial" checked> Partial</label>
+                            <label><input type="radio" name="great_e_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="e1" name="great_e" value="DN: Use T-charts: Capture the details of what the customer shares and then use those details to identify potential solutions to explore."><label for="e1">DN: Use T-charts: Capture the details of what the customer shares and then use those details to identify potential solutions to explore.</label>
+                            <input type="checkbox" id="e2" name="great_e" value="OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products."><label for="e2">OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products.</label>
+                            <input type="checkbox" id="e3" name="great_e" value="BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time."><label for="e3">BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time.</label>
+                        </div>
+                        <textarea id="notes_e" name="notes_e" class="step-notes" placeholder="Notes for Explore..."></textarea>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>A - Ask</legend>
+                         <div class="measurement-group">
+                            <label><input type="radio" name="great_a_measure" value="Effective"> Effective</label>
+                            <label><input type="radio" name="great_a_measure" value="Partial" checked> Partial</label>
+                            <label><input type="radio" name="great_a_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="a1" name="great_a" value="OI: Use T-Charts: Present a set of personalized options for your customer based on needs discussed."><label for="a1">OI: Use T-Charts: Present a set of personalized options for your customer based on needs discussed.</label>
+                            <input type="checkbox" id="a2" name="great_a" value="OI: Stay engaged by explaining the steps you are taking while processing your customer's transaction."><label for="a2">OI: Stay engaged by explaining the steps you are taking while processing your customer's transaction.</label>
+                            <input type="checkbox" id="a3" name="great_a" value="EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections."><label for="a3">EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections.</label>
+                            <input type="checkbox" id="a4" name="great_a" value="BA: Confidently position your solution and ask for the sale/agreement."><label for="a4">BA: Confidently position your solution and ask for the sale/agreement.</label>
+                        </div>
+                        <textarea id="notes_a" name="notes_a" class="step-notes" placeholder="Notes for Ask..."></textarea>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>T - Thank</legend>
+                         <div class="measurement-group">
+                            <label><input type="radio" name="great_t_measure" value="Effective"> Effective</label>
+                            <label><input type="radio" name="great_t_measure" value="Partial" checked> Partial</label>
+                            <label><input type="radio" name="great_t_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="t1" name="great_t" value="SA: Thank the customer for their visit today, use their name, smile, and make eye contact."><label for="t1">SA: Thank the customer for their visit today, use their name, smile, and make eye contact.</label>
+                            <input type="checkbox" id="t2" name="great_t" value="OI: Recap the solution, provide next steps, and set clear expectations."><label for="t2">OI: Recap the solution, provide next steps, and set clear expectations.</label>
+                            <input type="checkbox" id="t3" name="great_t" value="ME: Educate the customer on the ability to book an appointment for future visits online or on the Xfinity app."><label for="t3">ME: Educate the customer on the ability to book an appointment for future visits online or on the Xfinity app.</label>
+                            <input type="checkbox" id="t4" name="great_t" value="BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience."><label for="t4">BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience.</label>
+                            <input type="checkbox" id="t5" name="great_t" value="BA: Ask your customer to refer Xfinity to friends and family."><label for="t5">BA: Ask your customer to refer Xfinity to friends and family.</label>
+                        </div>
+                        <textarea id="notes_t" name="notes_t" class="step-notes" placeholder="Notes for Thank..."></textarea>
+                    </fieldset>
+                    
+                    <div>
+                        <label for="notes">Overall Summary Notes:</label>
+                        <textarea id="notes" name="notes" rows="5" placeholder="Overall strengths, opportunities, or AI-generated note..."></textarea>
+                    </div>
+                    <div>
+                        <button type="submit">Log Observation</button>
+                        <button type="button" class="ai-button" id="generate-ai-summary">Generate AI Notes for GREAT Steps</button>
+                        <div class="loader" id="summary-loader"></div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- PAGE 2: Log Coaching -->
+            <div id="Coaching" class="page-content">
+                <form id="coachingForm">
+                    <h2>Log Coaching Session</h2>
+                    <div>
+                        <label for="coaching-employee-select">Employee:</label>
+                        <select id="coaching-employee-select" name="employeeId" required>
+                            <option value="">-- Select a Rep --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div>
+                            <label for="coaching-date">Session Date:</label>
+                            <input type="date" id="coaching-date" name="date" required>
+                        </div>
+                        <div>
+                            <label for="coaching-type">Session Type:</label>
+                            <select id="coaching-type" name="sessionType" required>
+                                <option value="">-- Select a Type --</option>
+                                <option value="Observation Follow-up">Observation Follow-up</option>
+                                <option value="Performance Check-in">Performance Check-in</option>
+                                <option value="Monthly 1-on-1">Monthly 1-on-1</option>
+                                <option value="Goal Setting">Goal Setting</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div>
+                            <label for="coaching-tnps">tNPS Score (Optional):</label>
+                            <input type="number" id="coaching-tnps" name="tnps" placeholder="e.g., 63.6">
+                        </div>
+                        <div>
+                            <label for="coaching-sales">Sales Metric (Optional):</label>
+                            <input type="text" id="coaching-sales" name="sales" placeholder="e.g., 10 mobile lines">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="coaching-progress">What Progress has been made since last coaching session?
+                            <span class="label-hint">Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)</span>
+                        </label>
+                        <textarea id="coaching-progress" name="progress" class="profile-notes" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="coaching-obstacles">What challenge or obstacles has the Coachee experienced?
+                             <span class="label-hint">Ask something like, "What has been difficult for you recently?" (Include examples provided by Coachee)</span>
+                        </label>
+                        <textarea id="coaching-obstacles" name="obstacles" class="profile-notes" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="coaching-actionplan">Action Plan: What actions will the Coachee commit to after this conversation?
+                             <span class="label-hint">(Include SMART goal)</span>
+                        </label>
+                        <textarea id="coaching-actionplan" name="actionPlan" class="profile-notes" rows="3" placeholder="e.g., 'I will use a T-chart on my next 3 interactions.'"></textarea>
+                    </div>
+
+                    <button type="submit">Log Coaching Session</button>
+                </form>
+            </div>
+
+            <!-- PAGE 3: View Logs -->
+            <div id="ViewLogs" class="page-content">
+                <h2>View Performance Logs</h2>
+                <div>
+                    <label for="log-employee-select">Select Employee:</label>
+                    <select id="log-employee-select">
+                        <option value="">-- Select a Rep --</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <button type="button" class="ai-button" id="generate-ai-coaching" style="width: 100%; margin-top: 0;">Generate AI Coaching Plan</button>
+                    <div class="loader" id="coaching-loader"></div>
+                </div>
+                <div id="ai-coaching-output" class="ai-coaching-output">
+                </div>
+                
+                <div id="log-output">
+                    <p>Please select an employee to view their logs.</p>
+                </div>
+            </div>
+
+            <!-- PAGE 4: Employee Management -->
+            <div id="Employees" class="page-content">
+                <form id="addEmployeeForm">
+                    <h2>Add New Employee</h2>
+                    <div class="form-grid">
+                        <div>
+                            <label for="new-employee-name">Employee Name:</label>
+                            <input type="text" id="new-employee-name" placeholder="e.g., Rogers, Devin K" required>
+                        </div>
+                        <div>
+                            <label for="new-employee-role">Role:</label>
+                            <input type="text" id="new-employee-role" placeholder="e.g., Greeter, Sales Rep" required>
+                        </div>
+                        <div class="grid-span-2">
+                            <label for="new-employee-hire-date">Hire Date:</label>
+                            <input type="date" id="new-employee-hire-date" name="hireDate" required>
+                        </div>
+                    </div>
+                    <button type="submit">Add Employee</button>
+                </form>
+                
+                <h2 style="margin-top: 30px;">Current Employees</h2>
+                <ul id="employee-list">
+                </ul>
+            </div>
+        </main>
+        <!-- End Main Content -->
+    </div>
+    <!-- End App Layout -->
+
+    <!-- Edit Employee Modal -->
+    <div id="editEmployeeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="modal-close-btn">&times;</span>
+            <form id="editEmployeeForm">
+                <h2>Edit Employee</h2>
+                <input type="hidden" id="edit-employee-id" name="id">
+                
+                <div class="form-grid">
+                    <div class="grid-span-2">
+                        <label for="edit-employee-name">Employee Name:</label>
+                        <input type="text" id="edit-employee-name" name="name" required>
+                    </div>
+                    <div>
+                        <label for="edit-employee-role">Role:</label>
+                        <input type="text" id="edit-employee-role" name="role">
+                    </div>
+                    <div>
+                        <label for="edit-employee-hire-date">Hire Date:</label>
+                        <input type="date" id="edit-employee-hire-date" name="hireDate">
+                    </div>
+                    <div class="grid-span-2">
+                        <label for="edit-employee-strengths">Strengths:</label>
+                        <textarea id="edit-employee-strengths" name="strengths" class="profile-notes" placeholder="e.g., Great at building rapport..."></textarea>
+                    </div>
+                    <div class="grid-span-2">
+                        <label for="edit-employee-opportunities">Opportunities:</label>
+                        <textarea id="edit-employee-opportunities" name="opportunities" class="profile-notes" placeholder="e.g., Needs to focus on..."></textarea>
+                    </div>
+                </div>
+                <button type="submit">Save Changes</button>
+                <button type="button" class="delete-btn" id="delete-employee-btn">Delete Employee</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT SECTION -->
+    <script type="module">
+        // --- Firebase SDK Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            addDoc, 
+            deleteDoc, 
+            collection, 
+            onSnapshot, 
+            Timestamp,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Gemini API Configuration ---
+        const API_KEY = ""; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+
+        // --- Firebase Config & App Variables ---
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, userId;
+        let employeesRef, observationsRef, coachingsRef;
+        let employeesListener = null;
+        let observationsListener = null;
+        let coachingsListener = null;
+
+        // Global state variables
+        let localEmployees = {};
+        let localObservations = [];
+        let localCoachings = [];
+
+        // --- Core Data Functions ---
+        
+        function calculateTenure(hireDate) {
+            if (!hireDate) return "";
+            
+            const start = hireDate.toDate ? hireDate.toDate() : new Date(hireDate);
+            const end = new Date();
+            
+            end.setMinutes(end.getMinutes() - end.getTimezoneOffset());
+            
+            let years = end.getFullYear() - start.getFullYear();
+            let months = end.getMonth() - start.getMonth();
+            
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            let tenureStr = "";
+            if (years > 0) {
+                tenureStr += `${years} yr${years > 1 ? 's' : ''}`;
+            }
+            if (months > 0) {
+                if (tenureStr) tenureStr += ", ";
+                tenureStr += `${months} mo${months > 1 ? 's' : ''}`;
+            }
+            if (tenureStr === "") {
+                const days = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+                return ` (${days} days)`;
+            }
+
+            return ` (${tenureStr})`;
+        }
+
+
+        // --- Page Building Functions ---
+
+        function populateEmployeeDropdown(selectId) {
+            const employeeSelect = document.getElementById(selectId);
+            const selectedValue = employeeSelect.value;
+            
+            employeeSelect.innerHTML = '<option value="">-- Select a Rep --</option>';
+            
+            const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+
+            for (const [id, profile] of sortedEmployees) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = profile.name;
+                employeeSelect.appendChild(option);
+            }
+            
+            employeeSelect.value = selectedValue;
+        }
+
+        function populateEmployeeList() {
+            const employeeList = document.getElementById('employee-list');
+            employeeList.innerHTML = '';
+            
+            const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+
+            for (const [id, profile] of sortedEmployees) {
+                const li = document.createElement('li');
+                
+                const infoDiv = document.createElement('div');
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'employee-list-name';
+                nameSpan.textContent = profile.name;
+                infoDiv.appendChild(nameSpan);
+                
+                if (profile.role) {
+                    const roleSpan = document.createElement('span');
+                    roleSpan.className = 'employee-list-role';
+                    roleSpan.textContent = ` (${profile.role})`;
+                    infoDiv.appendChild(roleSpan);
+                }
+                
+                const tenureSpan = document.createElement('span');
+                tenureSpan.className = 'employee-list-tenure';
+                tenureSpan.textContent = calculateTenure(profile.hireDate);
+                infoDiv.appendChild(tenureSpan);
+
+                li.appendChild(infoDiv);
+                
+                li.addEventListener('click', () => {
+                    openEditModal(id, profile);
+                });
+                
+                employeeList.appendChild(li);
+            }
+        }
+        
+        function displayEmployeeLogs(employeeId) {
+            const logOutput = document.getElementById('log-output');
+            const coachingOutput = document.getElementById('ai-coaching-output');
+            logOutput.innerHTML = ''; 
+            coachingOutput.style.display = 'none';
+            coachingOutput.innerHTML = '';
+
+            if (!employeeId) {
+                logOutput.innerHTML = '<p>Please select an employee to view their logs.</p>';
+                return;
+            }
+
+            const employeeLogs = localObservations.filter(obs => obs.employeeId === employeeId);
+            const employeeCoachings = localCoachings.filter(c => c.employeeId === employeeId);
+
+            const combinedLogs = [...employeeLogs, ...employeeCoachings];
+            combinedLogs.sort((a, b) => b.date.toDate() - a.date.toDate());
+
+
+            const employeeName = localEmployees[employeeId]?.name || "Unknown Employee";
+
+            if (combinedLogs.length === 0) {
+                logOutput.innerHTML = `<p>No observations or coaching logs found for ${employeeName}.</p>`;
+                return;
+            }
+
+            for (const log of combinedLogs) { 
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'log-entry';
+
+                const dateP = document.createElement('p');
+                dateP.className = 'log-entry-date';
+                dateP.textContent = log.date.toDate().toLocaleString();
+                entryDiv.appendChild(dateP);
+                
+                if (log.greatAssessment) {
+                    const greatDiv = document.createElement('div');
+                    greatDiv.className = 'log-entry-great';
+                    
+                    const steps = ['greet', 'relate', 'explore', 'ask', 'thank'];
+                    for (const step of steps) {
+                        const data = log.greatAssessment[step];
+                        if (!data) continue;
+
+                        const title = step.charAt(0).toUpperCase() + step.slice(1);
+                        const p = document.createElement('p');
+                        p.innerHTML = `<strong>${title}</strong>`;
+                        
+                        if (data.measurement) {
+                            const measureSpan = document.createElement('span');
+                            measureSpan.className = 'log-step-measurement';
+                            measureSpan.textContent = ` (${data.measurement})`;
+                            p.appendChild(measureSpan);
+                        }
+                        
+                        if (data.behaviors && data.behaviors.length > 0) {
+                            const ul = document.createElement('ul');
+                            for (const val of data.behaviors) {
+                                const li = document.createElement('li');
+                                li.textContent = val;
+                                ul.appendChild(li);
+                            }
+                            p.appendChild(ul);
+                        }
+
+                        if (data.notes && data.notes.trim() !== "") {
+                            const notesDiv = document.createElement('div');
+                            notesDiv.className = 'log-step-notes';
+                            notesDiv.textContent = data.notes;
+                            p.appendChild(notesDiv);
+                        }
+                        
+                        greatDiv.appendChild(p);
+                    }
+                    entryDiv.appendChild(greatDiv);
+                
+                    const notesP = document.createElement('p');
+                    if (log.notes && log.notes.trim() !== "") {
+                        notesP.innerHTML = `<strong>Overall Notes:</strong> ${log.notes}`;
+                    }
+                    entryDiv.appendChild(notesP);
+                
+                } else if (log.sessionType) {
+                    const coachingDiv = document.createElement('div');
+                    coachingDiv.className = 'log-entry-coaching';
+                    
+                    coachingDiv.innerHTML = `
+                        <h4>Coaching Session: ${log.sessionType}</h4>
+                        <p><strong>tNPS Logged:</strong> ${log.tnps || 'N/A'}</p>
+                        <p><strong>Sales Logged:</strong> ${log.sales || 'N/A'}</p>
+                        <p><strong>Progress Since Last Session:</strong> ${log.progress || 'N/A'}</p>
+                        <p><strong>Challenges Experienced:</strong> ${log.obstacles || 'N/A'}</p>
+                        <p><strong>Action Plan / Commitment:</strong> ${log.actionPlan || 'N/A'}</p>
+                    `;
+                    entryDiv.appendChild(coachingDiv);
+                }
+                
+                logOutput.appendChild(entryDiv);
+            }
+        }
+
+        function refreshUI() {
+            populateEmployeeDropdown('employee'); // Obs form
+            populateEmployeeDropdown('log-employee-select'); // Log view
+            populateEmployeeDropdown('coaching-employee-select'); // Coaching form
+            populateEmployeeList(); // Manage employees
+            
+            displayEmployeeLogs(document.getElementById('log-employee-select').value);
+        }
+
+        
+        // --- Event Handling Functions ---
+
+        async function addEmployee(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('new-employee-name');
+            const roleInput = document.getElementById('new-employee-role');
+            const hireDateInput = document.getElementById('new-employee-hire-date');
+            
+            const newName = nameInput.value.trim();
+            const newRole = roleInput.value.trim();
+            const newHireDate = hireDateInput.value;
+            
+            if (newName && newRole && newHireDate) {
+                if (Object.values(localEmployees).find(emp => emp.name.toLowerCase() === newName.toLowerCase())) {
+                    alert("An employee with this name already exists.");
+                    return;
+                }
+
+                const newEmployee = {
+                    name: newName,
+                    role: newRole,
+                    hireDate: newHireDate,
+                    strengths: "",
+                    opportunities: ""
+                };
+                
+                try {
+                    await addDoc(employeesRef, newEmployee);
+                    
+                    nameInput.value = '';
+                    roleInput.value = '';
+                    hireDateInput.value = '';
+                } catch (e) {
+                    console.error("Error adding employee:", e);
+                    alert("Failed to add employee. See console for details.");
+                }
+
+            } else {
+                alert("Please fill out Name, Role, and Hire Date.");
+            }
+        }
+
+        async function deleteEmployee(idToDelete) {
+            const employeeName = localEmployees[idToDelete]?.name || "this employee";
+
+            if (!confirm(`Are you sure you want to delete ${employeeName}? This will also delete all their observations and coaching logs.`)) {
+                return;
+            }
+            
+            try {
+                await deleteDoc(doc(db, "artifacts", appId, "public", "data", "employees", idToDelete));
+                closeEditModal();
+            } catch (e) {
+                console.error("Error deleting employee:", e);
+                alert("Failed to delete employee. See console for details.");
+            }
+        }
+        
+        function getRadioValue(form, name) {
+            const radio = form.querySelector(`input[name="${name}"]:checked`);
+            return radio ? radio.value : "N/A";
+        }
+
+        async function logObservation(event) {
+            event.preventDefault();
+            const form = event.target;
+            const employeeId = form.employee.value;
+            const overallNotes = form.notes.value.trim();
+            
+            if (!employeeId) {
+                alert("Please select an employee.");
+                return;
+            }
+            
+            const greatAssessment = {
+                greet: {
+                    measurement: getRadioValue(form, 'great_g_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
+                    notes: form.notes_g.value.trim()
+                },
+                relate: {
+                    measurement: getRadioValue(form, 'great_r_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
+                    notes: form.notes_r.value.trim()
+                },
+                explore: {
+                    measurement: getRadioValue(form, 'great_e_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
+                    notes: form.notes_e.value.trim()
+                },
+                ask: {
+                    measurement: getRadioValue(form, 'great_a_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
+                    notes: form.notes_a.value.trim()
+                },
+                thank: {
+                    measurement: getRadioValue(form, 'great_t_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
+                    notes: form.notes_t.value.trim()
+                }
+            };
+
+            const isGreatEmpty = Object.values(greatAssessment).every(
+                step => step.behaviors.length === 0 && step.notes === ""
+            );
+            
+            if (isGreatEmpty && overallNotes === "") {
+                alert("Please check at least one behavior or add some notes.");
+                return;
+            }
+
+            const newObservation = {
+                employeeId: employeeId,
+                date: Timestamp.now(),
+                greatAssessment: greatAssessment, 
+                notes: overallNotes,
+                behaviors: []
+            };
+
+            try {
+                await addDoc(observationsRef, newObservation);
+                const employeeName = localEmployees[employeeId].name;
+                alert(`Observation logged for ${employeeName}!`);
+                form.reset();
+                form.employee.value = "";
+                form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+            } catch (e) {
+                console.error("Error logging observation:", e);
+                alert("Failed to log observation. See console for details.");
+            }
+        }
+        
+        async function logCoachingSession(event) {
+            event.preventDefault();
+            const form = document.getElementById('coachingForm');
+            const employeeId = form.employeeId.value;
+            
+            if (!employeeId) {
+                alert("Please select an employee.");
+                return;
+            }
+            
+            const dateStr = form.date.value;
+            if (!dateStr) {
+                alert("Please select a session date.");
+                return;
+            }
+            const sessionDate = Timestamp.fromDate(new Date(dateStr + "T12:00:00"));
+            
+            const newCoaching = {
+                employeeId: employeeId,
+                date: sessionDate,
+                sessionType: form.sessionType.value,
+                tnps: form.tnps.value || "",
+                sales: form.sales.value || "",
+                progress: form.progress.value.trim(),
+                obstacles: form.obstacles.value.trim(),
+                actionPlan: form.actionPlan.value.trim()
+            };
+            
+            try {
+                await addDoc(coachingsRef, newCoaching);
+                const employeeName = localEmployees[employeeId].name;
+                alert(`Coaching session logged for ${employeeName}!`);
+                form.reset();
+                form.employeeId.value = "";
+                document.getElementById('coaching-date').valueAsDate = new Date(); // Reset date
+            } catch (e) {
+                console.error("Error logging coaching session:", e);
+                alert("Failed to log coaching session. See console for details.");
+            }
+        }
+
+        
+        // --- AI Generation Functions ---
+
+        function showLoading(loaderId, buttonId, isLoading) {
+            const loader = document.getElementById(loaderId);
+            const button = document.getElementById(buttonId);
+            if (isLoading) {
+                loader.style.display = 'block';
+                button.disabled = true;
+                button.textContent = 'Generating...';
+            } else {
+                loader.style.display = 'none';
+                button.disabled = false;
+                button.textContent = buttonId.includes('summary') ? 'Generate AI Notes for GREAT Steps' : 'Generate AI Coaching Plan';
+            }
+        }
+        
+        async function generateAISummary() {
+            const form = document.getElementById('obsForm');
+            const employeeId = form.employee.value;
+            
+            if (!employeeId) {
+                alert("Please select an employee first.");
+                return;
+            }
+
+            const profile = localEmployees[employeeId];
+            
+            // UPDATED: Find most recent coaching log
+            const recentCoaching = localCoachings
+                .filter(c => c.employeeId === employeeId)
+                .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; // Get the newest one
+
+            let coachingContext = "No recent coaching session on file.\n";
+            if (recentCoaching && recentCoaching.actionPlan) {
+                coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
+            }
+            // END UPDATE
+            
+            const greatData = {
+                greet: {
+                    measurement: getRadioValue(form, 'great_g_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
+                    notes: form.notes_g.value.trim()
+                },
+                relate: {
+                    measurement: getRadioValue(form, 'great_r_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
+                    notes: form.notes_r.value.trim()
+                },
+                explore: {
+                    measurement: getRadioValue(form, 'great_e_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
+                    notes: form.notes_e.value.trim()
+                },
+                ask: {
+                    measurement: getRadioValue(form, 'great_a_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
+                    notes: form.notes_a.value.trim()
+                },
+                thank: {
+                    measurement: getRadioValue(form, 'great_t_measure'),
+                    behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
+                    notes: form.notes_t.value.trim()
+                }
+            };
+            
+            let prompt = `Act as a retail sales manager. Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, 1-2 sentence observation note for EACH of the 5 steps. Focus only on the data for that specific step.\n\n`;
+            prompt += `--- EMPLOYEE PROFILE ---\n`;
+            prompt += `Name: ${profile.name}\n`;
+            prompt += `Role: ${profile.role}\n`;
+            prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
+            prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
+            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+            
+            prompt += `--- PREVIOUS COACHING SESSION (For Context) ---\n`;
+            prompt += coachingContext;
+            
+            prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
+            const formatStep = (name, data) => {
+                let stepStr = `${name}: (${data.measurement})\n`;
+                if (data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
+                if (data.notes) stepStr += `  Notes: ${data.notes}\n`;
+                return stepStr;
+            };
+            prompt += formatStep('G - Greet', greatData.greet);
+            prompt += formatStep('R - Relate', greatData.relate);
+            prompt += formatStep('E - Explore', greatData.explore);
+            prompt += formatStep('A - Ask', greatData.ask);
+            prompt += formatStep('T - Thank', greatData.thank);
+
+            prompt += `\n--- GENERATE JSON OUTPUT ---`;
+
+            showLoading('summary-loader', 'generate-ai-summary', true);
+
+            try {
+                const generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "greet_note": { "type": "STRING" },
+                            "relate_note": { "type": "STRING" },
+                            "explore_note": { "type": "STRING" },
+                            "ask_note": { "type": "STRING" },
+                            "thank_note": { "type": "STRING" }
+                        }
+                    }
+                };
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: generationConfig 
+                };
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                const responseText = result.candidates[0].content.parts[0].text;
+                const notesObject = JSON.parse(responseText);
+
+                if (notesObject.greet_note) document.getElementById('notes_g').value = notesObject.greet_note;
+                if (notesObject.relate_note) document.getElementById('notes_r').value = notesObject.relate_note;
+                if (notesObject.explore_note) document.getElementById('notes_e').value = notesObject.explore_note;
+                if (notesObject.ask_note) document.getElementById('notes_a').value = notesObject.ask_note;
+                if (notesObject.thank_note) document.getElementById('notes_t').value = notesObject.thank_note;
+                
+                document.getElementById('notes').value = "";
+                alert("AI notes generated and filled in for each 'GREAT' step.");
+                
+            } catch (err) {
+                console.error('AI Generation Failed:', err);
+                alert('AI summary generation failed. Please check the console for errors.');
+            } finally {
+                showLoading('summary-loader', 'generate-ai-summary', false);
+            }
+        }
+        
+        async function generateAICoachingPlan() {
+            const employeeId = document.getElementById('log-employee-select').value;
+            
+            if (!employeeId) {
+                alert("Please select an employee from the dropdown first.");
+                return;
+            }
+
+            const profile = localEmployees[employeeId];
+            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
+                                          .sort((a, b) => b.date.toDate() - a.date.toDate());
+            
+            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
+                                          .sort((a, b) => b.date.toDate() - a.date.toDate());
+
+
+            if (obsHistory.length === 0 && coachingHistory.length === 0) {
+                alert("This employee has no observations or coaching logs. Please log one first.");
+                return;
+            }
+            
+            let prompt = `Act as an expert retail sales coach. I will provide an employee's profile, their complete observation history, and their coaching history. Please generate a detailed coaching plan.\n\n`;
+            prompt += `The plan must include two distinct sections:\n`;
+            prompt += `1.  **Feedback for Employee:** A concise summary for the employee, highlighting one key strength and one specific, actionable opportunity for improvement, referencing the "GREAT" process.\n`;
+            prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
+
+            prompt += `--- EMPLOYEE PROFILE ---\n`;
+            prompt += `Name: ${profile.name}\n`;
+            prompt += `Role: ${profile.role}\n`;
+            prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
+            prompt += `Manager-defined Strengths: ${profile.strengths || 'N/A'}\n`;
+            prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+
+            prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n\n`;
+            
+            const recentObsHistory = obsHistory.slice(0, 3); // Take up to 3 recent logs
+            if (recentObsHistory.length === 0) {
+                prompt += "No recent observations found.\n\n";
+            }
+            for (let i = 0; i < recentObsHistory.length; i++) {
+                const log = recentObsHistory[i];
+                prompt += `--- Observation Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
+                if (log.greatAssessment) {
+                    const formatStep = (name, data) => {
+                        if (!data) return "";
+                        let stepStr = `${name}: (${data.measurement || 'N/gA'})\n`;
+                        if (data.behaviors && data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
+                        if (data.notes) stepStr += `  Notes: ${data.notes}\n`;
+                        return stepStr;
+                    };
+                    prompt += formatStep('G - Greet', log.greatAssessment.greet);
+                    prompt += formatStep('R - Relate', log.greatAssessment.relate);
+                    prompt += formatStep('E - Explore', log.greatAssessment.explore);
+                    prompt += formatStep('A - Ask', log.greatAssessment.ask);
+                    prompt += formatStep('T - Thank', log.greatAssessment.thank);
+                }
+                prompt += `Overall Notes: ${log.notes || 'N/A'}\n\n`;
+            }
+
+            // UPDATED: Use new coaching fields in prompt
+            prompt += `--- COACHING HISTORY (Newest to Oldest) ---\n\n`;
+            const recentCoachingHistory = coachingHistory.slice(0, 2); // Take up to 2 recent logs
+            if (recentCoachingHistory.length === 0) {
+                prompt += "No recent coaching sessions found.\n\n";
+            }
+            for (let i = 0; i < recentCoachingHistory.length; i++) {
+                const log = recentCoachingHistory[i];
+                prompt += `--- Coaching Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
+                prompt += `Type: ${log.sessionType}\n`;
+                prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
+                prompt += `Progress Reported by Coachee: ${log.progress}\n`;
+                prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
+                prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
+            }
+            
+            prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now.`;
+            
+            showLoading('coaching-loader', 'generate-ai-coaching', true);
+            const coachingOutput = document.getElementById('ai-coaching-output');
+            coachingOutput.style.display = 'none';
+            coachingOutput.innerHTML = '';
+
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }]
+                };
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                let responseText = result.candidates[0].content.parts[0].text;
+                
+                responseText = responseText
+                    .replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>') 
+                    .replace(/\* (.*?)(?=\n\*|\n\n|$)/g, '<li>$1</li>'); 
+                
+                coachingOutput.innerHTML = responseText.replace(/<li>/g, '<ul><li>').replace(/<\/li>/g, '</li></ul>').replace(/<\/ul><ul>/g, '');
+                coachingOutput.style.display = 'block';
+                
+            } catch (err) {
+                console.error('AI Coaching Failed:', err);
+                coachingOutput.innerHTML = `<p style="color: red;">AI coaching plan generation failed. Please check the console for errors.</p>`;
+                coachingOutput.style.display = 'block';
+            } finally {
+                showLoading('coaching-loader', 'generate-ai-coaching', false);
+            }
+        }
+
+
+        /**
+         * Handles switching between the pages.
+         */
+        function openPage(event, pageName) {
+            const pageContents = document.getElementsByClassName('page-content');
+            for (let i = 0; i < pageContents.length; i++) {
+                pageContents[i].style.display = 'none';
+            }
+            
+            const navLinks = document.getElementsByClassName('nav-link');
+            for (let i = 0; i < navLinks.length; i++) {
+                navLinks[i].className = navLinks[i].className.replace(' active', '');
+            }
+            
+            document.getElementById(pageName).style.display = 'block';
+            event.currentTarget.className += ' active';
+        }
+
+        // --- MODAL Functions ---
+        const modal = document.getElementById('editEmployeeModal');
+        const editForm = document.getElementById('editEmployeeForm');
+
+        function openEditModal(id, profile) {
+            editForm.id.value = id;
+            editForm.name.value = profile.name;
+            editForm.role.value = profile.role || '';
+            editForm.hireDate.value = profile.hireDate || '';
+            editForm.strengths.value = profile.strengths || '';
+            editForm.opportunities.value = profile.opportunities || '';
+            modal.style.display = 'block';
+        }
+
+        function closeEditModal() {
+            modal.style.display = 'none';
+            editForm.reset();
+        }
+
+        async function saveEmployeeChanges(event) {
+            event.preventDefault();
+            const id = editForm.id.value;
+            
+            const updatedProfile = {
+                name: editForm.name.value.trim(),
+                role: editForm.role.value.trim(),
+                hireDate: editForm.hireDate.value,
+                strengths: editForm.strengths.value.trim(),
+                opportunities: editForm.opportunities.value.trim()
+            };
+            
+            try {
+                const docRef = doc(db, "artifacts", appId, "public", "data", "employees", id);
+                await setDoc(docRef, updatedProfile, { merge: true });
+                closeEditModal();
+            } catch (e) {
+                console.error("Error saving changes:", e);
+                alert("Failed to save changes. See console for details.");
+            }
+        }
+        
+        // --- Setup Listeners ---
+        function setupFirestoreListeners() {
+            if (employeesListener) employeesListener();
+            if (observationsListener) observationsListener();
+            if (coachingsListener) coachingsListener();
+
+            employeesRef = collection(db, "artifacts", appId, "public", "data", "employees");
+            observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
+            coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
+
+            employeesListener = onSnapshot(employeesRef, (snapshot) => {
+                console.log("Firebase: Employees snapshot received");
+                localEmployees = {};
+                snapshot.forEach((doc) => {
+                    localEmployees[doc.id] = { ...doc.data(), id: doc.id };
+                });
+                console.log("Local employees updated:", localEmployees);
+                refreshUI();
+            }, (error) => {
+                console.error("Error listening to employees:", error);
+                alert("Error: Could not load employees. Check console.");
+            });
+            
+            observationsListener = onSnapshot(observationsRef, (snapshot) => {
+                console.log("Firebase: Observations snapshot received");
+                localObservations = [];
+                snapshot.forEach((doc) => {
+                    localObservations.push({ ...doc.data(), id: doc.id });
+                });
+                console.log("Local observations updated:", localObservations.length);
+                displayEmployeeLogs(document.getElementById('log-employee-select').value);
+            }, (error) => {
+                console.error("Error listening to observations:", error);
+                alert("Error: Could not load observations. Check console.");
+            });
+            
+            coachingsListener = onSnapshot(coachingsRef, (snapshot) => {
+                console.log("Firebase: Coachings snapshot received");
+                localCoachings = [];
+                snapshot.forEach((doc) => {
+                    localCoachings.push({ ...doc.data(), id: doc.id });
+                });
+                console.log("Local coachings updated:", localCoachings.length);
+                displayEmployeeLogs(document.getElementById('log-employee-select').value);
+            }, (error) => {
+                console.error("Error listening to coachings:", error);
+                alert("Error: Could not load coaching logs. Check console.");
+            });
+        }
+
+
+        // --- Page Load ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('Debug');
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                alert("FATAL ERROR: Could not connect to database. App will not function.");
+                return;
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    console.log("Firebase: User authenticated:", user.uid);
+                    userId = user.uid;
+                    setupFirestoreListeners();
+                } else {
+                    console.log("Firebase: User signed out.");
+                    userId = null;
+                    if (employeesListener) employeesListener();
+                    if (observationsListener) observationsListener();
+                    if (coachingsListener) coachingsListener();
+                }
+            });
+
+            document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
+            document.getElementById('obsForm').addEventListener('submit', logObservation);
+            document.getElementById('coachingForm').addEventListener('submit', logCoachingSession);
+            
+            document.getElementById('generate-ai-summary').addEventListener('click', generateAISummary);
+            document.getElementById('generate-ai-coaching').addEventListener('click', generateAICoachingPlan);
+
+            document.getElementById('log-employee-select').addEventListener('change', (event) => {
+                displayEmployeeLogs(event.target.value);
+            });
+            
+            document.getElementById('modal-close-btn').addEventListener('click', closeEditModal);
+            document.getElementById('editEmployeeForm').addEventListener('submit', saveEmployeeChanges);
+            document.getElementById('delete-employee-btn').addEventListener('click', () => {
+                const id = document.getElementById('edit-employee-id').value;
+                deleteEmployee(id);
+            });
+            
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    closeEditModal();
+                }
+            });
+            
+            document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+            document.getElementById('coaching-date').valueAsDate = new Date();
+            
+            window.openPage = openPage;
+        });
+
+    </script>
+</body>
+</html>
