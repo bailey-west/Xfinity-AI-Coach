@@ -1502,6 +1502,17 @@
         const COACH_GOAL = 2;
 
         // --- Core Data Functions ---
+        
+        // NEW: Helper function to get first name
+        function getFirstName(fullName) {
+            if (!fullName) return "the employee";
+            const parts = fullName.split(',');
+            if (parts.length > 1) {
+                return parts[1].trim().split(' ')[0]; // "Rogers, Devin K" -> "Devin"
+            }
+            return fullName.split(' ')[0]; // "Devin Rogers" -> "Devin"
+        }
+
         // ... calculateTenure function (unchanged) ...
         function calculateTenure(hireDate) {
             if (!hireDate) return "";
@@ -2062,6 +2073,7 @@
                 return;
             }
             const profile = localEmployees[employeeId];
+            const employeeFirstName = getFirstName(profile.name); // NEW: Get first name
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
                 .sort((a, b) => b.date.toDate() - a.date.toDate())[0];
@@ -2098,14 +2110,15 @@
             };
 
             // --- AI PROMPT ---
-            let prompt = `Act as a sales manager for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${profile.name}.\n\n`;
+            // NEW: Updated persona and instructions
+            let prompt = `Act as a supportive, "fun" retail sales manager for an **Xfinity store**. Your tone should be **personal, friendly, and less robotic**. Use encouraging slang (like 'nailed it', 'awesome job', 'let's focus on...') where appropriate. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${employeeFirstName}.\n\n`;
             
             // NEW: Role-specific instructions
             const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
             if (isGreeter) {
-                prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback on their customer interaction, rapport-building, and service skills (G-Greet, R-Relate, T-Thank). **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity. Their job is to create a welcoming environment and manage the queue.\n\n`;
+                prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback on their customer interaction, rapport-building, and service skills (G-Greet, R-Relate, T-Thank). **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity. Their job is to create a welcoming environment and manage the queue.\n\n`;
             } else {
-                 prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
+                 prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. For the 'Explore' and 'Ask' steps, pay close attention to whether ${employeeFirstName} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity. Be sure to provide positive reinforcement for behaviors they did well.\n\n`;
             }
 
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
@@ -2129,6 +2142,10 @@
             prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
             prompt += `Customer Intent: ${customerIntent}\n\n`;
             const formatStep = (name, data) => {
+                // NEW: Handle "Not Observed" case
+                if (data.measurement === "Partial" && data.behaviors.length === 0 && !data.notes) {
+                    return `${name}: (Not Observed)\n`;
+                }
                 let stepStr = `${name}: (${data.measurement})\n`;
                 if (data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
                 if (data.notes) stepStr += `  Notes: ${data.notes}\n`;
@@ -2141,10 +2158,12 @@
             prompt += formatStep('T - Thank', greatData.thank);
             prompt += `\n--- GENERATE JSON OUTPUT ---
             Based on all this context, generate two things:
-            1.  **Step-by-Step Notes:** A professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 "GREAT" steps. **Use ${profile.name}'s name** where it feels natural.
-            2.  **Feedback Verbatim:** A short, constructive script (2-4 sentences) for me, the manager, to say directly to ${profile.name}. It should start with a positive, then identify one key opportunity from the observation. Example: 'Hi ${profile.name}, great job on... I did notice...'.
+            1.  **Step-by-Step Notes:** A professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 "GREAT" steps. **Use ${employeeFirstName}'s name** where it feels natural.
+                -   **Elaborate** on *why* a checked behavior was good (e.g., 'Awesome job building rapport, that really made the customer feel heard.').
+                -   **If a step is 'Not Observed'** (measurement is 'Partial' with no behaviors or notes), the JSON value for that note (e.g., "greet_note") **must be the string "Not observed."**
+            2.  **Feedback Verbatim:** A short, constructive script (2-4 sentences) for me, the manager, to say directly to ${employeeFirstName}. It should start with a positive, then identify one key opportunity from the observation. Example: 'Hey ${employeeFirstName}, awesome job on... I did notice...'.
             
-            **Remember the role context!** If they are a Greeter, do not mention sales.
+            **Remember the role context and the friendly, loose tone!**
             `;
 
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
@@ -2239,9 +2258,8 @@
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI notes generated and observation logged for ${employeeName}!`);
                 
-                // Reset form contents, but keep employee and AI output visible
-                // for review and potential back-to-back logging.
-                resetObsFormContents();
+                // Clear autosave, but leave form populated for review
+                clearObsData();
                 
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
@@ -2294,6 +2312,7 @@
             resetObsFormContents(); // Reset all the contents
             hideObsFormAIOutput(); // Hide all the AI output
             form.employee.value = ""; // Also reset the employee
+            clearObsData(); // NEW: Clear autosave
         }
         
         /**
@@ -2306,6 +2325,7 @@
                 return;
             }
             const profile = localEmployees[employeeId];
+            const employeeFirstName = getFirstName(profile.name); // NEW: Get first name
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
                                             .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
@@ -2314,18 +2334,19 @@
                 await showToast("This employee has no observations or coaching logs. Please log one first.", true);
                 return;
             }
-            let prompt = `Act as an expert retail sales coach for an **Xfinity store**. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${profile.name}**.\n\n`;
+            // NEW: Updated persona
+            let prompt = `Act as an expert, friendly retail coach for an **Xfinity store**. Your tone should be **personal, supportive, and less robotic**. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${employeeFirstName}**.\n\n`;
 
             // NEW: Role-specific instructions
             const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
             if (isGreeter) {
-                prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback and next steps *only* on their customer interaction, rapport-building, and service skills. **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity.\n\n`;
+                prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback and next steps *only* on their customer interaction, rapport-building, and service skills. **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity.\n\n`;
             } else {
-                 prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. Focus the feedback on one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **Xfinity Mobile**.\n\n`;
+                 prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. Focus the feedback on one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **Xfinity Mobile**.\n\n`;
             }
             
             prompt += `The plan must include two distinct sections:\n`;
-            prompt += `1.  **Feedback for ${profile.name}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity based on their role.\n`;
+            prompt += `1.  **Feedback for ${employeeFirstName}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity based on their role. Use a friendly, encouraging tone.\n`;
             prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly). These steps must be relevant to their role.\n\n`;
             
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
@@ -2385,7 +2406,7 @@
                 prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
                  prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
             }
-            prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now.`;
+            prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now. Remember to be personal and supportive, not robotic.`;
             showLoading('coaching-loader', 'generate-ai-coaching-plan', true, 'Generating Plan...'); // MODIFIED: Added loading text
             const coachingOutput = document.getElementById('ai-coaching-output');
             coachingOutput.style.display = 'none';
@@ -2447,11 +2468,13 @@
                 return;
             }
             const profile = localEmployees[employeeId];
+            const employeeFirstName = getFirstName(profile.name); // NEW: Get first name
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
                                             .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                                 .sort((a, b) => b.date.toDate() - a.date.toDate());
-            let prompt = `Act as an expert Xfinity retail sales manager. I am logging a 1-on-1 with ${profile.name}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
+            // NEW: Updated persona
+            let prompt = `Act as an expert, friendly Xfinity retail sales manager. I am logging a 1-on-1 with ${employeeFirstName}. I have provided my raw notes for the session. Your job is to make them sound professional but also **personal and supportive, not robotic**. Refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
 
             // NEW: Role-specific instructions
             const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
@@ -2489,8 +2512,8 @@
             }
             prompt += `\n--- GENERATE JSON OUTPUT ---
             Based on my raw notes, generate:
-            1.  **progress_note:** A refined, professional note summarizing the progress.
-            2.  **obstacles_note:** A refined, professional note summarizing the obstacles.
+            1.  **progress_note:** A refined, professional, and supportive note summarizing the progress.
+            2.  **obstacles_note:** A refined, professional, and supportive note summarizing the obstacles.
             3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note, the employee's role, and their history/KPIs.
             ---`;
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
@@ -2744,6 +2767,111 @@
             }
         }
 
+        // --- NEW: Autosave Functions ---
+        function saveObsData() {
+            try {
+                const form = document.getElementById('obsForm');
+                const data = {
+                    customerIntent: form['customer-intent'].value,
+                    employee: form.employee.value,
+                    
+                    great_g_measure: getRadioValue(form, 'great_g_measure'),
+                    great_g_behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
+                    notes_g: form.notes_g.value,
+                    
+                    great_r_measure: getRadioValue(form, 'great_r_measure'),
+                    great_r_behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
+                    notes_r: form.notes_r.value,
+                    
+                    great_e_measure: getRadioValue(form, 'great_e_measure'),
+                    great_e_behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
+                    notes_e: form.notes_e.value,
+                    
+                    great_a_measure: getRadioValue(form, 'great_a_measure'),
+                    great_a_behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
+                    notes_a: form.notes_a.value,
+                    
+                    great_t_measure: getRadioValue(form, 'great_t_measure'),
+                    great_t_behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
+                    notes_t: form.notes_t.value,
+                    
+                    notes: form.notes.value
+                };
+                localStorage.setItem('autoSavedObs', JSON.stringify(data));
+                // console.log("Autosave complete."); // For debugging
+            } catch (e) {
+                console.error("Autosave failed:", e);
+            }
+        }
+
+        function loadObsData() {
+            try {
+                const data = JSON.parse(localStorage.getItem('autoSavedObs'));
+                if (!data) return;
+                
+                const form = document.getElementById('obsForm');
+                
+                form['customer-intent'].value = data.customerIntent || '';
+                form.employee.value = data.employee || '';
+                
+                // Helper to set radios
+                const setRadio = (name, value) => {
+                    if (value) {
+                        const radio = form.querySelector(`input[name="${name}"][value="${value}"]`);
+                        if (radio) radio.checked = true;
+                    }
+                };
+                
+                // Helper to set checkboxes
+                const setCheckboxes = (name, values) => {
+                    if (values && values.length > 0) {
+                        values.forEach(val => {
+                            const cb = form.querySelector(`input[name="${name}"][value="${val}"]`);
+                            if (cb) cb.checked = true;
+                        });
+                    }
+                };
+
+                setRadio('great_g_measure', data.great_g_measure);
+                setCheckboxes('great_g', data.great_g_behaviors);
+                form.notes_g.value = data.notes_g || '';
+                
+                setRadio('great_r_measure', data.great_r_measure);
+                setCheckboxes('great_r', data.great_r_behaviors);
+                form.notes_r.value = data.notes_r || '';
+                
+                setRadio('great_e_measure', data.great_e_measure);
+                setCheckboxes('great_e', data.great_e_behaviors);
+                form.notes_e.value = data.notes_e || '';
+                
+                setRadio('great_a_measure', data.great_a_measure);
+                setCheckboxes('great_a', data.great_a_behaviors);
+                form.notes_a.value = data.notes_a || '';
+                
+                setRadio('great_t_measure', data.great_t_measure);
+                setCheckboxes('great_t', data.great_t_behaviors);
+                form.notes_t.value = data.notes_t || '';
+                
+                form.notes.value = data.notes || '';
+                
+                if (data.employee) {
+                    displayLastSMARTGoal(data.employee);
+                }
+                
+                console.log("Autosave data loaded.");
+                showToast("Restored your previous unsaved observation.", false);
+                
+            } catch (e) {
+                console.error("Failed to load autosave data:", e);
+                localStorage.removeItem('autoSavedObs'); // Clear corrupted data
+            }
+        }
+
+        function clearObsData() {
+            localStorage.removeItem('autoSavedObs');
+            console.log("Autosave data cleared.");
+        }
+
 
         // --- Page Load ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -2861,10 +2989,15 @@
                 });
             });
 
+            // NEW: Add autosave listener
+            document.getElementById('obsForm').addEventListener('input', saveObsData);
             
             document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
             document.getElementById('coaching-date').valueAsDate = new Date();
             
+            // NEW: Load autosaved data on page load
+            loadObsData();
+
             window.openPage = openPage;
         });
 
