@@ -1168,22 +1168,15 @@
                             <input type="date" id="coaching-date" name="date" required>
                         </div>
                         <div class="form-section">
-                            <label for="coaching-type">Session Type:</label>
-                            <select id="coaching-type" name="sessionType" required>
-                                <option value="">-- Select a Type --</option>
-                                <option value="Observation Follow-up">Observation Follow-up</option>
-                                <option value="Performance Check-in">Performance Check-in</option>
-                                <option value="Monthly 1-on-1">Monthly 1-on-1</option>
-                                <option value="Goal Setting">Goal Setting</option>
-                                <option value="Other">Other</option>
-                            </select>
+                            <label for="coaching-tnps">tNPS Score (Optional):</label>
+                            <input type="number" id="coaching-tnps" name="tnps" placeholder="e.g., 63.6">
                         </div>
                     </div>
 
                     <div class="form-grid">
                         <div class="form-section">
-                            <label for="coaching-tnps">tNPS Score (Optional):</label>
-                            <input type="number" id="coaching-tnps" name="tnps" placeholder="e.g., 63.6">
+                            <!-- <label for="coaching-tnps">tNPS Score (Optional):</label>
+                            <input type="number" id="coaching-tnps" name="tnps" placeholder="e.g., 63.6"> -->
                         </div>
                         <div class="form-section">
                             <label for="coaching-sales">Sales Metric (Optional):</label>
@@ -1705,11 +1698,11 @@
                         notesP.innerHTML = `<strong>Overall Notes:</strong> ${log.notes}`;
                     }
                     entryDiv.appendChild(notesP);
-                } else if (log.sessionType) {
+                } else if (log.actionPlan) { // MODIFIED: Check for actionPlan instead of sessionType
                     const coachingDiv = document.createElement('div');
                     coachingDiv.className = 'log-entry-coaching';
                     coachingDiv.innerHTML = `
-                        <h4>Coaching Session: ${log.sessionType}</h4>
+                        <h4>Coaching Session Log</h4>
                         <p><strong>tNPS Logged:</strong> ${log.tnps || 'N/A'}</p>
                         <p><strong>Sales Logged:</strong> ${log.sales || 'N/A'}</p>
                         <p><strong>Progress Since Last Session:</strong> ${log.progress || 'N/A'}</p>
@@ -2343,7 +2336,6 @@
                 const log = recentCoachingHistory[i];
                 prompt += `--- Coaching Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
                 prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`; // NEW
-                prompt += `Type: ${log.sessionType}\n`;
                 prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
                 prompt += `Progress Reported by Coachee: ${log.progress}\n`;
                 prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
@@ -2504,7 +2496,6 @@
                 const newCoaching = {
                     employeeId: employeeId,
                     date: sessionTimestamp,
-                    sessionType: form.sessionType.value,
                     tnps: form.tnps.value || "",
                     sales: form.sales.value || "",
                     progress: form.progress.value,
@@ -2802,7 +2793,7 @@
                 snapshot.forEach((doc) => {
                     localObservations.push({ ...doc.data(), id: doc.id });
                 });
-                localObservations.forEach(obs => obs.date = obs.date.toDate ? obs.date : Timestamp.fromDate(new Date(obs.date)));
+                // localObservations.forEach(obs => obs.date = obs.date.toDate ? obs.date : Timestamp.fromDate(new Date(obs.date))); // <-- REMOVED THIS LINE
                 console.log("Local observations updated:", localObservations.length);
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
             }, (error) => {
@@ -2814,7 +2805,7 @@
                 snapshot.forEach((doc) => {
                     localCoachings.push({ ...doc.data(), id: doc.id });
                 });
-                localCoachings.forEach(c => c.date = c.date.toDate ? c.date : Timestamp.fromDate(new Date(c.date)));
+                // localCoachings.forEach(c => c.date = c.date.toDate ? c.date : Timestamp.fromDate(new Date(c.date))); // <-- REMOVED THIS LINE
                 console.log("Local coachings updated:", localCoachings.length);
                 displayLastSMARTGoal(document.getElementById('employee').value);
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
@@ -2840,9 +2831,9 @@
             }
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
-                .sort((a, b) => b.date - a.date)[0]; 
+                .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; 
             if (recentCoaching) {
-                goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toLocaleDateString()}):</strong> ${recentCoaching.actionPlan}`;
+                goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toDate().toLocaleDateString()}):</strong> ${recentCoaching.actionPlan}`;
                 goalDisplay.style.display = 'block';
             } else {
                 goalDisplay.innerHTML = `<em>No previous SMART goals found for this employee.</em>`;
