@@ -1868,6 +1868,31 @@
         
         // --- Event Handling Functions ---
         
+        /**
+         * NEW: Shows/hides a loader and disables/enables a button
+         */
+        function showLoading(loaderId, buttonId, isLoading, loadingText) {
+            const loader = document.getElementById(loaderId);
+            const button = document.getElementById(buttonId);
+            
+            if (!button) return; // Guard clause
+
+            if (isLoading) {
+                loader.style.display = 'block';
+                button.disabled = true;
+                if (loadingText) {
+                    button.dataset.originalText = button.textContent; // Store original text
+                    button.textContent = loadingText;
+                }
+            } else {
+                loader.style.display = 'none';
+                button.disabled = false;
+                if (button.dataset.originalText) {
+                    button.textContent = button.dataset.originalText; // Restore original text
+                }
+            }
+        }
+        
         // ... showToast function (unchanged) ...
         let toastTimeout;
         function showToast(message, isError = false) {
@@ -2358,10 +2383,10 @@
                 prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
                 prompt += `Progress Reported by Coachee: ${log.progress}\n`;
                 prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
-                prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
+                 prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
             }
             prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now.`;
-            showLoading('coaching-loader', 'generate-ai-coaching-plan', true);
+            showLoading('coaching-loader', 'generate-ai-coaching-plan', true, 'Generating Plan...'); // MODIFIED: Added loading text
             const coachingOutput = document.getElementById('ai-coaching-output');
             coachingOutput.style.display = 'none';
             coachingOutput.innerHTML = '';
