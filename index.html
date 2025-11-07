@@ -335,6 +335,32 @@
             box-shadow: 0 0 0 3px rgba(0, 97, 166, 0.1);
         }
         
+        /* NEW: Wrapper for textarea and copy button */
+        .textarea-wrapper {
+            position: relative;
+        }
+        .copy-note-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f0f0f0;
+            color: var(--text-color-light);
+            border: 1px solid var(--border-color);
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            font-size: 12px;
+            line-height: 1;
+            z-index: 5;
+            display: none; /* Hidden by default */
+        }
+        .copy-note-btn:hover {
+            background: #e0e0e0;
+            color: var(--text-color);
+            transform: none;
+            box-shadow: none;
+        }
+
         .step-notes {
             min-height: 50px;
             font-size: 13px;
@@ -410,6 +436,27 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+        
+        /* NEW: General purpose copy button */
+        .copy-btn {
+            background: #f0f0f0;
+            color: var(--text-color-light);
+            border: 1px solid var(--border-color);
+            width: auto;
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-top: 10px;
+            float: right;
+        }
+         .copy-btn:hover {
+            background: #e0e0e0;
+            color: var(--text-color);
+            transform: none;
+            box-shadow: none;
+        }
+        .copy-btn i {
+            margin-right: 8px;
         }
 
         .ai-button {
@@ -593,6 +640,26 @@
         }
         #ai-coaching-output p, #ai-coaching-output li {
             line-height: 1.6;
+        }
+
+        /* NEW: AI Verbatim Feedback Output */
+        #ai-verbatim-output {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: var(--shadow-md);
+        }
+        #ai-verbatim-output h3 {
+            color: var(--success-color);
+            margin-top: 0;
+            border-bottom: 1px solid #d1f7e8;
+            padding-bottom: 10px;
+        }
+        #ai-verbatim-output p {
+            line-height: 1.6;
+            font-style: italic;
         }
         
         /* Simple Loading Spinner */
@@ -1005,7 +1072,11 @@
                             <input type="checkbox" id="g4" name="great_g" value="ME: Introduce relevant self-service options to improve the experience."><label for="g4">ME: Introduce relevant self-service options to improve the experience.</label>
                             <input type="checkbox" id="g5" name="great_g" value="SA: Introduce Xfinity Rewards or acknowledge existing enrollment."><label for="g5">SA: Introduce Xfinity Rewards or acknowledge existing enrollment.</label>
                         </div>
-                        <textarea id="notes_g" name="notes_g" class="step-notes" placeholder="Notes for Greet..."></textarea>
+                        <!-- NEW: Textarea wrapper for copy button -->
+                        <div class="textarea-wrapper">
+                            <textarea id="notes_g" name="notes_g" class="step-notes" placeholder="Notes for Greet..."></textarea>
+                            <button type="button" class="copy-note-btn" data-target="notes_g"><i class="fa-regular fa-copy"></i></button>
+                        </div>
                     </fieldset>
 
                     <fieldset>
@@ -1021,7 +1092,11 @@
                             <input type="checkbox" id="r3" name="great_r" value="DN: Learn what products and experiences are most valuable to the customer by asking 'tell me more' questions."><label for="r3">DN: Learn what products and experiences are most valuable to the customer by asking "tell me more" questions.</label>
                             <input type="checkbox" id="r4" name="great_r" value="ME: Provide information in a simple, relevant and easy to understand way."><label for="r4">ME: Provide information in a simple, relevant and easy to understand way.</label>
                         </div>
-                        <textarea id="notes_r" name="notes_r" class="step-notes" placeholder="Notes for Relate..."></textarea>
+                        <!-- NEW: Textarea wrapper for copy button -->
+                        <div class="textarea-wrapper">
+                            <textarea id="notes_r" name="notes_r" class="step-notes" placeholder="Notes for Relate..."></textarea>
+                            <button type="button" class="copy-note-btn" data-target="notes_r"><i class="fa-regular fa-copy"></i></button>
+                        </div>
                     </fieldset>
 
                     <fieldset>
@@ -1036,7 +1111,11 @@
                             <input type="checkbox" id="e2" name="great_e" value="OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products."><label for="e2">OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products.</label>
                             <input type="checkbox" id="e3" name="great_e" value="BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time."><label for="e3">BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time.</label>
                         </div>
-                        <textarea id="notes_e" name="notes_e" class="step-notes" placeholder="Notes for Explore..."></textarea>
+                        <!-- NEW: Textarea wrapper for copy button -->
+                        <div class="textarea-wrapper">
+                            <textarea id="notes_e" name="notes_e" class="step-notes" placeholder="Notes for Explore..."></textarea>
+                            <button type="button" class="copy-note-btn" data-target="notes_e"><i class="fa-regular fa-copy"></i></button>
+                        </div>
                     </fieldset>
 
                     <fieldset>
@@ -1052,7 +1131,11 @@
                             <input type="checkbox" id="a3" name="great_a" value="EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections."><label for="a3">EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections.</label>
                             <input type="checkbox" id="a4" name="great_a" value="BA: Confidently position your solution and ask for the sale/agreement."><label for="a4">BA: Confidently position your solution and ask for the sale/agreement.</label>
                         </div>
-                        <textarea id="notes_a" name="notes_a" class="step-notes" placeholder="Notes for Ask..."></textarea>
+                        <!-- NEW: Textarea wrapper for copy button -->
+                        <div class="textarea-wrapper">
+                            <textarea id="notes_a" name="notes_a" class="step-notes" placeholder="Notes for Ask..."></textarea>
+                            <button type="button" class="copy-note-btn" data-target="notes_a"><i class="fa-regular fa-copy"></i></button>
+                        </div>
                     </fieldset>
 
                     <fieldset>
@@ -1069,7 +1152,11 @@
                             <input type="checkbox" id="t4" name="great_t" value="BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience."><label for="t4">BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience.</label>
                             <input type="checkbox" id="t5" name="great_t" value="BA: Ask your customer to refer Xfinity to friends and family."><label for="t5">BA: Ask your customer to refer Xfinity to friends and family.</label>
                         </div>
-                        <textarea id="notes_t" name="notes_t" class="step-notes" placeholder="Notes for Thank..."></textarea>
+                        <!-- NEW: Textarea wrapper for copy button -->
+                        <div class="textarea-wrapper">
+                            <textarea id="notes_t" name="notes_t" class="step-notes" placeholder="Notes for Thank..."></textarea>
+                            <button type="button" class="copy-note-btn" data-target="notes_t"><i class="fa-regular fa-copy"></i></button>
+                        </div>
                     </fieldset>
                     
                     <div>
@@ -1080,6 +1167,11 @@
                         <!-- MODIFIED: This is now the only button -->
                         <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background: var(--gradient-primary); width: 100%; margin-top: 0; font-size: 1.1em; padding: 14px;">Generate AI Notes & Log Observation</button>
                         <div class="loader" id="summary-loader"></div>
+                    </div>
+                    
+                    <!-- NEW: AI Verbatim Feedback Output -->
+                    <div id="ai-verbatim-output" style="display: none;">
+                        <!-- Content will be added by JavaScript -->
                     </div>
                 </form>
             </div>
@@ -1351,6 +1443,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Gemini API Configuration ---
+        // WARNING: Do not hardcode API keys in production. Use environment variables or a secure backend.
         const API_KEY = "AIzaSyAWY5r9ovt_nGjXPXmv0NNjYnDY-B255bc"; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         
@@ -1377,6 +1470,7 @@
 
 
         // --- Firebase Config & App Variables ---
+        // This config is for a demo project. Replace with your own Firebase project config.
         const firebaseConfig = {
          apiKey: "AIzaSyDaRTH_-SrDMlKePFfKUaUa0FeGDD1-KIA",
          authDomain: "retail-coaching-tool.firebaseapp.com",
@@ -1838,6 +1932,22 @@
             }
             return false;
         }
+
+        // NEW: Copy to Clipboard Helper
+        function copyToClipboard(text, successMessage) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMessage || 'Copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showToast('Failed to copy text.', true);
+            }
+            document.body.removeChild(textarea);
+        }
         
         // ... addEmployee function (unchanged) ...
         async function addEmployee(event) {
@@ -1912,7 +2022,7 @@
         }
         
         /**
-         * UPDATED: Added loggedBy
+         * UPDATED: Added loggedBy, Role-Awareness, and Verbatim Feedback
          */
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
@@ -1961,9 +2071,18 @@
                     notes: form.notes_t.value.trim()
                 }
             };
+
+            // --- AI PROMPT ---
             let prompt = `Act as a sales manager for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${profile.name}.\n\n`;
-            prompt += `Based on the "GREAT" sales process inputs (measurement, behaviors, and notes), write a professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 steps. **Use ${profile.name}'s name** where it feels natural to make it personal.\n\n`;
-            prompt += `For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
+            
+            // NEW: Role-specific instructions
+            const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
+            if (isGreeter) {
+                prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback on their customer interaction, rapport-building, and service skills (G-Greet, R-Relate, T-Thank). **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity. Their job is to create a welcoming environment and manage the queue.\n\n`;
+            } else {
+                 prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. For the 'Explore' and 'Ask' steps, pay close attention to whether ${profile.name} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity.\n\n`;
+            }
+
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n"; 
             let goalsContext = "Monthly goals are not set.\n";
@@ -1995,9 +2114,23 @@
             prompt += formatStep('E - Explore', greatData.explore);
             prompt += formatStep('A - Ask', greatData.ask);
             prompt += formatStep('T - Thank', greatData.thank);
-            prompt += `\n--- GENERATE JSON OUTPUT ---`;
+            prompt += `\n--- GENERATE JSON OUTPUT ---
+            Based on all this context, generate two things:
+            1.  **Step-by-Step Notes:** A professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 "GREAT" steps. **Use ${profile.name}'s name** where it feels natural.
+            2.  **Feedback Verbatim:** A short, constructive script (2-4 sentences) for me, the manager, to say directly to ${profile.name}. It should start with a positive, then identify one key opportunity from the observation. Example: 'Hi ${profile.name}, great job on... I did notice...'.
+            
+            **Remember the role context!** If they are a Greeter, do not mention sales.
+            `;
+
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
+            
+            // NEW: Clear old verbatim output
+            const verbatimOutput = document.getElementById('ai-verbatim-output');
+            verbatimOutput.style.display = 'none';
+            verbatimOutput.innerHTML = '';
+            
             try {
+                // NEW: Updated schema
                 const generationConfig = {
                     responseMimeType: "application/json",
                     responseSchema: {
@@ -2007,7 +2140,8 @@
                             "relate_note": { "type": "STRING" },
                             "explore_note": { "type": "STRING" },
                             "ask_note": { "type": "STRING" },
-                            "thank_note": { "type": "STRING" }
+                            "thank_note": { "type": "STRING" },
+                            "feedbackVerbatim": { "type": "STRING" }
                         }
                     }
                 };
@@ -2032,11 +2166,33 @@
                 }
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
+
+                // Populate step notes
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
                 if (notesObject.relate_note) form.notes_r.value = notesObject.relate_note;
                 if (notesObject.explore_note) form.notes_e.value = notesObject.explore_note;
                 if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
                 if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
+                
+                // Show copy buttons for steps
+                form.querySelectorAll('.copy-note-btn').forEach(btn => btn.style.display = 'block');
+
+                // NEW: Populate and show verbatim feedback
+                if (notesObject.feedbackVerbatim) {
+                    const verbatimText = notesObject.feedbackVerbatim;
+                    verbatimOutput.innerHTML = `
+                        <h3>AI-Assisted Feedback Verbatim</h3>
+                        <p>"${verbatimText}"</p>
+                        <button type="button" class="copy-btn" id="copy-verbatim-btn"><i class="fa-regular fa-copy"></i> Copy Verbatim</button>
+                    `;
+                    verbatimOutput.style.display = 'block';
+                    // Add listener to new button
+                    document.getElementById('copy-verbatim-btn').addEventListener('click', () => {
+                        copyToClipboard(verbatimText, 'Verbatim script copied!');
+                    });
+                }
+
+                // Log the observation
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -2054,11 +2210,16 @@
                     loggedByEmail: currentUser.email // NEW
                 };
                 await addDoc(observationsRef, newObservation);
+                
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI notes generated and observation logged for ${employeeName}!`);
+                
+                // Reset form BUT keep employee selected for easier back-to-back logs
+                const selectedEmployee = form.employee.value;
                 form.reset();
-                form.employee.value = "";
+                form.employee.value = selectedEmployee; // Keep employee selected
                 form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+                // Keep copy buttons and verbatim visible until form is truly reset (by changing employee)
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
                 await showToast('AI generation or logging failed. Please check the console for errors.', true);
@@ -2067,7 +2228,25 @@
             }
         }
         
-        // ... generateAICoachingPlan function (unchanged) ...
+        /**
+         * NEW: Resets the observation form fully
+         */
+        function resetObsForm() {
+            const form = document.getElementById('obsForm');
+            form.reset();
+            form.employee.value = "";
+            form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+            
+            // Hide AI-generated content
+            document.getElementById('ai-verbatim-output').style.display = 'none';
+            document.getElementById('ai-verbatim-output').innerHTML = '';
+            form.querySelectorAll('.copy-note-btn').forEach(btn => btn.style.display = 'none');
+            document.getElementById('last-goal-display').style.display = 'none';
+        }
+        
+        /**
+         * UPDATED: Added Role-Awareness
+         */
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
@@ -2084,9 +2263,19 @@
                 return;
             }
             let prompt = `Act as an expert retail sales coach for an **Xfinity store**. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${profile.name}**.\n\n`;
+
+            // NEW: Role-specific instructions
+            const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
+            if (isGreeter) {
+                prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback and next steps *only* on their customer interaction, rapport-building, and service skills. **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity.\n\n`;
+            } else {
+                 prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. Focus the feedback on one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **Xfinity Mobile**.\n\n`;
+            }
+            
             prompt += `The plan must include two distinct sections:\n`;
-            prompt += `1.  **Feedback for ${profile.name}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **XFinity Mobile**.\n`;
-            prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
+            prompt += `1.  **Feedback for ${profile.name}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity based on their role.\n`;
+            prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly). These steps must be relevant to their role.\n\n`;
+            
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n";
             let goalsContext = "Monthly goals are not set.\n";
@@ -2211,6 +2400,15 @@
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                                 .sort((a, b) => b.date.toDate() - a.date.toDate());
             let prompt = `Act as an expert Xfinity retail sales manager. I am logging a 1-on-1 with ${profile.name}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
+
+            // NEW: Role-specific instructions
+            const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
+            if (isGreeter) {
+                prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please refine the notes and create a SMART goal focused *only* on their customer interaction, rapport, or service skills. **DO NOT** create sales-based SMART goals.\n\n`;
+            } else {
+                 prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. Please refine the notes and create a SMART goal that is ambitious but achievable, ideally tied to a key sales KPI (like Mobile, HSI, or 'service to sales' conversions).\n\n`;
+            }
+
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n";
             let goalsContext = "Monthly goals are not set.\n";
@@ -2241,7 +2439,7 @@
             Based on my raw notes, generate:
             1.  **progress_note:** A refined, professional note summarizing the progress.
             2.  **obstacles_note:** A refined, professional note summarizing the obstacles.
-            3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note and the employee's history/KPIs.
+            3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note, the employee's role, and their history/KPIs.
             ---`;
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
             try {
@@ -2358,6 +2556,10 @@
             }
             if (pageName === 'Goals') {
                 displayStoreGoals();
+            }
+            // NEW: Reset obs form if navigating away
+            if (pageName !== 'Observation') {
+                resetObsForm();
             }
         }
 
@@ -2561,6 +2763,9 @@
             document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
 
             document.getElementById('employee').addEventListener('change', (event) => {
+                // NEW: Reset form elements when employee changes
+                resetObsForm();
+                document.getElementById('employee').value = event.target.value; // Re-select the new employee
                 displayLastSMARTGoal(event.target.value);
             });
             
@@ -2589,9 +2794,19 @@
             document.getElementById('prompt-close-btn').addEventListener('click', () => {
                 document.getElementById('custom-prompt-modal').style.display = 'none';
             });
-            // REMOVED STRAY '_' FROM THE LINE BELOW
             document.getElementById('prompt-cancel-btn').addEventListener('click', () => {
                 document.getElementById('custom-prompt-modal').style.display = 'none';
+            });
+
+            // NEW: Add listeners for all step copy buttons
+            document.querySelectorAll('.copy-note-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetId = e.currentTarget.dataset.target;
+                    const textarea = document.getElementById(targetId);
+                    if (textarea && textarea.value) {
+                        copyToClipboard(textarea.value, `Copied ${targetId.split('_')[1].toUpperCase()} notes!`);
+                    }
+                });
             });
 
             
