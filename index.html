@@ -2214,12 +2214,10 @@
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI notes generated and observation logged for ${employeeName}!`);
                 
-                // Reset form BUT keep employee selected for easier back-to-back logs
-                const selectedEmployee = form.employee.value;
-                form.reset();
-                form.employee.value = selectedEmployee; // Keep employee selected
-                form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
-                // Keep copy buttons and verbatim visible until form is truly reset (by changing employee)
+                // Reset form contents, but keep employee and AI output visible
+                // for review and potential back-to-back logging.
+                resetObsFormContents();
+                
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
                 await showToast('AI generation or logging failed. Please check the console for errors.', true);
@@ -2229,19 +2227,48 @@
         }
         
         /**
-         * NEW: Resets the observation form fully
+         * NEW: Resets the observation form contents (notes, checkboxes, etc.)
+         * but *leaves the employee dropdown as-is*.
+         * It also does NOT hide AI output, as it's used after generation.
          */
-        function resetObsForm() {
+        function resetObsFormContents() {
             const form = document.getElementById('obsForm');
-            form.reset();
-            form.employee.value = "";
+            
+            // Reset text inputs/textareas
+            form.customerIntent.value = "";
+            form.notes_g.value = "";
+            form.notes_r.value = "";
+            form.notes_e.value = "";
+            form.notes_a.value = "";
+            form.notes_t.value = "";
+            form.notes.value = "";
+            
+            // Reset radio buttons to "Partial"
             form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
             
-            // Hide AI-generated content
+            // Reset checkboxes
+            form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        /**
+         * NEW: Hides all AI-generated output on the observation form.
+         */
+        function hideObsFormAIOutput() {
             document.getElementById('ai-verbatim-output').style.display = 'none';
             document.getElementById('ai-verbatim-output').innerHTML = '';
-            form.querySelectorAll('.copy-note-btn').forEach(btn => btn.style.display = 'none');
+            document.getElementById('obsForm').querySelectorAll('.copy-note-btn').forEach(btn => btn.style.display = 'none');
             document.getElementById('last-goal-display').style.display = 'none';
+        }
+
+        /**
+         * NEW: Resets the entire observation form, including the employee and AI output.
+         * Replaces the old `resetObsForm`
+         */
+        function resetObsFormFully() {
+            const form = document.getElementById('obsForm');
+            resetObsFormContents(); // Reset all the contents
+            hideObsFormAIOutput(); // Hide all the AI output
+            form.employee.value = ""; // Also reset the employee
         }
         
         /**
@@ -2559,7 +2586,7 @@
             }
             // NEW: Reset obs form if navigating away
             if (pageName !== 'Observation') {
-                resetObsForm();
+                resetObsFormFully(); // <--- Use the full reset
             }
         }
 
@@ -2764,8 +2791,8 @@
 
             document.getElementById('employee').addEventListener('change', (event) => {
                 // NEW: Reset form elements when employee changes
-                resetObsForm();
-                document.getElementById('employee').value = event.target.value; // Re-select the new employee
+                resetObsFormContents(); // Clear fields
+                hideObsFormAIOutput(); // Hide AI output from previous employee
                 displayLastSMARTGoal(event.target.value);
             });
             
