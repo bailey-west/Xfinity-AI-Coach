@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retail Coaching Tool</title>
-    <!-- ... existing styles ... -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
@@ -28,10 +27,10 @@
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07);
-            
-            /* NEW: Sidebar width variables */
-            --sidebar-width: 260px;
-            --sidebar-width-collapsed: 70px;
+
+            /* NEW: Sidebar width variable */
+            --sidebar-width-open: 260px;
+            --sidebar-width-closed: 70px; /* Width when collapsed */
         }
 
         body { 
@@ -46,15 +45,16 @@
         /* App Layout */
         .app-layout {
             display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr;
+            /* Use variable for sidebar width */
+            grid-template-columns: var(--sidebar-width-open) 1fr;
             grid-template-rows: 1fr;
             min-height: 100vh;
-            transition: grid-template-columns 0.3s ease; /* NEW: Transition */
+            transition: grid-template-columns 0.3s ease; /* Animate collapse */
         }
-        
-        /* NEW: Collapsed sidebar state */
+
+        /* NEW: Collapsed state */
         .app-layout.sidebar-collapsed {
-            grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+            grid-template-columns: var(--sidebar-width-closed) 1fr;
         }
 
         /* Sidebar Navigation */
@@ -65,79 +65,57 @@
             display: flex;
             flex-direction: column;
             box-shadow: var(--shadow-md);
-            width: var(--sidebar-width); /* NEW: Use variable */
-            transition: width 0.3s ease; /* NEW: Transition */
-            position: relative; /* NEW: For toggle button */
-        }
-        
-        .app-layout.sidebar-collapsed .sidebar-nav {
-            width: var(--sidebar-width-collapsed); /* NEW: Collapsed width */
-            padding: 20px 8px; /* Slightly tighter padding */
-        }
-
-        /* NEW: Sidebar Toggle Button */
-        .sidebar-toggle {
-            background: var(--primary-color);
-            border: none;
-            color: var(--light-color);
-            font-size: 1em;
-            cursor: pointer;
-            border-radius: 50%;
-            position: absolute;
-            top: 25px;
-            right: -15px;
-            width: 30px;
-            height: 30px;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-md);
+            /* NEW: Animate width changes */
+            overflow-x: hidden; /* Hide text during collapse */
             transition: all 0.3s ease;
-        }
-        .sidebar-toggle:hover {
-            background: var(--primary-color-dark);
-            transform: scale(1.05);
-        }
-        .sidebar-toggle i {
-            transition: transform 0.3s ease;
-        }
-        .app-layout.sidebar-collapsed .sidebar-toggle i {
-            transform: rotate(180deg);
         }
 
         .sidebar-header {
-            padding: 0 10px 20px 10px; /* Adjusted padding */
+            padding: 0 10px 20px 10px;
             font-size: 1.5em;
             font-weight: bold;
             color: var(--light-color); /* White text */
             border-bottom: 1px solid #3f3f46; /* Dark border */
             margin-bottom: 20px;
-            display: flex; /* NEW: Flex for alignment */
-            align-items: center; /* NEW: Flex for alignment */
+            /* NEW: Flex for logo and toggle */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .sidebar-header .fa-solid {
-            margin-right: 12px; /* NEW: Spacing */
+        .sidebar-header .fa-store {
+            margin-right: 10px;
             color: var(--primary-color);
-            min-width: 20px; /* NEW: Ensure icon has space */
+            /* NEW: Hide icon when collapsed */
+            transition: opacity 0.2s;
+        }
+        .sidebar-header .logo-text {
+            /* NEW: Class for text to hide */
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.2s;
         }
         
-        /* NEW: Hide text when collapsed */
-        .app-layout.sidebar-collapsed .sidebar-header span {
-            display: none;
+        /* NEW: Sidebar Toggle Button */
+        #sidebar-toggle {
+            display: none; /* Hide on load, JS will show */
+            background: none;
+            border: none;
+            color: var(--text-color-light);
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: color 0.2s, background-color 0.2s;
         }
-        .app-layout.sidebar-collapsed .sidebar-header {
-            padding: 0 0 20px 0;
-            justify-content: center;
+        #sidebar-toggle:hover {
+            color: var(--light-color);
+            background-color: #27272a;
         }
-         .app-layout.sidebar-collapsed .sidebar-header .fa-solid {
-             margin-right: 0;
-         }
 
 
         .sidebar-nav a {
             display: flex;
-            /* justify-content: space-between; */ /* MODIFIED: Handled by group */
+            justify-content: flex-start; /* Changed from space-between */
             align-items: center;
             padding: 12px 15px;
             text-decoration: none;
@@ -146,52 +124,27 @@
             border-radius: 6px;
             margin-bottom: 5px;
             transition: background-color 0.2s, color 0.2s, transform 0.2s;
+            white-space: nowrap; /* Prevent text wrap */
         }
         .sidebar-nav a .nav-text-group {
             display: flex;
             align-items: center;
-            width: 100%; /* NEW: Fill space */
-            justify-content: space-between; /* NEW: Pushes warning icon */
-        }
-        .sidebar-nav a .nav-text-group-main {
-             display: flex; /* NEW: Group icon and text */
-             align-items: center;
-             white-space: nowrap; /* NEW: Prevent wrap */
-             overflow: hidden; /* NEW: Hide text */
+            /* NEW: For hiding text */
+            opacity: 1;
+            transition: opacity 0.2s;
         }
         .sidebar-nav a i {
             margin-right: 12px;
             width: 20px;
             text-align: center;
             transition: color 0.2s;
+            font-size: 1.1em; /* NEW: Slightly larger icons */
         }
         .sidebar-nav a:hover {
             background-color: #27272a; /* Slightly lighter dark */
             color: var(--light-color);
             transform: translateX(3px); /* Hover animation */
         }
-        
-        /* NEW: Collapsed nav link styles */
-        .app-layout.sidebar-collapsed .sidebar-nav a {
-            justify-content: center;
-        }
-        .app-layout.sidebar-collapsed .sidebar-nav a .nav-text-group-main span {
-            display: none; /* Hide text */
-        }
-        .app-layout.sidebar-collapsed .sidebar-nav a .nav-text-group .nav-warning-icon {
-            display: none; /* Hide warning icon text when collapsed, consider showing just icon */
-        }
-        .app-layout.sidebar-collapsed .sidebar-nav a .nav-text-group {
-            justify-content: center;
-        }
-        .app-layout.sidebar-collapsed .sidebar-nav a i {
-            margin-right: 0;
-        }
-         .app-layout.sidebar-collapsed .sidebar-nav a:hover {
-             transform: translateX(0); /* Disable hover indent */
-         }
-
-
         .sidebar-nav a.active {
             background-color: var(--primary-color);
             color: var(--light-color);
@@ -205,6 +158,11 @@
             color: #facc15; /* Yellow */
             font-size: 0.9em;
             animation: blink 1.5s linear infinite;
+            /* NEW: Margin for spacing */
+            margin-left: auto;
+            padding-left: 10px;
+            opacity: 1;
+            transition: opacity 0.2s;
         }
         .sidebar-nav a.active .nav-warning-icon {
             color: var(--light-color);
@@ -215,12 +173,12 @@
         
         /* Sign-in / Sign-out Button */
         .sidebar-footer {
-            /* margin-top: auto; */ /* <-- REMOVED THIS LINE TO FIX DEAD SPACE */
+            margin-top: auto; /* Pushes to bottom */
             padding-top: 15px;
             border-top: 1px solid #3f3f46;
         }
         .auth-button {
-            display: flex; /* MODIFIED: For icon/text */
+            display: flex; /* Use flex */
             align-items: center;
             padding: 12px 15px;
             text-decoration: none;
@@ -228,20 +186,27 @@
             font-weight: 500;
             border-radius: 6px;
             margin: 5px;
-            transition: background-image 0.3s, background-color 0.3s, transform 0.2s, padding 0.3s ease;
+            transition: background-image 0.3s, background-color 0.3s, transform 0.2s;
             background: var(--gradient-primary); /* Gradient */
             border: none;
             width: calc(100% - 10px);
             cursor: pointer;
             font-size: 15px;
             text-align: left;
-            overflow: hidden; /* NEW */
-            white-space: nowrap; /* NEW */
+            white-space: nowrap; /* Prevent wrap */
         }
         .auth-button i {
-            margin-right: 10px; /* NEW: Space */
-            transition: margin 0.3s ease; /* NEW */
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1em;
         }
+        .auth-button .auth-text {
+             /* NEW: Class for text */
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
         .auth-button.sign-out {
             background-color: var(--danger-color);
             background-image: none;
@@ -254,20 +219,46 @@
             background-color: var(--danger-color-dark);
             transform: scale(1.02);
         }
-        
-        /* NEW: Collapsed auth button */
+
+        /* NEW: Styles for Collapsed Sidebar */
+        .app-layout.sidebar-collapsed .sidebar-nav {
+            padding: 20px 8px; /* Tighter padding */
+        }
+        .app-layout.sidebar-collapsed .sidebar-header {
+            padding: 0 7px 20px 7px;
+            justify-content: center; /* Center toggle */
+        }
+        .app-layout.sidebar-collapsed .sidebar-header .fa-store,
+        .app-layout.sidebar-collapsed .sidebar-header .logo-text {
+            opacity: 0; /* Hide logo */
+            width: 0;
+            margin: 0;
+        }
+        .app-layout.sidebar-collapsed .nav-text-group,
+        .app-layout.sidebar-collapsed .nav-warning-icon,
+        .app-layout.sidebar-collapsed .auth-text {
+            opacity: 0; /* Hide all text */
+            width: 0;
+            overflow: hidden;
+        }
+        .app-layout.sidebar-collapsed .sidebar-nav a {
+            padding: 12px 13px; /* Adjust padding */
+            justify-content: center; /* Center icons */
+        }
+        .app-layout.sidebar-collapsed .sidebar-nav a i {
+            margin-right: 0; /* No margin */
+        }
+        .app-layout.sidebar-collapsed .sidebar-nav a:hover {
+            transform: none; /* No sideways hover */
+        }
         .app-layout.sidebar-collapsed .auth-button {
-            justify-content: center;
-            padding: 12px 0;
+            padding: 12px 13px; /* Adjust padding */
+            justify-content: center; /* Center icons */
             width: calc(100% - 16px);
-            margin: 5px 8px;
         }
-        .app-layout.sidebar-collapsed .auth-button span {
-            display: none;
-        }
-        .app-layout.sidebar-collapsed .auth-button i {
+         .app-layout.sidebar-collapsed .auth-button i {
             margin-right: 0;
-        }
+         }
 
 
         /* Main Content Area */
@@ -303,7 +294,7 @@
             margin-top: 0;
             color: var(--text-color);
         }
-        div { 
+        .form-section { /* NEW: Replaced div */
             margin-bottom: 15px; 
         }
         label { 
@@ -318,6 +309,19 @@
             font-size: 0.9em;
             display: block;
             margin-top: 2px;
+        }
+        /* NEW: AI Recommendation callout */
+        .ai-recommendation {
+            font-style: italic;
+            color: var(--primary-color);
+            font-size: 0.95em;
+            margin-top: -10px;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-color);
+            display: none; /* Hidden by default */
         }
 
         select, textarea, input[type="text"], input[type="number"], input[type="date"] { 
@@ -335,30 +339,9 @@
             box-shadow: 0 0 0 3px rgba(0, 97, 166, 0.1);
         }
         
-        /* NEW: Wrapper for textarea and copy button */
+        /* NEW: Wrapper for textareas with copy buttons */
         .textarea-wrapper {
             position: relative;
-        }
-        .copy-note-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #f0f0f0;
-            color: var(--text-color-light);
-            border: 1px solid var(--border-color);
-            width: 30px;
-            height: 30px;
-            padding: 0;
-            font-size: 12px;
-            line-height: 1;
-            z-index: 5;
-            display: none; /* Hidden by default */
-        }
-        .copy-note-btn:hover {
-            background: #e0e0e0;
-            color: var(--text-color);
-            transform: none;
-            box-shadow: none;
         }
 
         .step-notes {
@@ -370,6 +353,28 @@
             min-height: 80px;
             font-size: 14px;
         }
+        
+        /* NEW: Copy button style */
+        .copy-btn {
+            display: none; /* Hide by default */
+            position: absolute;
+            top: 15px;
+            right: 5px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.8em;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s, background-color 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+            background-color: var(--primary-color-dark);
+        }
+
 
         fieldset { 
             border: 1px solid var(--border-color); 
@@ -436,27 +441,6 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
-        }
-        
-        /* NEW: General purpose copy button */
-        .copy-btn {
-            background: #f0f0f0;
-            color: var(--text-color-light);
-            border: 1px solid var(--border-color);
-            width: auto;
-            padding: 8px 12px;
-            font-size: 14px;
-            margin-top: 10px;
-            float: right;
-        }
-         .copy-btn:hover {
-            background: #e0e0e0;
-            color: var(--text-color);
-            transform: none;
-            box-shadow: none;
-        }
-        .copy-btn i {
-            margin-right: 8px;
         }
 
         .ai-button {
@@ -642,25 +626,22 @@
             line-height: 1.6;
         }
 
-        /* NEW: AI Verbatim Feedback Output */
-        #ai-verbatim-output {
+        /* NEW: Verbatim Feedback Output */
+        #verbatim-feedback-wrapper {
+            display: none; /* Hide until AI generates */
             background-color: var(--success-bg);
             border: 1px solid var(--success-color);
             border-radius: 12px;
             padding: 20px;
             margin-top: 20px;
-            box-shadow: var(--shadow-md);
         }
-        #ai-verbatim-output h3 {
+        #verbatim-feedback-wrapper h3 {
             color: var(--success-color);
             margin-top: 0;
-            border-bottom: 1px solid #d1f7e8;
+            border-bottom: 1px dashed #bfeacb;
             padding-bottom: 10px;
         }
-        #ai-verbatim-output p {
-            line-height: 1.6;
-            font-style: italic;
-        }
+        
         
         /* Simple Loading Spinner */
         .loader {
@@ -680,6 +661,12 @@
         @keyframes load-spinner {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        /* NEW: Tiny loader for coaching recs */
+        .loader-small {
+            width: 1.5em;
+            height: 1.5em;
+            margin: 0 0 5px 0;
         }
 
         /* MODAL (POP-UP) STYLES */
@@ -976,53 +963,40 @@
         <!-- Sidebar Navigation -->
         <nav class="sidebar-nav">
             <div class="sidebar-header">
-                <i class="fa-solid fa-store"></i> <span>myAI Retail Coach</span>
+                <span class="logo-text"><i class="fa-solid fa-store"></i> myAI Coach</span>
+                <!-- NEW: Toggle Button -->
+                <button id="sidebar-toggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
             
-            <!-- NEW: Sidebar Toggle Button -->
-            <button class="sidebar-toggle" id="sidebar-toggle-btn">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            
             <a href="#" class="nav-link active" onclick="openPage(event, 'Observation')">
-                <div class="nav-text-group">
-                    <span class="nav-text-group-main"><i class="fa-solid fa-magnifying-glass-chart"></i> <span>Log Observation</span></span>
-                </div>
+                <span class="nav-text-group"><i class="fa-solid fa-magnifying-glass-chart"></i> Log Observation</span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'Coaching')">
-                <div class="nav-text-group">
-                    <span class="nav-text-group-main"><i class="fa-solid fa-bullhorn"></i> <span>Log Coaching</span></span>
-                </div>
+                <span class="nav-text-group"><i class="fa-solid fa-bullhorn"></i> Log Coaching</span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'Tracker')">
-                <div class="nav-text-group">
-                    <span class="nav-text-group-main"><i class="fa-solid fa-calendar-check"></i> <span>Monthly Tracker</span></span>
-                </div>
+                <span class="nav-text-group"><i class="fa-solid fa-calendar-check"></i> Monthly Tracker</span>
             </a>
             <a href="#" class="nav-link" id="nav-goals" onclick="openPage(event, 'Goals')">
-                <div class="nav-text-group">
-                    <span class="nav-text-group-main"><i class="fa-solid fa-bullseye"></i> <span>Store Goals</span></span>
-                    <span class="nav-warning-icon" id="nav-goals-warning"><i class="fa-solid fa-exclamation-circle"></i></span>
-                </div>
+                <span class="nav-text-group"><i class="fa-solid fa-bullseye"></i> Store Goals</span>
+                <span class="nav-warning-icon" id="nav-goals-warning"><i class="fa-solid fa-exclamation-circle"></i></span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'ViewLogs')">
-                <div class="nav-text-group">
-                    <span class="nav-text-group-main"><i class="fa-solid fa-list-alt"></i> <span>View Logs</span></span>
-                </div>
+                <span class="nav-text-group"><i class="fa-solid fa-list-alt"></i> View Logs</span>
             </a>
             <a href="#" class="nav-link" onclick="openPage(event, 'Employees')">
-                 <div class="nav-text-group">
-                    <span class="nav-text-group-main"><i class="fa-solid fa-users"></i> <span>Manage Employees</span></span>
-                </div>
+                <span class="nav-text-group"><i class="fa-solid fa-users"></i> Manage Employees</span>
             </a>
             
             <!-- Sign in/out buttons -->
             <div class="sidebar-footer">
                 <button class="auth-button" id="sign-in-btn">
-                    <i class="fa-brands fa-google"></i> <span>Sign In with Google</span>
+                    <i class="fa-brands fa-google"></i> <span class="auth-text">Sign In with Google</span>
                 </button>
                 <button class="auth-button sign-out" id="sign-out-btn">
-                    <i class="fa-solid fa-right-from-bracket"></i> <span id="sign-out-text">Sign Out</span>
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="auth-text">Sign Out</span>
                 </button>
             </div>
         </nav>
@@ -1041,12 +1015,12 @@
                 <form id="obsForm">
                     <h2>New Observation</h2>
                     
-                    <div>
+                    <div class="form-section">
                         <label for="customer-intent">Customer Intent:</label>
                         <input type="text" id="customer-intent" name="customerIntent" placeholder="e.g., Pay bill, new mobile line, equipment swap..." required>
                     </div>
                     
-                    <div>
+                    <div class="form-section">
                         <label for="employee">Employee:</label>
                         <select id="employee" name="employee" required>
                             <option value="">-- Select a Rep --</option>
@@ -1072,10 +1046,10 @@
                             <input type="checkbox" id="g4" name="great_g" value="ME: Introduce relevant self-service options to improve the experience."><label for="g4">ME: Introduce relevant self-service options to improve the experience.</label>
                             <input type="checkbox" id="g5" name="great_g" value="SA: Introduce Xfinity Rewards or acknowledge existing enrollment."><label for="g5">SA: Introduce Xfinity Rewards or acknowledge existing enrollment.</label>
                         </div>
-                        <!-- NEW: Textarea wrapper for copy button -->
+                        <!-- NEW: Textarea wrapper -->
                         <div class="textarea-wrapper">
                             <textarea id="notes_g" name="notes_g" class="step-notes" placeholder="Notes for Greet..."></textarea>
-                            <button type="button" class="copy-note-btn" data-target="notes_g"><i class="fa-regular fa-copy"></i></button>
+                            <button type="button" class="copy-btn" id="copy-g"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </fieldset>
 
@@ -1092,10 +1066,9 @@
                             <input type="checkbox" id="r3" name="great_r" value="DN: Learn what products and experiences are most valuable to the customer by asking 'tell me more' questions."><label for="r3">DN: Learn what products and experiences are most valuable to the customer by asking "tell me more" questions.</label>
                             <input type="checkbox" id="r4" name="great_r" value="ME: Provide information in a simple, relevant and easy to understand way."><label for="r4">ME: Provide information in a simple, relevant and easy to understand way.</label>
                         </div>
-                        <!-- NEW: Textarea wrapper for copy button -->
                         <div class="textarea-wrapper">
                             <textarea id="notes_r" name="notes_r" class="step-notes" placeholder="Notes for Relate..."></textarea>
-                            <button type="button" class="copy-note-btn" data-target="notes_r"><i class="fa-regular fa-copy"></i></button>
+                            <button type="button" class="copy-btn" id="copy-r"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </fieldset>
 
@@ -1111,10 +1084,9 @@
                             <input type="checkbox" id="e2" name="great_e" value="OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products."><label for="e2">OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products.</label>
                             <input type="checkbox" id="e3" name="great_e" value="BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time."><label for="e3">BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time.</label>
                         </div>
-                        <!-- NEW: Textarea wrapper for copy button -->
                         <div class="textarea-wrapper">
                             <textarea id="notes_e" name="notes_e" class="step-notes" placeholder="Notes for Explore..."></textarea>
-                            <button type="button" class="copy-note-btn" data-target="notes_e"><i class="fa-regular fa-copy"></i></button>
+                            <button type="button" class="copy-btn" id="copy-e"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </fieldset>
 
@@ -1131,10 +1103,9 @@
                             <input type="checkbox" id="a3" name="great_a" value="EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections."><label for="a3">EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections.</label>
                             <input type="checkbox" id="a4" name="great_a" value="BA: Confidently position your solution and ask for the sale/agreement."><label for="a4">BA: Confidently position your solution and ask for the sale/agreement.</label>
                         </div>
-                        <!-- NEW: Textarea wrapper for copy button -->
                         <div class="textarea-wrapper">
                             <textarea id="notes_a" name="notes_a" class="step-notes" placeholder="Notes for Ask..."></textarea>
-                            <button type="button" class="copy-note-btn" data-target="notes_a"><i class="fa-regular fa-copy"></i></button>
+                            <button type="button" class="copy-btn" id="copy-a"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </fieldset>
 
@@ -1152,35 +1123,39 @@
                             <input type="checkbox" id="t4" name="great_t" value="BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience."><label for="t4">BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience.</label>
                             <input type="checkbox" id="t5" name="great_t" value="BA: Ask your customer to refer Xfinity to friends and family."><label for="t5">BA: Ask your customer to refer Xfinity to friends and family.</label>
                         </div>
-                        <!-- NEW: Textarea wrapper for copy button -->
                         <div class="textarea-wrapper">
                             <textarea id="notes_t" name="notes_t" class="step-notes" placeholder="Notes for Thank..."></textarea>
-                            <button type="button" class="copy-note-btn" data-target="notes_t"><i class="fa-regular fa-copy"></i></button>
+                            <button type="button" class="copy-btn" id="copy-t"><i class="fa-solid fa-copy"></i></button>
                         </div>
                     </fieldset>
                     
-                    <div>
-                        <label for="notes">Overall Summary Notes:</label>
-                        <textarea id="notes" name="notes" rows="5" placeholder="Overall strengths, opportunities, or AI-generated note..."></textarea>
+                    <div class="form-section">
+                        <label for="notes">Overall Summary Notes (Optional):</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Any additional overall notes..."></textarea>
                     </div>
-                    <div>
-                        <!-- MODIFIED: This is now the only button -->
+
+                    <div class="form-section">
                         <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background: var(--gradient-primary); width: 100%; margin-top: 0; font-size: 1.1em; padding: 14px;">Generate AI Notes & Log Observation</button>
                         <div class="loader" id="summary-loader"></div>
                     </div>
-                    
-                    <!-- NEW: AI Verbatim Feedback Output -->
-                    <div id="ai-verbatim-output" style="display: none;">
-                        <!-- Content will be added by JavaScript -->
-                    </div>
                 </form>
+
+                <!-- NEW: Verbatim Feedback Section -->
+                <div id="verbatim-feedback-wrapper">
+                    <h3>AI-Assisted Manager Verbatim (Feedback Script)</h3>
+                    <div class="textarea-wrapper">
+                        <textarea id="verbatim-feedback" class="profile-notes" rows="6"></textarea>
+                        <button type="button" class="copy-btn" id="copy-verbatim" style="display: block;"><i class="fa-solid fa-copy"></i></button>
+                    </div>
+                </div>
+
             </div>
             
             <!-- PAGE 2: Log Coaching -->
             <div id="Coaching" class="page-content">
                 <form id="coachingForm">
                     <h2>Log Coaching Session</h2>
-                    <div>
+                    <div class="form-section">
                         <label for="coaching-employee-select">Employee:</label>
                         <select id="coaching-employee-select" name="employeeId" required>
                             <option value="">-- Select a Rep --</option>
@@ -1188,11 +1163,11 @@
                     </div>
                     
                     <div class="form-grid">
-                        <div>
+                        <div class="form-section">
                             <label for="coaching-date">Session Date:</label>
                             <input type="date" id="coaching-date" name="date" required>
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="coaching-type">Session Type:</label>
                             <select id="coaching-type" name="sessionType" required>
                                 <option value="">-- Select a Type --</option>
@@ -1206,32 +1181,41 @@
                     </div>
 
                     <div class="form-grid">
-                        <div>
+                        <div class="form-section">
                             <label for="coaching-tnps">tNPS Score (Optional):</label>
                             <input type="number" id="coaching-tnps" name="tnps" placeholder="e.g., 63.6">
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="coaching-sales">Sales Metric (Optional):</label>
                             <input type="text" id="coaching-sales" name="sales" placeholder="e.g., 10 mobile lines">
                         </div>
                     </div>
+
+                    <!-- NEW: Loader for AI Recs -->
+                    <div class="loader loader-small" id="coaching-rec-loader"></div>
                     
-                    <div>
+                    <div class="form-section">
                         <label for="coaching-progress">What Progress has been made since last coaching session?
                             <span class="label-hint">Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)</span>
                         </label>
+                        <!-- NEW: AI Rec -->
+                        <p class="ai-recommendation" id="rec-progress"></p>
                         <textarea id="coaching-progress" name="progress" class="profile-notes" rows="3" placeholder="Type your raw notes here..."></textarea>
                     </div>
-                    <div>
+                    <div class="form-section">
                         <label for="coaching-obstacles">What challenge or obstacles has the Coachee experienced?
                              <span class="label-hint">Ask something like, "What has been difficult for you recently?" (Include examples provided by Coachee)</span>
                         </label>
+                        <!-- NEW: AI Rec -->
+                        <p class="ai-recommendation" id="rec-obstacles"></p>
                         <textarea id="coaching-obstacles" name="obstacles" class="profile-notes" rows="3" placeholder="Type your raw notes here..."></textarea>
                     </div>
-                    <div>
+                    <div class="form-section">
                         <label for="coaching-actionplan">Action Plan: What actions will the Coachee commit to after this conversation?
                              <span class="label-hint">(Include SMART goal)</span>
                         </label>
+                        <!-- NEW: AI Rec -->
+                        <p class="ai-recommendation" id="rec-actionplan"></p>
                         <textarea id="coaching-actionplan" name="actionPlan" class="profile-notes" rows="3" placeholder="Type a raw SMART goal here... (e.g., 'get 10 mobile lines next week')"></textarea>
                     </div>
 
@@ -1270,27 +1254,27 @@
                     <p style="text-align: center; margin-top: -10px; margin-bottom: 20px; color: var(--text-color-light);">Set the store-wide goals for the current fiscal month. All AI-generated SMART goals will reference these numbers.</p>
                     
                     <div class="goals-grid">
-                        <div>
+                        <div class="form-section">
                             <label for="goal-xm">XM (Xfinity Mobile)</label>
                             <input type="number" id="goal-xm" name="xm" placeholder="e.g., 40">
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="goal-hsi">HSI (Internet)</label>
                             <input type="number" id="goal-hsi" name="hsi" placeholder="e.g., 20">
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="goal-video">Video</label>
                             <input type="number" id="goal-video" name="video" placeholder="e.g., 10">
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="goal-cdv">CDV (Voice)</label>
                             <input type="number" id="goal-cdv" name="cdv" placeholder="e.g., 5">
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="goal-xhs">XHS (Home Security)</label>
                             <input type="number" id="goal-xhs" name="xhs" placeholder="e.g., 5">
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="goal-upgrades">Device Upgrades</label>
                             <input type="number" id="goal-upgrades" name="upgrades" placeholder="e.g., 15">
                         </div>
@@ -1311,14 +1295,14 @@
             <div id="ViewLogs" class="page-content">
                 <!-- ... existing view logs ... -->
                 <h2>View Performance Logs</h2>
-                <div>
+                <div class="form-section">
                     <label for="log-employee-select">Select Employee:</label>
                     <select id="log-employee-select">
                         <option value="">-- Select a Rep --</option>
                     </select>
                 </div>
                 
-                <div>
+                <div class="form-section">
                     <button type="button" class="ai-button" id="generate-ai-coaching-plan" style="width: 100%; margin-top: 0;">Generate AI Coaching Plan</button>
                     <div class="loader" id="coaching-loader"></div>
                 </div>
@@ -1336,15 +1320,15 @@
                 <form id="addEmployeeForm">
                     <h2>Add New Employee</h2>
                     <div class="form-grid">
-                        <div>
+                        <div class="form-section">
                             <label for="new-employee-name">Employee Name:</label>
                             <input type="text" id="new-employee-name" placeholder="e.g., Rogers, Devin K" required>
                         </div>
-                        <div>
+                        <div class="form-section">
                             <label for="new-employee-role">Role:</label>
                             <input type="text" id="new-employee-role" placeholder="e.g., Greeter, Sales Rep" required>
                         </div>
-                        <div class="grid-span-2">
+                        <div class="grid-span-2 form-section">
                             <label for="new-employee-hire-date">Hire Date:</label>
                             <input type="date" id="new-employee-hire-date" name="hireDate" required>
                         </div>
@@ -1371,23 +1355,23 @@
                 <input type="hidden" id="edit-employee-id" name="id">
                 
                 <div class="form-grid">
-                    <div class="grid-span-2">
+                    <div class="grid-span-2 form-section">
                         <label for="edit-employee-name">Employee Name:</label>
                         <input type="text" id="edit-employee-name" name="name" required>
                     </div>
-                    <div>
+                    <div class="form-section">
                         <label for="edit-employee-role">Role:</label>
                         <input type="text" id="edit-employee-role" name="role">
                     </div>
-                    <div>
+                    <div class="form-section">
                         <label for="edit-employee-hire-date">Hire Date:</label>
                         <input type="date" id="edit-employee-hire-date" name="hireDate">
                     </div>
-                    <div class="grid-span-2">
+                    <div class="grid-span-2 form-section">
                         <label for="edit-employee-strengths">Strengths:</label>
                         <textarea id="edit-employee-strengths" name="strengths" class="profile-notes" placeholder="e.g., Great at building rapport..."></textarea>
                     </div>
-                    <div class="grid-span-2">
+                    <div class="grid-span-2 form-section">
                         <label for="edit-employee-opportunities">Opportunities:</label>
                         <textarea id="edit-employee-opportunities" name="opportunities" class="profile-notes" placeholder="e.g., Needs to focus on..."></textarea>
                     </div>
@@ -1454,11 +1438,11 @@
             - tNPS score goal: 75
             - XM% to goal: 100%
             - XM conversion rate: 10%
-            - HSD (high speed data OR internet sale) to goal: 100%
+            - HSD to goal: 100%
             - Gigabit+ sell in: 50%
-            - Video/CDV(Landline)/XH(Home security) unit % to goal: 100%
+            - Video/CDV/XH unit % to goal: 100%
             - Wablets: Watch/Tablet sale: minimum 2 per week, recommended 4 per week, with attach rate of 45%
-            - XMC (Xfinity Mobile Care or insurance unit) attach: 60%
+            - XMC attach: 60%
             - Unlimited Premium (higher mobile plan) attach: 45%
             - New/New (New mobile line attach on a new internet sale, same day): 30% attach
             - Monthly Mobile Line (LA) Goal: 40 per rep (approx 10-15 per week).
@@ -1470,7 +1454,6 @@
 
 
         // --- Firebase Config & App Variables ---
-        // This config is for a demo project. Replace with your own Firebase project config.
         const firebaseConfig = {
          apiKey: "AIzaSyDaRTH_-SrDMlKePFfKUaUa0FeGDD1-KIA",
          authDomain: "retail-coaching-tool.firebaseapp.com",
@@ -1501,18 +1484,10 @@
         const OBS_GOAL = 4;
         const COACH_GOAL = 2;
 
-        // --- Core Data Functions ---
-        
-        // NEW: Helper function to get first name
-        function getFirstName(fullName) {
-            if (!fullName) return "the employee";
-            const parts = fullName.split(',');
-            if (parts.length > 1) {
-                return parts[1].trim().split(' ')[0]; // "Rogers, Devin K" -> "Devin"
-            }
-            return fullName.split(' ')[0]; // "Devin Rogers" -> "Devin"
-        }
+        // NEW: Autosave key
+        const AUTOSAVE_KEY = 'obsFormAutosave';
 
+        // --- Core Data Functions ---
         // ... calculateTenure function (unchanged) ...
         function calculateTenure(hireDate) {
             if (!hireDate) return "";
@@ -1569,6 +1544,24 @@
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const fiscalMonthName = `Fiscal ${monthNames[endMonth]} ${endYear}`;
             return { startDate, endDate, name: fiscalMonthName };
+        }
+
+        /**
+         * NEW: Gets the first name from a "Last, First K" string
+         */
+        function getFirstName(fullName) {
+            if (!fullName) return "this employee";
+            try {
+                // Split by comma first (e.g., "Rogers, Devin K")
+                if (fullName.includes(',')) {
+                    return fullName.split(',')[1].split(' ')[1];
+                }
+                // Fallback for "Devin Rogers"
+                return fullName.split(' ')[0];
+            } catch (e) {
+                console.warn("Could not parse first name from:", fullName);
+                return fullName; // Return full name on error
+            }
         }
 
 
@@ -1775,7 +1768,7 @@
                 for(let i = 0; i < obsCount; i++) {
                     const log = employeeObs[i];
                     obsPips.innerHTML += `<span class="progress-pip filled"></span>`;
-                    obsTooltip += `• ${log.date.toDate().toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
+                    obsTooltip += `• ${log.date.toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
                 }
                 for(let i = obsCount; i < OBS_GOAL; i++) {
                     obsPips.innerHTML += `<span class="progress-pip"></span>`;
@@ -1790,7 +1783,7 @@
                 for(let i = 0; i < coachCount; i++) {
                     const log = employeeCoaching[i];
                     coachPips.innerHTML += `<span class="progress-pip filled"></span>`;
-                    coachTooltip += `• ${log.date.toDate().toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
+                    coachTooltip += `• ${log.date.toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
                 }
                 for(let i = coachCount; i < COACH_GOAL; i++) {
                     coachPips.innerHTML += `<span class="progress-pip"></span>`;
@@ -1879,31 +1872,6 @@
         
         // --- Event Handling Functions ---
         
-        /**
-         * NEW: Shows/hides a loader and disables/enables a button
-         */
-        function showLoading(loaderId, buttonId, isLoading, loadingText) {
-            const loader = document.getElementById(loaderId);
-            const button = document.getElementById(buttonId);
-            
-            if (!button) return; // Guard clause
-
-            if (isLoading) {
-                loader.style.display = 'block';
-                button.disabled = true;
-                if (loadingText) {
-                    button.dataset.originalText = button.textContent; // Store original text
-                    button.textContent = loadingText;
-                }
-            } else {
-                loader.style.display = 'none';
-                button.disabled = false;
-                if (button.dataset.originalText) {
-                    button.textContent = button.dataset.originalText; // Restore original text
-                }
-            }
-        }
-        
         // ... showToast function (unchanged) ...
         let toastTimeout;
         function showToast(message, isError = false) {
@@ -1967,22 +1935,6 @@
                 await showToast("Incorrect code. Deletion cancelled.", true);
             }
             return false;
-        }
-
-        // NEW: Copy to Clipboard Helper
-        function copyToClipboard(text, successMessage) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showToast(successMessage || 'Copied to clipboard!');
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-                showToast('Failed to copy text.', true);
-            }
-            document.body.removeChild(textarea);
         }
         
         // ... addEmployee function (unchanged) ...
@@ -2057,8 +2009,35 @@
             return radio ? radio.value : "N/A";
         }
         
+        // NEW: showLoading function (was missing)
+        function showLoading(loaderId, buttonId, isLoading, buttonText = "") {
+            const loader = document.getElementById(loaderId);
+            const button = document.getElementById(buttonId);
+            
+            if (isLoading) {
+                loader.style.display = 'block';
+                if (button) {
+                    button.disabled = true;
+                    if (buttonText) button.textContent = buttonText;
+                }
+            } else {
+                loader.style.display = 'none';
+                if (button) {
+                    button.disabled = false;
+                    if (buttonText) button.textContent = buttonText;
+                }
+            }
+        }
+
         /**
-         * UPDATED: Added loggedBy, Role-Awareness, and Verbatim Feedback
+         * UPDATED: 
+         * - Uses first name for AI
+         * - AI is "fun & loose"
+         * - AI writes notes ABOUT employee, verbatim TO employee
+         * - AI handles blank/partial as "Not Observed"
+         * - AI does NOT clear form, populates notes
+         * - AI shows verbatim feedback
+         * - Clears autosave on success
          */
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
@@ -2073,13 +2052,16 @@
                 return;
             }
             const profile = localEmployees[employeeId];
-            const employeeFirstName = getFirstName(profile.name); // NEW: Get first name
+            const firstName = getFirstName(profile.name); // NEW
+            const employeeRole = profile.role || "Sales Rep"; // NEW
+            const isGreeter = employeeRole.toLowerCase().includes("greeter"); // NEW
+
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
                 .sort((a, b) => b.date.toDate() - a.date.toDate())[0];
             let coachingContext = "No recent coaching session on file.\n";
             if (recentCoaching && recentCoaching.actionPlan) {
-                coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
+                coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
             }
             const greatData = {
                 greet: {
@@ -2110,30 +2092,39 @@
             };
 
             // --- AI PROMPT ---
-            // NEW: Updated persona and instructions
-            let prompt = `Act as a supportive, "fun" retail sales manager for an **Xfinity store**. Your tone should be **personal, friendly, and less robotic**. Use encouraging slang (like 'nailed it', 'awesome job', 'let's focus on...') where appropriate. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. You are writing feedback *for* ${employeeFirstName}.\n\n`;
+            let prompt = `Act as a 'manager-next-door' sales coach for an **Xfinity retail store**. Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**. Your tone should be **personal, supportive, and a bit fun/loose**, not robotic. Use positive reinforcement ("nailed it," "great job") when good behaviors are checked.`;
             
-            // NEW: Role-specific instructions
-            const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
+            prompt += `I'm writing an observation *ABOUT* **${firstName}**.`;
+            
+            // NEW: Role-based AI
             if (isGreeter) {
-                prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback on their customer interaction, rapport-building, and service skills (G-Greet, R-Relate, T-Thank). **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity. Their job is to create a welcoming environment and manage the queue.\n\n`;
+                prompt += `\n\n**ROLE-BASED CONTEXT: ${firstName} is a GREETER.** Their job is *NOT* sales-based. Focus *only* on the customer service and 'Greet' step. Do *not* mention sales, mobile, or 'service to sales' opportunities. Their goal is to be friendly, efficient, and set the customer up for the right next step.\n\n`;
             } else {
-                 prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. For the 'Explore' and 'Ask' steps, pay close attention to whether ${employeeFirstName} **pivoted to a mobile sale** (e.g., "BA: ...Champion Mobile every time" or "OI: ...proactive review"). If they missed it, call it out as an opportunity. Be sure to provide positive reinforcement for behaviors they did well.\n\n`;
+                prompt += `\n\n**ROLE-BASED CONTEXT: ${firstName} is a SALES REP.** Their job is 100% 'service to sales.' Focus on their sales behaviors, 'Explore' and 'Ask' steps, and whether they pivoted to Xfinity Mobile. This is their primary job.\n\n`;
             }
+            
+            prompt += `I will provide inputs for the 5 'GREAT' steps. For each step, generate two things:\n`;
+            prompt += `1.  **note (for my logs):** A 1-2 sentence note *ABOUT* ${firstName} (e.g., "${firstName} did a great job..."). If the input is empty or "Partial" with no notes, just write "Not Observed."\n`;
+            prompt += `2.  **verbatim (for me to say):** A 1-2 sentence script *TO* ${firstName} (e.g., "Hey ${firstName}, great job on..."). If "Not Observed," write "N/A."\n\n`;
 
+            prompt += `--- IMPORTANT LOGIC ---\n`;
+            prompt += `* If a 'Partial' step has no checkboxes or notes, you *MUST* treat it as 'Not Observed'.\n`;
+            prompt += `* **DO NOT ASSUME a missed opportunity** just because a sales box wasn't checked. ONLY mention a missed opportunity if the 'Customer Intent' (e.g., 'bill pay') *clearly* presented a 'service to sales' chance AND the sales behaviors were *NOT* checked. If the intent was already sales-focused, just focus on what they did.\n`;
+            prompt += `* If good behaviors are checked, add positive reinforcement (e.g., "nailed the T-chart").\n\n`;
+            
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n"; 
             let goalsContext = "Monthly goals are not set.\n";
             if (localStoreGoals.totalGoal) {
                 goalsContext = `Current Monthly Goals:\n` +
-                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
+                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XH: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
                                `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
             }
             prompt += `--- CURRENT STORE GOALS ---\n`;
             prompt += goalsContext + "\n\n";
             prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${profile.name}\n`;
-            prompt += `Role: ${profile.role}\n`;
+            prompt += `Name: ${profile.name} (First Name: ${firstName})\n`;
+            prompt += `Role: ${employeeRole}\n`;
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
             prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
             prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
@@ -2141,14 +2132,15 @@
             prompt += coachingContext;
             prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
             prompt += `Customer Intent: ${customerIntent}\n\n`;
+            
             const formatStep = (name, data) => {
-                // NEW: Handle "Not Observed" case
-                if (data.measurement === "Partial" && data.behaviors.length === 0 && !data.notes) {
-                    return `${name}: (Not Observed)\n`;
-                }
                 let stepStr = `${name}: (${data.measurement})\n`;
                 if (data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
                 if (data.notes) stepStr += `  Notes: ${data.notes}\n`;
+                // NEW: Handle "Not Observed"
+                if (data.measurement === "Partial" && data.behaviors.length === 0 && data.notes === "") {
+                    stepStr = `${name}: (Not Observed)\n`;
+                }
                 return stepStr;
             };
             prompt += formatStep('G - Greet', greatData.greet);
@@ -2156,36 +2148,25 @@
             prompt += formatStep('E - Explore', greatData.explore);
             prompt += formatStep('A - Ask', greatData.ask);
             prompt += formatStep('T - Thank', greatData.thank);
-            prompt += `\n--- GENERATE JSON OUTPUT ---
-            Based on all this context, generate two things:
-            1.  **Step-by-Step Notes:** A professional, constructive, and **personal** 1-2 sentence observation note for EACH of the 5 "GREAT" steps. **Use ${employeeFirstName}'s name** where it feels natural.
-                -   **Elaborate** on *why* a checked behavior was good (e.g., 'Awesome job building rapport, that really made the customer feel heard.').
-                -   **If a step is 'Not Observed'** (measurement is 'Partial' with no behaviors or notes), the JSON value for that note (e.g., "greet_note") **must be the string "Not observed."**
-            2.  **Feedback Verbatim:** A short, constructive script (2-4 sentences) for me, the manager, to say directly to ${employeeFirstName}. It should start with a positive, then identify one key opportunity from the observation. Example: 'Hey ${employeeFirstName}, awesome job on... I did notice...'.
-            
-            **Remember the role context and the friendly, loose tone!**
-            `;
+            prompt += `\n--- GENERATE JSON OUTPUT ---`;
 
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
-            
-            // NEW: Clear old verbatim output
-            const verbatimOutput = document.getElementById('ai-verbatim-output');
-            verbatimOutput.style.display = 'none';
-            verbatimOutput.innerHTML = '';
-            
             try {
-                // NEW: Updated schema
                 const generationConfig = {
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: "OBJECT",
                         properties: {
                             "greet_note": { "type": "STRING" },
+                            "greet_verbatim": { "type": "STRING" },
                             "relate_note": { "type": "STRING" },
+                            "relate_verbatim": { "type": "STRING" },
                             "explore_note": { "type": "STRING" },
+                            "explore_verbatim": { "type": "STRING" },
                             "ask_note": { "type": "STRING" },
+                            "ask_verbatim": { "type": "STRING" },
                             "thank_note": { "type": "STRING" },
-                            "feedbackVerbatim": { "type": "STRING" }
+                            "thank_verbatim": { "type": "STRING" }
                         }
                     }
                 };
@@ -2211,32 +2192,32 @@
                 const responseText = result.candidates[0].content.parts[0].text;
                 const notesObject = JSON.parse(responseText);
 
-                // Populate step notes
+                // --- NEW: Populate form instead of clearing ---
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
                 if (notesObject.relate_note) form.notes_r.value = notesObject.relate_note;
                 if (notesObject.explore_note) form.notes_e.value = notesObject.explore_note;
                 if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
                 if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
                 
-                // Show copy buttons for steps
-                form.querySelectorAll('.copy-note-btn').forEach(btn => btn.style.display = 'block');
+                // Show verbatim feedback
+                const verbatimWrapper = document.getElementById('verbatim-feedback-wrapper');
+                const verbatimText = document.getElementById('verbatim-feedback');
+                let fullVerbatim = `Hey ${firstName}, I just finished my observation and wanted to share a few things!\n\n`;
+                if(notesObject.greet_verbatim !== "N/A") fullVerbatim += `On the 'Greet': ${notesObject.greet_verbatim}\n`;
+                if(notesObject.relate_verbatim !== "N/A") fullVerbatim += `On 'Relate': ${notesObject.relate_verbatim}\n`;
+                if(notesObject.explore_verbatim !== "N/A") fullVerbatim += `On 'Explore': ${notesObject.explore_verbatim}\n`;
+                if(notesObject.ask_verbatim !== "N/A") fullVerbatim += `On 'Ask': ${notesObject.ask_verbatim}\n`;
+                if(notesObject.thank_verbatim !== "N/A") fullVerbatim += `And on 'Thank': ${notesObject.thank_verbatim}\n`;
+                fullVerbatim += `\nKeep up the great work!`;
+                
+                verbatimText.value = fullVerbatim;
+                verbatimWrapper.style.display = 'block';
 
-                // NEW: Populate and show verbatim feedback
-                if (notesObject.feedbackVerbatim) {
-                    const verbatimText = notesObject.feedbackVerbatim;
-                    verbatimOutput.innerHTML = `
-                        <h3>AI-Assisted Feedback Verbatim</h3>
-                        <p>"${verbatimText}"</p>
-                        <button type="button" class="copy-btn" id="copy-verbatim-btn"><i class="fa-regular fa-copy"></i> Copy Verbatim</button>
-                    `;
-                    verbatimOutput.style.display = 'block';
-                    // Add listener to new button
-                    document.getElementById('copy-verbatim-btn').addEventListener('click', () => {
-                        copyToClipboard(verbatimText, 'Verbatim script copied!');
-                    });
-                }
+                // Show all copy buttons
+                document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'block');
 
-                // Log the observation
+                // --- End Populate ---
+
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -2254,69 +2235,29 @@
                     loggedByEmail: currentUser.email // NEW
                 };
                 await addDoc(observationsRef, newObservation);
-                
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI notes generated and observation logged for ${employeeName}!`);
                 
-                // Clear autosave, but leave form populated for review
-                clearObsData();
-                
+                // --- NEW: Clear autosave ONLY on success ---
+                localStorage.removeItem(AUTOSAVE_KEY);
+                // Do NOT reset the form
+                // form.reset();
+                // form.employee.value = "";
+                // form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
                 await showToast('AI generation or logging failed. Please check the console for errors.', true);
             } finally {
-                showLoading('summary-loader', 'generate-and-log-ai-summary', false);
+                showLoading('summary-loader', 'generate-and-log-ai-summary', false, 'Generate AI Notes & Log Observation');
             }
         }
         
         /**
-         * NEW: Resets the observation form contents (notes, checkboxes, etc.)
-         * but *leaves the employee dropdown as-is*.
-         * It also does NOT hide AI output, as it's used after generation.
-         */
-        function resetObsFormContents() {
-            const form = document.getElementById('obsForm');
-            
-            // Reset text inputs/textareas
-            form.customerIntent.value = "";
-            form.notes_g.value = "";
-            form.notes_r.value = "";
-            form.notes_e.value = "";
-            form.notes_a.value = "";
-            form.notes_t.value = "";
-            form.notes.value = "";
-            
-            // Reset radio buttons to "Partial"
-            form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
-            
-            // Reset checkboxes
-            form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        }
-
-        /**
-         * NEW: Hides all AI-generated output on the observation form.
-         */
-        function hideObsFormAIOutput() {
-            document.getElementById('ai-verbatim-output').style.display = 'none';
-            document.getElementById('ai-verbatim-output').innerHTML = '';
-            document.getElementById('obsForm').querySelectorAll('.copy-note-btn').forEach(btn => btn.style.display = 'none');
-            document.getElementById('last-goal-display').style.display = 'none';
-        }
-
-        /**
-         * NEW: Resets the entire observation form, including the employee and AI output.
-         * Replaces the old `resetObsForm`
-         */
-        function resetObsFormFully() {
-            const form = document.getElementById('obsForm');
-            resetObsFormContents(); // Reset all the contents
-            hideObsFormAIOutput(); // Hide all the AI output
-            form.employee.value = ""; // Also reset the employee
-            clearObsData(); // NEW: Clear autosave
-        }
-        
-        /**
-         * UPDATED: Added Role-Awareness
+         * UPDATED: 
+         * - Uses First Name
+         * - Role-aware (Greeter vs. Sales)
+         * - Fun/loose tone
          */
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
@@ -2325,43 +2266,45 @@
                 return;
             }
             const profile = localEmployees[employeeId];
-            const employeeFirstName = getFirstName(profile.name); // NEW: Get first name
+            const firstName = getFirstName(profile.name); // NEW
+            const employeeRole = profile.role || "Sales Rep"; // NEW
+            const isGreeter = employeeRole.toLowerCase().includes("greeter"); // NEW
+
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                            .sort((a, b) => b.date.toDate() - a.date.toDate());
+                                               .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
-                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
+                                                  .sort((a, b) => b.date.toDate() - a.date.toDate());
             if (obsHistory.length === 0 && coachingHistory.length === 0) {
                 await showToast("This employee has no observations or coaching logs. Please log one first.", true);
                 return;
             }
-            // NEW: Updated persona
-            let prompt = `Act as an expert, friendly retail coach for an **Xfinity store**. Your tone should be **personal, supportive, and less robotic**. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${employeeFirstName}**.\n\n`;
-
-            // NEW: Role-specific instructions
-            const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
-            if (isGreeter) {
-                prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please focus all feedback and next steps *only* on their customer interaction, rapport-building, and service skills. **DO NOT** mention sales, Xfinity Mobile, or other product metrics as an opportunity.\n\n`;
-            } else {
-                 prompt += `**IMPORTANT ROLE CONTEXT:** ${employeeFirstName} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. Focus the feedback on one key strength and one specific, actionable opportunity, especially as it relates to our 'service to sales' model and **Xfinity Mobile**.\n\n`;
-            }
+            let prompt = `Act as an expert retail sales coach for an **Xfinity store**. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${firstName}**.`;
+            prompt += `Your tone should be **personal, supportive, and a bit fun/loose**, not robotic.`;
             
+            // NEW: Role-based AI
+            if (isGreeter) {
+                prompt += `\n\n**ROLE-BASED CONTEXT: ${firstName} is a GREETER.** Their job is *NOT* sales-based. Focus *only* on their customer service, 'Greet' step, and efficiency. Do *not* create a sales-based plan.\n\n`;
+            } else {
+                prompt += `\n\n**ROLE-BASED CONTEXT: ${firstName} is a SALES REP.** Their job is 100% 'service to sales.' Focus on sales behaviors, 'Explore' and 'Ask' steps, and whether they pivot to Xfinity Mobile.\n\n`;
+            }
+
             prompt += `The plan must include two distinct sections:\n`;
-            prompt += `1.  **Feedback for ${employeeFirstName}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength and one specific, actionable opportunity based on their role. Use a friendly, encouraging tone.\n`;
-            prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly). These steps must be relevant to their role.\n\n`;
+            prompt += `1.  **Feedback for ${firstName}:** A concise summary *for the employee*. **Use their name.** Highlight one key strength (a "win") and one specific, actionable opportunity.\n`;
+            prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
             
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
             prompt += KPI_CONTEXT + "\n\n";
             let goalsContext = "Monthly goals are not set.\n";
             if (localStoreGoals.totalGoal) {
                 goalsContext = `Current Monthly Goals:\n` +
-                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
+                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XH: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
                                `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
             }
             prompt += `--- CURRENT STORE GOALS ---\n`;
             prompt += goalsContext + "\n\n";
             prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${profile.name}\n`;
-            prompt += `Role: ${profile.role}\n`;
+            prompt += `Name: ${profile.name} (First Name: ${firstName})\n`;
+            prompt += `Role: ${employeeRole}\n`;
             prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
             prompt += `Manager-defined Strengths: ${profile.strengths || 'N/A'}\n`;
             prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
@@ -2378,7 +2321,7 @@
                 if (log.greatAssessment) {
                     const formatStep = (name, data) => {
                         if (!data) return "";
-                        let stepStr = `${name}: (${data.measurement || 'N/gA'})\n`;
+                        let stepStr = `${name}: (${data.measurement || 'N/A'})\n`;
                         if (data.behaviors && data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
                         if (data.notes) stepStr += `  Notes: ${data.notes}\n`;
                         return stepStr;
@@ -2404,10 +2347,10 @@
                 prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
                 prompt += `Progress Reported by Coachee: ${log.progress}\n`;
                 prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
-                 prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
+                prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
             }
-            prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now. Remember to be personal and supportive, not robotic.`;
-            showLoading('coaching-loader', 'generate-ai-coaching-plan', true, 'Generating Plan...'); // MODIFIED: Added loading text
+            prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now.`;
+            showLoading('coaching-loader', 'generate-ai-coaching-plan', true, "Generating AI Plan...");
             const coachingOutput = document.getElementById('ai-coaching-output');
             coachingOutput.style.display = 'none';
             coachingOutput.innerHTML = '';
@@ -2441,12 +2384,12 @@
                 coachingOutput.innerHTML = `<p style="color: red;">AI coaching plan generation failed. Please check the console for errors.</p>`;
                 coachingOutput.style.display = 'block';
             } finally {
-                showLoading('coaching-loader', 'generate-ai-coaching-plan', false);
+                showLoading('coaching-loader', 'generate-ai-coaching-plan', false, "Generate AI Coaching Plan");
             }
         }
 
         /**
-         * UPDATED: Added loggedBy
+         * UPDATED: Added loggedBy, uses First Name, fun tone
          */
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
@@ -2468,20 +2411,21 @@
                 return;
             }
             const profile = localEmployees[employeeId];
-            const employeeFirstName = getFirstName(profile.name); // NEW: Get first name
-            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                            .sort((a, b) => b.date.toDate() - a.date.toDate());
-            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
-                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
-            // NEW: Updated persona
-            let prompt = `Act as an expert, friendly Xfinity retail sales manager. I am logging a 1-on-1 with ${employeeFirstName}. I have provided my raw notes for the session. Your job is to make them sound professional but also **personal and supportive, not robotic**. Refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
+            const firstName = getFirstName(profile.name); // NEW
+            const employeeRole = profile.role || "Sales Rep"; // NEW
+            const isGreeter = employeeRole.toLowerCase().includes("greeter"); // NEW
 
-            // NEW: Role-specific instructions
-            const isGreeter = profile.role && profile.role.toLowerCase().includes('greeter');
+            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
+                                               .sort((a, b) => b.date.toDate() - a.date.toDate());
+            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
+                                                  .sort((a, b) => b.date.toDate() - a.date.toDate());
+            let prompt = `Act as an expert Xfinity retail sales manager with a fun, supportive tone. I am logging a 1-on-1 with ${firstName}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
+            
+            // NEW: Role-based AI
             if (isGreeter) {
-                prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Greeter**. This is a customer service role, **NOT a sales role**. Please refine the notes and create a SMART goal focused *only* on their customer interaction, rapport, or service skills. **DO NOT** create sales-based SMART goals.\n\n`;
+                prompt += `**ROLE-BASED CONTEXT: ${firstName} is a GREETER.** Their job is *NOT* sales-based. Any SMART goal should focus on customer service, efficiency, or 'Greet' behaviors, *NOT* sales units.\n\n`;
             } else {
-                 prompt += `**IMPORTANT ROLE CONTEXT:** ${profile.name} is a **Sales Rep**. Their primary goal is 'service to sales' and championing Xfinity Mobile. Please refine the notes and create a SMART goal that is ambitious but achievable, ideally tied to a key sales KPI (like Mobile, HSI, or 'service to sales' conversions).\n\n`;
+                prompt += `**ROLE-BASED CONTEXT: ${firstName} is a SALES REP.** Their job is 'service to sales.' The SMART goal should focus on sales-driving behaviors (e.g., 'Explore,' 'Ask') and specific KPIs like XM, XMC, etc.\n\n`;
             }
 
             prompt += `--- BUSINESS CONTEXT & KPIs ---\n`;
@@ -2489,13 +2433,13 @@
             let goalsContext = "Monthly goals are not set.\n";
             if (localStoreGoals.totalGoal) {
                 goalsContext = `Current Monthly Goals:\n` +
-                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
+                               `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XH: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
                                `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
             }
             prompt += `--- CURRENT STORE GOALS ---\n`;
             prompt += goalsContext + "\n\n";
             prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${profile.name}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
+            prompt += `Name: ${profile.name} (First Name: ${firstName})\nRole: ${employeeRole}\nTenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
             prompt += `--- MANAGER'S RAW NOTES (INPUT) ---\n`;
             prompt += `Progress: ${rawProgress}\n`;
             prompt += `Obstacles: ${rawObstacles}\n`;
@@ -2512,9 +2456,9 @@
             }
             prompt += `\n--- GENERATE JSON OUTPUT ---
             Based on my raw notes, generate:
-            1.  **progress_note:** A refined, professional, and supportive note summarizing the progress.
-            2.  **obstacles_note:** A refined, professional, and supportive note summarizing the obstacles.
-            3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note, the employee's role, and their history/KPIs.
+            1.  **progress_note:** A refined, professional note summarizing the progress.
+            2.  **obstacles_note:** A refined, professional note summarizing the obstacles.
+            3.  **smart_goal:** A full, specific SMART goal based on my raw "Action Plan" note and the employee's history/KPIs.
             ---`;
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
             try {
@@ -2575,11 +2519,138 @@
                 form.reset();
                 form.employeeId.value = "";
                 document.getElementById('coaching-date').valueAsDate = new Date();
+                // NEW: Clear AI recs
+                document.getElementById('rec-progress').style.display = 'none';
+                document.getElementById('rec-obstacles').style.display = 'none';
+                document.getElementById('rec-actionplan').style.display = 'none';
             } catch (err) {
                 console.error('AI Coaching Prep Failed:', err);
                 await showToast('AI coaching prep failed. Please check the console for errors.', true);
             } finally {
-                showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
+                showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false, "Generate AI-Assisted Notes & Log Session");
+            }
+        }
+
+        /**
+         * NEW: Generates AI recommendations for the coaching page
+         */
+        async function generateCoachingRecommendations(employeeId) {
+            const recLoader = document.getElementById('coaching-rec-loader');
+            const recProgress = document.getElementById('rec-progress');
+            const recObstacles = document.getElementById('rec-obstacles');
+            const recActionPlan = document.getElementById('rec-actionplan');
+
+            // Clear old recs
+            recLoader.style.display = 'block';
+            recProgress.style.display = 'none';
+            recObstacles.style.display = 'none';
+            recActionPlan.style.display = 'none';
+
+            if (!employeeId) {
+                recLoader.style.display = 'none';
+                return;
+            }
+
+            const profile = localEmployees[employeeId];
+            const firstName = getFirstName(profile.name);
+            const employeeRole = profile.role || "Sales Rep";
+            const isGreeter = employeeRole.toLowerCase().includes("greeter");
+
+            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
+                                               .sort((a, b) => b.date.toDate() - a.date.toDate());
+            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
+                                                  .sort((a, b) => b.date.toDate() - a.date.toDate());
+
+            if (obsHistory.length === 0 && coachingHistory.length === 0) {
+                 recLoader.style.display = 'none';
+                 recProgress.textContent = "AI Rec: No prior logs found. Start by asking about their week.";
+                 recProgress.style.display = 'block';
+                 return;
+            }
+
+            let prompt = `Act as an expert Xfinity retail manager. I'm about to coach ${firstName}. \n`;
+            
+            if (isGreeter) {
+                prompt += `**${firstName} is a GREETER.** Focus on customer service and efficiency, NOT sales.\n`;
+            } else {
+                prompt += `**${firstName} is a SALES REP.** Focus on 'service to sales' behaviors, mobile (XM), and KPIs.\n`;
+            }
+
+            prompt += `Based on their last goal and last observation, give me three *one-sentence* talking points for our 1-on-1.\n\n`;
+
+            const recentCoaching = coachingHistory.slice(0, 1);
+             if(recentCoaching.length > 0) {
+                prompt += `Last Coaching Goal (${recentCoaching[0].date.toDate().toLocaleDateString()}): ${recentCoaching[0].actionPlan}\n\n`;
+            } else {
+                prompt += `Last Coaching Goal: None on file.\n\n`;
+            }
+
+            const recentObs = obsHistory.slice(0, 1);
+            if(recentObs.length > 0) {
+                prompt += `Last Observation (${recentObs[0].date.toDate().toLocaleDateString()}): Customer Intent: ${recentObs[0].customerIntent}\n`;
+                if(recentObs[0].greatAssessment) {
+                    prompt += `  Explore: (${recentObs[0].greatAssessment.explore?.measurement}) - Notes: ${recentObs[0].greatAssessment.explore?.notes}\n`;
+                    prompt += `  Ask: (${recentObs[0].greatAssessment.ask?.measurement}) - Notes: ${recentObs[0].greatAssessment.ask?.notes}\n`;
+                }
+            } else {
+                prompt += `Last Observation: None on file.\n\n`;
+            }
+
+            prompt += `--- GENERATE JSON OUTPUT ---
+            1.  **progress_rec:** A question to ask about their progress (e.g., "Ask how they're feeling about...").
+            2.  **obstacles_rec:** A question to discover obstacles (e.g., "Ask what's been blocking them on...").
+            3.  **action_plan_rec:** A suggestion for their next SMART goal (e.g., "Suggest they focus on...").
+            ---`;
+
+            try {
+                const generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "progress_rec": { "type": "STRING" },
+                            "obstacles_rec": { "type": "STRING" },
+                            "action_plan_rec": { "type": "STRING" }
+                        }
+                    }
+                };
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: generationConfig 
+                };
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error('API failure');
+                
+                const result = await response.json();
+                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
+                    throw new Error("AI returned an invalid response.");
+                }
+                const responseText = result.candidates[0].content.parts[0].text;
+                const recs = JSON.parse(responseText);
+
+                if (recs.progress_rec) {
+                    recProgress.textContent = `AI Rec: ${recs.progress_rec}`;
+                    recProgress.style.display = 'block';
+                }
+                if (recs.obstacles_rec) {
+                    recObstacles.textContent = `AI Rec: ${recs.obstacles_rec}`;
+                    recObstacles.style.display = 'block';
+                }
+                if (recs.action_plan_rec) {
+                    recActionPlan.textContent = `AI Rec: ${recs.action_plan_rec}`;
+                    recActionPlan.style.display = 'block';
+                }
+
+            } catch (err) {
+                console.error('AI Recommendation Failed:', err);
+                recProgress.textContent = "AI recommendations failed to load.";
+                recProgress.style.display = 'block';
+            } finally {
+                recLoader.style.display = 'none';
             }
         }
         
@@ -2616,15 +2687,26 @@
 
         // ... openPage function (unchanged) ...
         function openPage(event, pageName) {
+            // NEW: Clear autosave if navigating away
+            if (document.getElementById('Observation').classList.contains('active') && pageName !== 'Observation') {
+                const confirmed = confirm("Are you sure you want to navigate away? Your observation form will be cleared.");
+                if (!confirmed) {
+                    event.preventDefault();
+                    return;
+                }
+                resetObsForm(true); // Full reset
+            }
+
+
             const pageContents = document.getElementsByClassName('page-content');
             for (let i = 0; i < pageContents.length; i++) {
-                pageContents[i].style.display = 'none';
+                pageContents[i].classList.remove('active');
             }
             const navLinks = document.getElementsByClassName('nav-link');
             for (let i = 0; i < navLinks.length; i++) {
                 navLinks[i].className = navLinks[i].className.replace(' active', '');
             }
-            document.getElementById(pageName).style.display = 'block';
+            document.getElementById(pageName).classList.add('active'); // Changed to classList
             event.currentTarget.className += ' active';
             if (pageName === 'Tracker') {
                 updateTrackerTab();
@@ -2632,9 +2714,8 @@
             if (pageName === 'Goals') {
                 displayStoreGoals();
             }
-            // NEW: Reset obs form if navigating away
-            if (pageName !== 'Observation') {
-                resetObsFormFully(); // <--- Use the full reset
+            if (pageName === 'Observation') {
+                loadAutosave(); // NEW: Load autosave
             }
         }
 
@@ -2721,6 +2802,7 @@
                 snapshot.forEach((doc) => {
                     localObservations.push({ ...doc.data(), id: doc.id });
                 });
+                localObservations.forEach(obs => obs.date = obs.date.toDate ? obs.date : Timestamp.fromDate(new Date(obs.date)));
                 console.log("Local observations updated:", localObservations.length);
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
             }, (error) => {
@@ -2732,6 +2814,7 @@
                 snapshot.forEach((doc) => {
                     localCoachings.push({ ...doc.data(), id: doc.id });
                 });
+                localCoachings.forEach(c => c.date = c.date.toDate ? c.date : Timestamp.fromDate(new Date(c.date)));
                 console.log("Local coachings updated:", localCoachings.length);
                 displayLastSMARTGoal(document.getElementById('employee').value);
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
@@ -2757,9 +2840,9 @@
             }
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
-                .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; 
+                .sort((a, b) => b.date - a.date)[0]; 
             if (recentCoaching) {
-                goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toDate().toLocaleDateString()}):</strong> ${recentCoaching.actionPlan}`;
+                goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toLocaleDateString()}):</strong> ${recentCoaching.actionPlan}`;
                 goalDisplay.style.display = 'block';
             } else {
                 goalDisplay.innerHTML = `<em>No previous SMART goals found for this employee.</em>`;
@@ -2767,109 +2850,125 @@
             }
         }
 
-        // --- NEW: Autosave Functions ---
-        function saveObsData() {
-            try {
-                const form = document.getElementById('obsForm');
-                const data = {
-                    customerIntent: form['customer-intent'].value,
-                    employee: form.employee.value,
-                    
-                    great_g_measure: getRadioValue(form, 'great_g_measure'),
-                    great_g_behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
-                    notes_g: form.notes_g.value,
-                    
-                    great_r_measure: getRadioValue(form, 'great_r_measure'),
-                    great_r_behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
-                    notes_r: form.notes_r.value,
-                    
-                    great_e_measure: getRadioValue(form, 'great_e_measure'),
-                    great_e_behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
-                    notes_e: form.notes_e.value,
-                    
-                    great_a_measure: getRadioValue(form, 'great_a_measure'),
-                    great_a_behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
-                    notes_a: form.notes_a.value,
-                    
-                    great_t_measure: getRadioValue(form, 'great_t_measure'),
-                    great_t_behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
-                    notes_t: form.notes_t.value,
-                    
-                    notes: form.notes.value
-                };
-                localStorage.setItem('autoSavedObs', JSON.stringify(data));
-                // console.log("Autosave complete."); // For debugging
-            } catch (e) {
-                console.error("Autosave failed:", e);
-            }
+        // --- NEW: Autosave & Reset Functions ---
+        function autosaveObsForm() {
+            const form = document.getElementById('obsForm');
+            const formData = new FormData(form);
+            const data = {};
+            // Manual iteration for all fields including checkboxes
+            data.customerIntent = form.customerIntent.value;
+            data.employee = form.employee.value;
+            
+            data.great_g_measure = getRadioValue(form, 'great_g_measure');
+            data.great_g_behaviors = Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value);
+            data.notes_g = form.notes_g.value;
+
+            data.great_r_measure = getRadioValue(form, 'great_r_measure');
+            data.great_r_behaviors = Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value);
+            data.notes_r = form.notes_r.value;
+
+            data.great_e_measure = getRadioValue(form, 'great_e_measure');
+            data.great_e_behaviors = Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value);
+            data.notes_e = form.notes_e.value;
+
+            data.great_a_measure = getRadioValue(form, 'great_a_measure');
+            data.great_a_behaviors = Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value);
+            data.notes_a = form.notes_a.value;
+
+            data.great_t_measure = getRadioValue(form, 'great_t_measure');
+            data.great_t_behaviors = Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value);
+            data.notes_t = form.notes_t.value;
+
+            data.notes = form.notes.value;
+
+            localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+            console.log("Autosave complete.");
         }
 
-        function loadObsData() {
-            try {
-                const data = JSON.parse(localStorage.getItem('autoSavedObs'));
-                if (!data) return;
-                
-                const form = document.getElementById('obsForm');
-                
-                form['customer-intent'].value = data.customerIntent || '';
-                form.employee.value = data.employee || '';
-                
-                // Helper to set radios
-                const setRadio = (name, value) => {
-                    if (value) {
-                        const radio = form.querySelector(`input[name="${name}"][value="${value}"]`);
-                        if (radio) radio.checked = true;
-                    }
-                };
-                
-                // Helper to set checkboxes
-                const setCheckboxes = (name, values) => {
-                    if (values && values.length > 0) {
-                        values.forEach(val => {
-                            const cb = form.querySelector(`input[name="${name}"][value="${val}"]`);
-                            if (cb) cb.checked = true;
-                        });
-                    }
-                };
-
-                setRadio('great_g_measure', data.great_g_measure);
-                setCheckboxes('great_g', data.great_g_behaviors);
-                form.notes_g.value = data.notes_g || '';
-                
-                setRadio('great_r_measure', data.great_r_measure);
-                setCheckboxes('great_r', data.great_r_behaviors);
-                form.notes_r.value = data.notes_r || '';
-                
-                setRadio('great_e_measure', data.great_e_measure);
-                setCheckboxes('great_e', data.great_e_behaviors);
-                form.notes_e.value = data.notes_e || '';
-                
-                setRadio('great_a_measure', data.great_a_measure);
-                setCheckboxes('great_a', data.great_a_behaviors);
-                form.notes_a.value = data.notes_a || '';
-                
-                setRadio('great_t_measure', data.great_t_measure);
-                setCheckboxes('great_t', data.great_t_behaviors);
-                form.notes_t.value = data.notes_t || '';
-                
-                form.notes.value = data.notes || '';
-                
-                if (data.employee) {
-                    displayLastSMARTGoal(data.employee);
-                }
-                
-                console.log("Autosave data loaded.");
-                showToast("Restored your previous unsaved observation.", false);
-                
-            } catch (e) {
-                console.error("Failed to load autosave data:", e);
-                localStorage.removeItem('autoSavedObs'); // Clear corrupted data
+        function loadAutosave() {
+            const savedData = localStorage.getItem(AUTOSAVE_KEY);
+            if (!savedData) {
+                console.log("No autosave data found.");
+                return;
             }
+            console.log("Loading autosave data...");
+            const data = JSON.parse(savedData);
+            const form = document.getElementById('obsForm');
+
+            form.customerIntent.value = data.customerIntent || '';
+            form.employee.value = data.employee || '';
+            
+            if (data.employee) {
+                displayLastSMARTGoal(data.employee);
+            }
+
+            if(data.great_g_measure) form.querySelector(`input[name="great_g_measure"][value="${data.great_g_measure}"]`).checked = true;
+            data.great_g_behaviors.forEach(val => {
+                const cb = form.querySelector(`input[name="great_g"][value="${val}"]`);
+                if (cb) cb.checked = true;
+            });
+            form.notes_g.value = data.notes_g || '';
+
+            if(data.great_r_measure) form.querySelector(`input[name="great_r_measure"][value="${data.great_r_measure}"]`).checked = true;
+            data.great_r_behaviors.forEach(val => {
+                const cb = form.querySelector(`input[name="great_r"][value="${val}"]`);
+                if (cb) cb.checked = true;
+            });
+            form.notes_r.value = data.notes_r || '';
+
+            if(data.great_e_measure) form.querySelector(`input[name="great_e_measure"][value="${data.great_e_measure}"]`).checked = true;
+            data.great_e_behaviors.forEach(val => {
+                const cb = form.querySelector(`input[name="great_e"][value="${val}"]`);
+                if (cb) cb.checked = true;
+            });
+            form.notes_e.value = data.notes_e || '';
+
+            if(data.great_a_measure) form.querySelector(`input[name="great_a_measure"][value="${data.great_a_measure}"]`).checked = true;
+            data.great_a_behaviors.forEach(val => {
+                const cb = form.querySelector(`input[name="great_a"][value="${val}"]`);
+                if (cb) cb.checked = true;
+            });
+            form.notes_a.value = data.notes_a || '';
+
+            if(data.great_t_measure) form.querySelector(`input[name="great_t_measure"][value="${data.great_t_measure}"]`).checked = true;
+            data.great_t_behaviors.forEach(val => {
+                const cb = form.querySelector(`input[name="great_t"][value="${val}"]`);
+                if (cb) cb.checked = true;
+            });
+            form.notes_t.value = data.notes_t || '';
+
+            form.notes.value = data.notes || '';
         }
 
-        function clearObsData() {
-            localStorage.removeItem('autoSavedObs');
-            console.log("Autosave data cleared.");
+        /**
+         * NEW: Resets the observation form
+         * @param {boolean} fullReset - If true, clears employee and intent.
+         */
+        function resetObsForm(fullReset = false) {
+            const form = document.getElementById('obsForm');
+            
+            if (fullReset) {
+                form.reset();
+                form.employee.value = "";
+                localStorage.removeItem(AUTOSAVE_KEY);
+            }
+
+            // Always clear AI-generated content and notes
+            form.notes_g.value = '';
+            form.notes_r.value = '';
+            form.notes_e.value = '';
+            form.notes_a.value = '';
+            form.notes_t.value = '';
+            form.notes.value = '';
+            form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+            
+            document.getElementById('verbatim-feedback-wrapper').style.display = 'none';
+            document.getElementById('verbatim-feedback').value = '';
+            document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'none');
+
+            if (fullReset) {
+                document.getElementById('last-goal-display').style.display = 'none';
+            }
         }
 
 
@@ -2903,9 +3002,10 @@
                     userId = user.uid;
                     appWrapper.classList.remove('logged-out'); 
                     
-                    // MODIFIED: Use new span for text
-                    const signOutText = document.getElementById('sign-out-text');
-                    signOutText.textContent = `Sign Out (${user.displayName || user.email})`;
+                    // FIX: Hide sign-in button when logged in
+                    signInBtn.style.display = 'none'; // <-- ADDED THIS
+                    signOutBtn.style.display = 'flex'; // <-- MODIFIED THIS to flex
+                    signOutBtn.querySelector('.auth-text').textContent = `Sign Out (${user.displayName || user.email})`;
                     
                     setupFirestoreListeners();
                 } else {
@@ -2913,9 +3013,10 @@
                     userId = null;
                     appWrapper.classList.add('logged-out'); 
                     
-                    // MODIFIED: Use new span for text
-                    const signOutText = document.getElementById('sign-out-text');
-                    signOutText.textContent = `Sign Out`;
+                    // FIX: Hide sign-out button when logged out
+                    signInBtn.style.display = 'flex'; // <-- MODIFIED THIS to flex
+                    signOutBtn.style.display = 'none'; // <-- ADDED THIS
+                    signOutBtn.querySelector('.auth-text').textContent = `Sign Out`;
                     
                     if (employeesListener) employeesListener();
                     if (observationsListener) observationsListener();
@@ -2925,12 +3026,6 @@
             });
 
             // --- Add All UI Event Listeners ---
-            
-            // NEW: Sidebar Toggle
-            document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
-                document.getElementById('app-wrapper').classList.toggle('sidebar-collapsed');
-            });
-            
             document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
             document.getElementById('coachingForm').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -2942,15 +3037,22 @@
             document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
             document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
 
+            // UPDATED: Obs employee dropdown
             document.getElementById('employee').addEventListener('change', (event) => {
-                // NEW: Reset form elements when employee changes
-                resetObsFormContents(); // Clear fields
-                hideObsFormAIOutput(); // Hide AI output from previous employee
+                // resetObsForm(false); // <-- REMOVED this line
                 displayLastSMARTGoal(event.target.value);
+                // Clear only AI content
+                document.getElementById('verbatim-feedback-wrapper').style.display = 'none';
+                document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'none');
             });
             
             document.getElementById('log-employee-select').addEventListener('change', (event) => {
                 displayEmployeeLogs(event.target.value);
+            });
+
+            // NEW: Coaching employee dropdown
+            document.getElementById('coaching-employee-select').addEventListener('change', (event) => {
+                generateCoachingRecommendations(event.target.value);
             });
             
             document.getElementById('sign-in-btn').addEventListener('click', signInWithGoogle);
@@ -2978,27 +3080,89 @@
                 document.getElementById('custom-prompt-modal').style.display = 'none';
             });
 
-            // NEW: Add listeners for all step copy buttons
-            document.querySelectorAll('.copy-note-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const targetId = e.currentTarget.dataset.target;
-                    const textarea = document.getElementById(targetId);
-                    if (textarea && textarea.value) {
-                        copyToClipboard(textarea.value, `Copied ${targetId.split('_')[1].toUpperCase()} notes!`);
-                    }
-                });
+            // NEW: Sidebar Toggle
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            toggleBtn.style.display = 'block'; // Show button now that JS is loaded
+            toggleBtn.addEventListener('click', () => {
+                appWrapper.classList.toggle('sidebar-collapsed');
+                const isCollapsed = appWrapper.classList.contains('sidebar-collapsed');
+                toggleBtn.innerHTML = isCollapsed ? '<i class="fa-solid fa-bars"></i>' : '<i class="fa-solid fa-times"></i>';
             });
 
-            // NEW: Add autosave listener
-            document.getElementById('obsForm').addEventListener('input', saveObsData);
+            // NEW: Copy Button Listeners
+            const setupCopyButton = (btnId, textElId) => {
+                document.getElementById(btnId).addEventListener('click', async () => {
+                    const text = document.getElementById(textElId).value;
+                    if (!text) return;
+                    try {
+                        // Use execCommand as a fallback for iframe clipboard restrictions
+                        const ta = document.createElement('textarea');
+                        ta.value = text;
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                        await showToast("Copied to clipboard!");
+                    } catch (err) {
+                        console.error('Copy failed:', err);
+                        await showToast("Copy failed. See console.", true);
+                    }
+                });
+            };
+            setupCopyButton('copy-g', 'notes_g');
+            setupCopyButton('copy-r', 'notes_r');
+            setupCopyButton('copy-e', 'notes_e');
+            setupCopyButton('copy-a', 'notes_a');
+            setupCopyButton('copy-t', 'notes_t');
+            setupCopyButton('copy-verbatim', 'verbatim-feedback');
+
+            // NEW: Autosave listener
+            document.getElementById('obsForm').addEventListener('input', autosaveObsForm);
             
             document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
             document.getElementById('coaching-date').valueAsDate = new Date();
             
-            // NEW: Load autosaved data on page load
-            loadObsData();
+            // Make openPage global
+            window.openPage = (event, pageName) => {
+                // Prevent the default link behavior
+                event.preventDefault();
+                // Check for confirmation before navigating away from Observation
+                const obsPage = document.getElementById('Observation');
+                if (obsPage.classList.contains('active') && pageName !== 'Observation') {
+                    const savedData = localStorage.getItem(AUTOSAVE_KEY);
+                    // Only ask for confirmation if there is data
+                    if (savedData) {
+                        const confirmed = confirm("Are you sure you want to navigate away? Your unsaved observation notes will be cleared.");
+                        if (!confirmed) {
+                            return; // Stop navigation
+                        }
+                    }
+                    resetObsForm(true); // Full reset
+                }
 
-            window.openPage = openPage;
+                // Standard page switching logic
+                const pageContents = document.getElementsByClassName('page-content');
+                for (let i = 0; i < pageContents.length; i++) {
+                    pageContents[i].classList.remove('active');
+                }
+                const navLinks = document.getElementsByClassName('nav-link');
+                for (let i = 0; i < navLinks.length; i++) {
+                    navLinks[i].className = navLinks[i].className.replace(' active', '');
+                }
+                document.getElementById(pageName).classList.add('active');
+                event.currentTarget.className += ' active';
+                
+                // Page-specific refresh logic
+                if (pageName === 'Tracker') {
+                    updateTrackerTab();
+                }
+                if (pageName === 'Goals') {
+                    displayStoreGoals();
+                }
+                if (pageName === 'Observation') {
+                    loadAutosave(); // Load autosave
+                }
+            };
         });
 
     </script>
