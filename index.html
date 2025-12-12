@@ -1355,8 +1355,7 @@
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- NEW: Netlify Backend Helper ---
-        // This replaces the direct API_KEY variables.
+        // --- Netlify Backend Helper ---
         async function callNetlifyGemini(promptText) {
             const response = await fetch('/.netlify/functions/fetch-gemini', {
                 method: 'POST',
@@ -1365,15 +1364,13 @@
             });
             
             if (!response.ok) {
-                // If Netlify or Google errors out
                 throw new Error(`Netlify Error: ${response.status} ${response.statusText}`);
             }
             
-            // Return the exact JSON Google sends back
             return await response.json();
         }
         
-        // --- UPDATED: KPI Context ---
+        // --- KPI Context ---
         const KPI_CONTEXT = `
             Please use the following Xfinity retail KPIs and expectations when generating SMART goals:
             - Reps are full-time, 5x8-hour shifts.
@@ -1392,8 +1389,6 @@
             - 'Service to sales' means every service interaction (like a bill pay or equipment swap)
               is an opportunity to perform an account review and pivot to a sale (especially Xfinity Mobile).
         `;
-        // --- END KPI Context ---
-
 
         // --- Firebase Config & App Variables ---
         const firebaseConfig = {
@@ -1407,60 +1402,49 @@
         };
         
         const appId = firebaseConfig.projectId || 'default-app-id';
-        const DELETE_FAILSAFE_CODE = "DELETE-1234"; // NEW: Failsafe code
-        const AUTOSAVE_KEY = "obsFormAutosave"; // NEW: Autosave
+        const DELETE_FAILSAFE_CODE = "DELETE-1234"; 
+        const AUTOSAVE_KEY = "obsFormAutosave"; 
 
-        let db, auth, userId, googleProvider, app, analytics, currentUser; // NEW: currentUser
-        let employeesRef, observationsRef, coachingsRef, storeGoalsRef; // NEW: storeGoalsRef
+        let db, auth, userId, googleProvider, app, analytics, currentUser; 
+        let employeesRef, observationsRef, coachingsRef, storeGoalsRef; 
         let employeesListener = null;
         let observationsListener = null;
         let coachingsListener = null;
-        let storeGoalsListener = null; // NEW: storeGoalsListener
+        let storeGoalsListener = null; 
 
         // Global state variables
         let localEmployees = {};
         let localObservations = [];
         let localCoachings = [];
-        let localStoreGoals = {}; // NEW: localStoreGoals
+        let localStoreGoals = {}; 
         
-        // NEW: Goal constants
         const OBS_GOAL = 4;
         const COACH_GOAL = 2;
         
         // --- Helper Functions ---
         
-        /**
-         * NEW: Extracts the first name from a "Last, First K" format
-         */
         function getFirstName(fullName) {
             if (!fullName) return "the employee";
             try {
                 const parts = fullName.split(',');
                 if (parts.length > 1) {
-                    // "Last, First K" -> " First K"
                     const firstNameParts = parts[1].trim().split(' ');
-                    // " First K" -> "First"
                     return firstNameParts[0];
                 } else {
-                    // "First Last" -> "First"
                     const parts = fullName.trim().split(' ');
                     return parts[0];
                 }
             } catch (e) {
                 console.error("Error parsing name:", e);
-                return fullName; // Fallback to full name
+                return fullName; 
             }
         }
         
-        /**
-         * NEW: Checks if a role is a Greeter role
-         */
         function isGreeterRole(role) {
             if (!role) return false;
             return role.toLowerCase().includes('greeter');
         }
 
-        // ... calculateTenure function (unchanged) ...
         function calculateTenure(hireDate) {
             if (!hireDate) return "";
             const start = hireDate.toDate ? hireDate.toDate() : new Date(hireDate);
@@ -1485,7 +1469,6 @@
             return ` (${tenureStr})`;
         }
         
-        // ... getFiscalMonthInfo function (unchanged) ...
         function getFiscalMonthInfo(date) {
             const day = date.getDate();
             let startMonth = date.getMonth();
@@ -1518,9 +1501,7 @@
             return { startDate, endDate, name: fiscalMonthName };
         }
 
-
         // --- Page Building Functions ---
-        // ... populateEmployeeDropdown function (unchanged) ...
         function populateEmployeeDropdown(selectId) {
             const employeeSelect = document.getElementById(selectId);
             const selectedValue = employeeSelect.value;
@@ -1534,7 +1515,7 @@
             }
             employeeSelect.value = selectedValue;
         }
-        // ... populateEmployeeList function (unchanged) ...
+
         function populateEmployeeList() {
             const employeeList = document.getElementById('employee-list');
             employeeList.innerHTML = '';
@@ -1564,10 +1545,6 @@
             }
         }
         
-        /**
-         * Displays the logs for the selected employee ID
-         * UPDATED to show who logged
-         */
         function displayEmployeeLogs(employeeId) {
             const logOutput = document.getElementById('log-output');
             const coachingOutput = document.getElementById('ai-coaching-output');
@@ -1606,7 +1583,6 @@
                 headerDiv.appendChild(deleteBtn);
                 entryDiv.appendChild(headerDiv);
                 
-                // NEW: Show who logged it
                 if (log.loggedBy) {
                     const byline = document.createElement('p');
                     byline.className = 'log-byline';
@@ -1659,7 +1635,7 @@
                         notesP.innerHTML = `<strong>Overall Notes:</strong> ${log.notes}`;
                     }
                     entryDiv.appendChild(notesP);
-                } else if (log.actionPlan) { // MODIFIED: Check for actionPlan instead of sessionType
+                } else if (log.actionPlan) { 
                     const coachingDiv = document.createElement('div');
                     coachingDiv.className = 'log-entry-coaching';
                     coachingDiv.innerHTML = `
@@ -1676,10 +1652,6 @@
             }
         }
         
-        /**
-         * NEW: Updates the Monthly Tracker tab
-         * FIXED: Error on .toLocaleDateString()
-         */
         function updateTrackerTab() {
             try {
                 const fiscalMonth = getFiscalMonthInfo(new Date());
@@ -1689,7 +1661,6 @@
                 const tableBody = document.getElementById('tracker-table-body');
                 tableBody.innerHTML = ''; 
 
-                // Filter logs by current fiscal month
                 const obsInMonth = localObservations.filter(obs => {
                     const date = obs.date.toDate();
                     return date >= fiscalMonth.startDate && date <= fiscalMonth.endDate;
@@ -1717,14 +1688,12 @@
                     let statusClass = isComplete ? 'status-complete' : 'status-progress';
                     let statusText = isComplete ? '<i class="fa-solid fa-check-circle"></i> Complete' : 'In Progress';
                     
-                    // Create Obs Pips + Tooltip
                     const obsPips = document.createElement('div');
                     obsPips.className = 'progress-pips';
                     let obsTooltip = `Observations (${obsCount}/${OBS_GOAL}):\n`;
                     for(let i = 0; i < obsCount; i++) {
                         const log = employeeObs[i];
                         obsPips.innerHTML += `<span class="progress-pip filled"></span>`;
-                        // FIXED: Added .toDate()
                         obsTooltip += `• ${log.date.toDate().toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
                     }
                     for(let i = obsCount; i < OBS_GOAL; i++) {
@@ -1733,14 +1702,12 @@
                     if(obsCount === 0) obsTooltip = `No observations logged this fiscal month.`;
                     obsPips.innerHTML += `<span class="tooltip-content">${obsTooltip.trim()}</span>`;
                     
-                    // Create Coaching Pips + Tooltip
                     const coachPips = document.createElement('div');
                     coachPips.className = 'progress-pips';
                     let coachTooltip = `Coaching (${coachCount}/${COACH_GOAL}):\n`;
                     for(let i = 0; i < coachCount; i++) {
                         const log = employeeCoaching[i];
                         coachPips.innerHTML += `<span class="progress-pip filled"></span>`;
-                        // FIXED: Added .toDate()
                         coachTooltip += `• ${log.date.toDate().toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
                     }
                     for(let i = coachCount; i < COACH_GOAL; i++) {
@@ -1749,7 +1716,6 @@
                     if(coachCount === 0) coachTooltip = `No coaching logged this fiscal month.`;
                     coachPips.innerHTML += `<span class="tooltip-content">${coachTooltip.trim()}</span>`;
 
-                    // Build Table Row
                     const nameCell = document.createElement('td');
                     nameCell.textContent = profile.name;
                     tr.appendChild(nameCell);
@@ -1775,11 +1741,9 @@
                 }
             } catch (error) {
                 console.error("Error updating tracker tab:", error);
-                // This is likely the source of the bug, log it
             }
         }
         
-        // ... displayStoreGoals function (unchanged) ...
         function displayStoreGoals() {
             const form = document.getElementById('goalsForm');
             form.xm.value = localStoreGoals.xm || '';
@@ -1799,7 +1763,6 @@
             }
         }
         
-        // ... checkGoalDate function (unchanged) ...
         function checkGoalDate() {
             const warningIcon = document.getElementById('nav-goals-warning');
             if (!localStoreGoals.lastUpdated) {
@@ -1816,10 +1779,10 @@
         }
         
         function refreshUI() {
-            populateEmployeeDropdown('employee'); // Obs form
-            populateEmployeeDropdown('log-employee-select'); // Log view
-            populateEmployeeDropdown('coaching-employee-select'); // Coaching form
-            populateEmployeeList(); // Manage employees
+            populateEmployeeDropdown('employee'); 
+            populateEmployeeDropdown('log-employee-select'); 
+            populateEmployeeDropdown('coaching-employee-select'); 
+            populateEmployeeList(); 
             displayEmployeeLogs(document.getElementById('log-employee-select').value);
             
             if(document.getElementById('Tracker').classList.contains('active')) {
@@ -1834,7 +1797,6 @@
         
         // --- Event Handling Functions ---
         
-        // ... showToast function (unchanged) ...
         let toastTimeout;
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast-notification');
@@ -1853,7 +1815,6 @@
             }, 3000); 
         }
 
-        // ... showCustomPrompt function (unchanged) ...
         function showCustomPrompt(message) {
             const modal = document.getElementById('custom-prompt-modal');
             const messageEl = document.getElementById('custom-prompt-message');
@@ -1887,7 +1848,6 @@
             });
         }
         
-        // ... showDeleteFailsafe function (unchanged) ...
         async function showDeleteFailsafe(actionName) {
             const message = `This action is permanent and cannot be undone.\n\nTo delete this ${actionName}, please type the failsafe code: ${DELETE_FAILSAFE_CODE}`;
             const userInput = await showCustomPrompt(message);
@@ -1899,7 +1859,6 @@
             return false;
         }
         
-        // ... addEmployee function (unchanged) ...
         async function addEmployee(event) {
             event.preventDefault();
             const nameInput = document.getElementById('new-employee-name');
@@ -1934,7 +1893,7 @@
                 await showToast("Please fill out Name, Role, and Hire Date.", true);
             }
         }
-        // ... deleteEmployee function (unchanged) ...
+
         async function deleteEmployee(idToDelete) {
             const employeeName = localEmployees[idToDelete]?.name || "this employee";
             if (!await showDeleteFailsafe(`employee (${employeeName}) and ALL their logs`)) {
@@ -1949,7 +1908,7 @@
                 await showToast("Failed to delete employee. See console for details.", true);
             }
         }
-        // ... deleteLog function (unchanged) ...
+
         async function deleteLog(logId, logType, logTypeName) {
             if (!await showDeleteFailsafe(logTypeName)) {
                 return;
@@ -1965,15 +1924,11 @@
             }
         }
         
-        // ... getRadioValue function (unchanged) ...
         function getRadioValue(form, name) {
             const radio = form.querySelector(`input[name="${name}"]:checked`);
             return radio ? radio.value : "N/A";
         }
         
-        /**
-         * NEW: Handles showing/hiding loading spinners
-         */
         function showLoading(loaderId, buttonId, isLoading, loadingText = null) {
             const loader = document.getElementById(loaderId);
             const button = document.getElementById(buttonId);
@@ -1993,9 +1948,7 @@
             }
         }
 
-        /**
-         * UPDATED: Uses callNetlifyGemini() instead of direct fetch
-         */
+        // --- CORE AI FUNCTION 1: Generate Observation ---
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
@@ -2047,10 +2000,8 @@
                 }
             };
             
-            // --- AI PROMPT ---
             let prompt = `Act as a retail sales manager for an **Xfinity store**. Your tone is supportive, fun, and professional, but also loose (e.g., "nailed it", "awesome job"). Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**.\n\n`;
             
-            // --- Role-Specific Logic ---
             if (isGreeter) {
                 prompt += `The employee, ${firstName}, is a **Greeter**. Their job is NOT sales-based. Their goal is 100% customer service, making a great first impression, and setting the stage. **DO NOT mention sales, mobile, or KPIs.** Focus *only* on the customer service behaviors in the Greet & Relate steps.\n\n`;
             } else {
@@ -2106,9 +2057,7 @@
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
             
             try {
-                // --- MODIFIED: Use new Netlify helper ---
                 const result = await callNetlifyGemini(prompt);
-                // ----------------------------------------
                 
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
@@ -2116,18 +2065,23 @@
                 }
                 const responseText = result.candidates[0].content.parts[0].text;
                 
-                // Clean markdown code blocks if present
-                const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                // --- FIX: Robust JSON Extraction ---
+                let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                const firstBrace = cleanJson.indexOf('{');
+                const lastBrace = cleanJson.lastIndexOf('}');
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
+                }
+                // -----------------------------------
+
                 const notesObject = JSON.parse(cleanJson);
 
-                // NEW: Populate notes into the form, don't clear
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
                 if (notesObject.relate_note) form.notes_r.value = notesObject.relate_note;
                 if (notesObject.explore_note) form.notes_e.value = notesObject.explore_note;
                 if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
                 if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
                 
-                // NEW: Populate verbatim feedback
                 const verbatimSection = document.getElementById('verbatim-feedback-section');
                 const verbatimOutput = document.getElementById('verbatim-feedback-output');
                 if (notesObject.manager_verbatim) {
@@ -2137,10 +2091,8 @@
                     verbatimSection.style.display = 'none';
                 }
                 
-                // NEW: Show copy buttons
                 document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'block');
 
-                // --- Save to Firestore ---
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -2154,33 +2106,24 @@
                     customerIntent: customerIntent,
                     greatAssessment: greatAssessmentWithAINotes, 
                     notes: form.notes.value.trim(),
-                    loggedBy: currentUser.displayName || currentUser.email, // NEW
-                    loggedByEmail: currentUser.email // NEW
+                    loggedBy: currentUser.displayName || currentUser.email,
+                    loggedByEmail: currentUser.email
                 };
                 await addDoc(observationsRef, newObservation);
                 
                 const employeeName = localEmployees[employeeId].name;
                 await showToast(`AI notes generated and observation logged for ${employeeName}!`);
                 
-                // NEW: Clear autosave *after* successful log
                 clearAutosave();
-
-                // DO NOT RESET FORM
-                // form.reset();
-                // form.employee.value = "";
-                // form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
                 
             } catch (err) {
                 console.error('AI Generation or Logging Failed:', err);
-                await showToast('AI generation or logging failed. Please check the console for errors.', true);
+                await showToast('AI generation failed. Check console for details.', true);
             } finally {
                 showLoading('summary-loader', 'generate-and-log-ai-summary', false);
             }
         }
         
-        /**
-         * UPDATED: Uses callNetlifyGemini()
-         */
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
@@ -2201,7 +2144,6 @@
             }
             let prompt = `Act as an expert retail sales coach for an **Xfinity store**. Your tone is supportive, fun, and professional, but also loose. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${firstName}**.\n\n`;
 
-            // --- Role-Specific Logic ---
             if (isGreeter) {
                 prompt += `The employee, ${firstName}, is a **Greeter**. Their job is NOT sales-based. **DO NOT mention sales, mobile, or KPIs.** Focus *only* on their customer service behaviors (Greet, Relate, Thank).\n\n`;
             } else {
@@ -2239,7 +2181,7 @@
             for (let i = 0; i < recentObsHistory.length; i++) {
                 const log = recentObsHistory[i];
                 prompt += `--- Observation Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
-                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`; // NEW
+                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`; 
                 prompt += `Customer Intent: ${log.customerIntent || 'N/A'}\n`;
                 if (log.greatAssessment) {
                     const formatStep = (name, data) => {
@@ -2266,7 +2208,7 @@
             for (let i = 0; i < recentCoachingHistory.length; i++) {
                 const log = recentCoachingHistory[i];
                 prompt += `--- Coaching Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
-                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`; // NEW
+                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`;
                 prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
                 prompt += `Progress Reported by Coachee: ${log.progress}\n`;
                 prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
@@ -2281,9 +2223,7 @@
             coachingOutput.innerHTML = '';
             
             try {
-                // --- MODIFIED: Use new Netlify helper ---
                 const result = await callNetlifyGemini(prompt);
-                // ----------------------------------------
 
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
@@ -2304,15 +2244,12 @@
             }
         }
         
-        /**
-         * UPDATED: Uses callNetlifyGemini()
-         */
+        // --- CORE AI FUNCTION 2: Recommendations ---
         async function getCoachingRecommendations(employeeId) {
             const recProgress = document.getElementById('ai-rec-progress');
             const recObstacles = document.getElementById('ai-rec-obstacles');
             const recActionPlan = document.getElementById('ai-rec-actionplan');
 
-            // Reset to defaults
             recProgress.textContent = `Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)`;
             recObstacles.textContent = `Ask something like, "What has been difficult for you recently?" (Include examples provided by Coachee)`;
             recActionPlan.textContent = `(Include SMART goal)`;
@@ -2361,15 +2298,21 @@
             prompt += `\n--- GENERATE JSON OUTPUT (3 one-sentence talking points) ---`;
 
             try {
-                // --- MODIFIED: Use new Netlify helper ---
                 const result = await callNetlifyGemini(prompt);
-                // ----------------------------------------
                 
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) throw new Error('Invalid AI response');
                 
                 const responseText = result.candidates[0].content.parts[0].text;
-                // Clean markdown code blocks if present
-                const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                
+                // --- FIX: Robust JSON Extraction ---
+                let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                const firstBrace = cleanJson.indexOf('{');
+                const lastBrace = cleanJson.lastIndexOf('}');
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
+                }
+                // -----------------------------------
+                
                 const recs = JSON.parse(cleanJson);
                 
                 if (recs.progress_rec) recProgress.textContent = recs.progress_rec;
@@ -2382,10 +2325,7 @@
             }
         }
 
-
-        /**
-         * UPDATED: Uses callNetlifyGemini()
-         */
+        // --- CORE AI FUNCTION 3: Generate Coaching Notes ---
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
             const employeeId = form.employeeId.value;
@@ -2464,16 +2404,23 @@
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
             
             try {
-                // --- MODIFIED: Use new Netlify helper ---
                 const result = await callNetlifyGemini(prompt);
-                // ----------------------------------------
 
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
                 const responseText = result.candidates[0].content.parts[0].text;
-                const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                
+                // --- FIX: Robust JSON Extraction ---
+                let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                const firstBrace = cleanJson.indexOf('{');
+                const lastBrace = cleanJson.lastIndexOf('}');
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
+                }
+                // -----------------------------------
+
                 const notesObject = JSON.parse(cleanJson);
 
                 if (notesObject.progress_note) form.progress.value = notesObject.progress_note;
@@ -2492,8 +2439,8 @@
                     progress: form.progress.value,
                     obstacles: form.obstacles.value,
                     actionPlan: form.actionPlan.value,
-                    loggedBy: currentUser.displayName || currentUser.email, // NEW
-                    loggedByEmail: currentUser.email // NEW
+                    loggedBy: currentUser.displayName || currentUser.email,
+                    loggedByEmail: currentUser.email
                 };
                 await addDoc(coachingsRef, newCoaching);
                 const employeeName = localEmployees[employeeId].name;
@@ -2503,13 +2450,12 @@
                 document.getElementById('coaching-date').valueAsDate = new Date();
             } catch (err) {
                 console.error('AI Coaching Prep Failed:', err);
-                await showToast('AI coaching prep failed. Please check the console for errors.', true);
+                await showToast('AI coaching prep failed. Check console for details.', true);
             } finally {
                 showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             }
         }
         
-        // ... saveStoreGoals function (unchanged) ...
         async function saveStoreGoals(event) {
             event.preventDefault();
             const form = document.getElementById('goalsForm');
@@ -2540,9 +2486,6 @@
             }
         }
 
-        /**
-         * UPDATED: Clears autosave and AI output when navigating
-         */
         function openPage(event, pageName) {
             const pageContents = document.getElementsByClassName('page-content');
             for (let i = 0; i < pageContents.length; i++) {
@@ -2555,9 +2498,8 @@
             document.getElementById(pageName).style.display = 'block';
             event.currentTarget.className += ' active';
             
-            // NEW: Reset form when navigating away
             if (pageName !== 'Observation') {
-                resetObsForm(true); // Full reset
+                resetObsForm(true); 
             }
             if (pageName !== 'Coaching') {
                 resetCoachingForm();
@@ -2571,7 +2513,6 @@
             }
         }
         
-        // --- NEW: Autosave Functions ---
         function saveToAutosave() {
             try {
                 const form = document.getElementById('obsForm');
@@ -2645,7 +2586,6 @@
                 setCheckboxes('great_t', formData.great_t_behaviors);
 
                 console.log("Loaded data from autosave.");
-                // Re-display SMART goal if employee was saved
                 displayLastSMARTGoal(formData.employeeId);
 
             } catch (e) {
@@ -2659,10 +2599,6 @@
             console.log("Autosave cleared.");
         }
         
-        /**
-         * NEW: Resets the observation form
-         * @param {boolean} fullReset - If true, also clears the employee dropdown
-         */
         function resetObsForm(fullReset = false) {
             const form = document.getElementById('obsForm');
             form.reset();
@@ -2683,16 +2619,12 @@
             }
         }
         
-        /**
-         * NEW: Resets the coaching form
-         */
         function resetCoachingForm() {
             const form = document.getElementById('coachingForm');
             form.reset();
             form.employeeId.value = "";
             document.getElementById('coaching-date').valueAsDate = new Date();
             
-            // Reset AI hints
             document.getElementById('ai-rec-progress').textContent = `Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)`;
             document.getElementById('ai-rec-obstacles').textContent = `Ask something like, "What has been difficult for you recently?" (Include examples provided by Coachee)`;
             document.getElementById('ai-rec-actionplan').textContent = `(Include SMART goal)`;
@@ -2700,7 +2632,6 @@
 
 
         // --- MODAL Functions ---
-        // ... openEditModal, closeEditModal, saveEmployeeChanges (unchanged) ...
         const modal = document.getElementById('editEmployeeModal');
         const editForm = document.getElementById('editEmployeeForm');
         function openEditModal(id, profile) {
@@ -2738,7 +2669,6 @@
         }
         
         // --- Auth Functions ---
-        // ... signInWithGoogle, signOutUser (unchanged) ...
         async function signInWithGoogle() {
             try {
                 await signInWithPopup(auth, googleProvider);
@@ -2809,7 +2739,6 @@
             });
         }
         
-        // ... displayLastSMARTGoal function (unchanged) ...
         function displayLastSMARTGoal(employeeId) {
             const goalDisplay = document.getElementById('last-goal-display');
             if (!employeeId) {
@@ -2835,7 +2764,7 @@
             const appWrapper = document.getElementById('app-wrapper');
             const signInBtn = document.getElementById('sign-in-btn');
             const signOutBtn = document.getElementById('sign-out-btn');
-            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn'); // NEW
+            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn'); 
             
             try {
                 app = initializeApp(firebaseConfig);
@@ -2843,8 +2772,8 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 googleProvider = new GoogleAuthProvider(); 
-                googleProvider.addScope('profile'); // <-- ADDED THIS
-                googleProvider.addScope('email');   // <-- ADDED THIS
+                googleProvider.addScope('profile'); 
+                googleProvider.addScope('email');   
                 setLogLevel('Debug');
                 
             } catch (e) {
@@ -2854,15 +2783,14 @@
             }
 
             onAuthStateChanged(auth, (user) => {
-                currentUser = user; // NEW: Store user object globally
+                currentUser = user; 
                 if (user) {
                     console.log("Firebase: User authenticated:", user.uid);
                     userId = user.uid;
                     appWrapper.classList.remove('logged-out'); 
                     
-                    // FIX: Hide sign-in button when logged in
-                    signInBtn.style.display = 'none'; // <-- ADDED THIS
-                    signOutBtn.style.display = 'flex'; // <-- MODIFIED
+                    signInBtn.style.display = 'none'; 
+                    signOutBtn.style.display = 'flex'; 
                     signOutBtn.querySelector('.auth-text').textContent = `Sign Out (${user.displayName || user.email})`;
                     
                     setupFirestoreListeners();
@@ -2871,9 +2799,8 @@
                     userId = null;
                     appWrapper.classList.add('logged-out'); 
                     
-                    // FIX: Hide sign-out button when logged out
-                    signInBtn.style.display = 'flex'; // <-- MODIFIED
-                    signOutBtn.style.display = 'none'; // <-- ADDED THIS
+                    signInBtn.style.display = 'flex'; 
+                    signOutBtn.style.display = 'none'; 
                     signOutBtn.querySelector('.auth-text').textContent = `Sign Out`;
                     
                     if (employeesListener) employeesListener();
@@ -2895,7 +2822,6 @@
             document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
             document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
 
-            // MODIFIED: Only reset AI parts, not form
             document.getElementById('employee').addEventListener('change', (event) => {
                 const employeeId = event.target.value;
                 displayLastSMARTGoal(employeeId);
@@ -2904,7 +2830,6 @@
                 document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'none');
             });
             
-            // NEW: Coaching dropdown listener
             document.getElementById('coaching-employee-select').addEventListener('change', (event) => {
                 getCoachingRecommendations(event.target.value);
             });
@@ -2916,7 +2841,6 @@
             document.getElementById('sign-in-btn').addEventListener('click', signInWithGoogle);
             document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
             
-            // Modal buttons
             document.getElementById('modal-close-btn').addEventListener('click', closeEditModal);
             document.getElementById('editEmployeeForm').addEventListener('submit', saveEmployeeChanges);
             document.getElementById('delete-employee-btn').addEventListener('click', () => {
@@ -2930,7 +2854,6 @@
                 }
             });
             
-            // Custom Prompt Modal buttons
             document.getElementById('prompt-close-btn').addEventListener('click', () => {
                 document.getElementById('custom-prompt-modal').style.display = 'none';
             });
@@ -2938,12 +2861,10 @@
                 document.getElementById('custom-prompt-modal').style.display = 'none';
             });
             
-            // NEW: Sidebar Toggle
             sidebarToggleBtn.addEventListener('click', () => {
                 appWrapper.classList.toggle('sidebar-collapsed');
             });
             
-            // NEW: Copy Button Listeners
             document.querySelectorAll('.copy-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     const targetId = button.dataset.target;
@@ -2952,11 +2873,10 @@
 
                     if (targetElement.tagName === 'TEXTAREA') {
                         textToCopy = targetElement.value;
-                    } else { // It's a DIV (for verbatim)
-                        textToCopy = targetElement.innerText; // Use innerText to respect line breaks
+                    } else { 
+                        textToCopy = targetElement.innerText; 
                     }
                     
-                    // Simple copy to clipboard
                     const tempText = document.createElement('textarea');
                     tempText.value = textToCopy;
                     document.body.appendChild(tempText);
@@ -2973,13 +2893,11 @@
                 });
             });
             
-            // NEW: Autosave listener
             document.getElementById('obsForm').addEventListener('input', saveToAutosave);
             
-            // --- Init Page ---
             document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
             document.getElementById('coaching-date').valueAsDate = new Date();
-            loadFromAutosave(); // NEW: Load autosaved data
+            loadFromAutosave(); 
             
             window.openPage = openPage;
         });
