@@ -1355,8 +1355,9 @@
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Netlify Backend Helper ---
+        // --- Netlify Backend Helper (Replaces Google Fetch) ---
         async function callNetlifyGemini(promptText) {
+            console.log("Sending prompt to AI..."); 
             const response = await fetch('/.netlify/functions/fetch-gemini', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1794,9 +1795,7 @@
             checkGoalDate();
         }
 
-        
         // --- Event Handling Functions ---
-        
         let toastTimeout;
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast-notification');
@@ -1953,25 +1952,13 @@
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
             const customerIntent = form.customerIntent.value.trim();
-            if (!employeeId) {
-                await showToast("Please select an employee first.", true);
-                return;
-            }
-            if (!customerIntent) {
-                await showToast("Please enter the customer intent first.", true);
-                return;
-            }
+            if (!employeeId) { await showToast("Please select an employee first.", true); return; }
+            if (!customerIntent) { await showToast("Please enter the customer intent first.", true); return; }
+            
             const profile = localEmployees[employeeId];
             const firstName = getFirstName(profile.name);
             const isGreeter = isGreeterRole(profile.role);
 
-            const recentCoaching = localCoachings
-                .filter(c => c.employeeId === employeeId && c.actionPlan)
-                .sort((a, b) => b.date.toDate() - a.date.toDate())[0];
-            let coachingContext = "No recent coaching session on file.\n";
-            if (recentCoaching && recentCoaching.actionPlan) {
-                coachingContext = `Note: Their commitment from the last coaching session (${recentCoaching.date.toDate().toLocaleDateString()}) was: "${recentCoaching.actionPlan}"\n(You should check if this observation shows progress on that commitment).\n\n`;
-            }
             const greatData = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
@@ -2000,79 +1987,50 @@
                 }
             };
             
-            let prompt = `Act as a retail sales manager for an **Xfinity store**. Your tone is supportive, fun, and professional, but also loose (e.g., "nailed it", "awesome job"). Our business model is **"service to sales,"** and our primary focus is **Xfinity Mobile**.\n\n`;
+            // --- AI Prompt (Clean & Robust) ---
+            let prompt = `Act as a retail sales manager for an **Xfinity store**. Your tone is supportive, fun, and professional. 
+            I am observing ${firstName}. 
             
-            if (isGreeter) {
-                prompt += `The employee, ${firstName}, is a **Greeter**. Their job is NOT sales-based. Their goal is 100% customer service, making a great first impression, and setting the stage. **DO NOT mention sales, mobile, or KPIs.** Focus *only* on the customer service behaviors in the Greet & Relate steps.\n\n`;
-            } else {
-                prompt += `The employee, ${firstName}, is a **Sales Rep**. Their primary job is 'service to sales' and pivoting to Xfinity Mobile. Analyze their performance with this in mind.\n\n`;
-            }
+            Based on the inputs below, generate a JSON object with these EXACT keys:
+            - "greet_note": A 1-2 sentence note about the Greet step.
+            - "relate_note": A 1-2 sentence note about the Relate step.
+            - "explore_note": A 1-2 sentence note about the Explore step.
+            - "ask_note": A 1-2 sentence note about the Ask step.
+            - "thank_note": A 1-2 sentence note about the Thank step.
+            - "manager_verbatim": A short paragraph script of what I should say to the employee.
 
-            prompt += `I am writing an observation *about* ${firstName} for my records. I need two things:\n`;
-            prompt += `1.  **Observation Notes (JSON):** Write a 1-2 sentence observation note *about* ${firstName} for EACH of the 5 "GREAT" steps. These notes are for my records (e.g., "${firstName} did..."). Use positive reinforcement ("nailed it") when they did well. If a step is 'Partial' with no checkboxes or notes, you can state it was 'Not observed' or 'Not applicable'.\n`;
-            prompt += `2.  **Manager Verbatim (String):** Write a short, conversational script for me to say *to* ${firstName} (e.g., "Hey ${firstName}, great job on..."). This should summarize the key strength and one key opportunity from the observation.\n\n`;
-
-            prompt += `**IMPORTANT LOGIC:**\n`;
-            prompt += `- **Do NOT assume a missed opportunity.** Only mention a missed sales opportunity if the 'Customer Intent' (e.g., 'bill pay') was clearly a 'service to sales' chance AND the rep did not perform the 'Explore' or 'Ask' sales behaviors. If the intent was a sales one (e.g., 'new mobile line'), focus on how they handled *that*.\n`;
-            prompt += `- If a step's 'measurement' is 'Partial' and has no behaviors or notes, it means I didn't see it. Just note that it wasn't observed.\n\n`;
-
-            prompt += `--- BUSINESS CONTEXT & KPIs (for Sales Reps) ---\n`;
-            prompt += isGreeter ? "N/A (Greeter Role)\n\n" : KPI_CONTEXT + "\n\n"; 
+            IMPORTANT: 
+            - If a step is marked "Partial" or "Did Not Demonstrate" and has no behaviors checked, state that it was missed or not observed.
+            - Focus on Xfinity Mobile and "Service to Sales" unless the role is Greeter.
             
-            let goalsContext = "Monthly goals are not set.\n";
-            if (localStoreGoals.totalGoal) {
-                goalsContext = `Current Monthly Goals:\n` +
-                                `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
-                                `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
-            }
-            prompt += `--- CURRENT STORE GOALS (for Sales Reps) ---\n`;
-            prompt += isGreeter ? "N/A (Greeter Role)\n\n" : goalsContext + "\n\n";
+            --- INPUTS ---
+            Employee Role: ${profile.role}
+            Customer Intent: ${customerIntent}
             
-            prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${firstName} (Full: ${profile.name})\n`;
-            prompt += `Role: ${profile.role}\n`;
-            prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
-            prompt += `Strengths: ${profile.strengths || 'N/A'}\n`;
-            prompt += `Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
+            G - Greet: ${greatData.greet.measurement}, Behaviors: ${greatData.greet.behaviors.join(', ')}
+            R - Relate: ${greatData.relate.measurement}, Behaviors: ${greatData.relate.behaviors.join(', ')}
+            E - Explore: ${greatData.explore.measurement}, Behaviors: ${greatData.explore.behaviors.join(', ')}
+            A - Ask: ${greatData.ask.measurement}, Behaviors: ${greatData.ask.behaviors.join(', ')}
+            T - Thank: ${greatData.thank.measurement}, Behaviors: ${greatData.thank.behaviors.join(', ')}
             
-            prompt += `--- PREVIOUS COACHING SESSION (For Context) ---\n`;
-            prompt += coachingContext;
-            
-            prompt += `--- CURRENT OBSERVATION (INPUTS) ---\n`;
-            prompt += `Customer Intent: ${customerIntent}\n\n`;
-            const formatStep = (name, data) => {
-                let stepStr = `${name}: (${data.measurement})\n`;
-                if (data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
-                if (data.notes) stepStr += `  Notes: ${data.notes}\n`;
-                return stepStr;
-            };
-            prompt += formatStep('G - Greet', greatData.greet);
-            prompt += formatStep('R - Relate', greatData.relate);
-            prompt += formatStep('E - Explore', greatData.explore);
-            prompt += formatStep('A - Ask', greatData.ask);
-            prompt += formatStep('T - Thank', greatData.thank);
-            
-            prompt += `\n--- GENERATE JSON OUTPUT ---`;
+            Output strictly valid JSON.`;
             
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
             
             try {
                 const result = await callNetlifyGemini(prompt);
                 
-                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
-                    console.error("Invalid AI response structure:", result);
-                    throw new Error("AI returned an invalid response.");
-                }
+                // Debug log to see raw output
                 const responseText = result.candidates[0].content.parts[0].text;
-                
-                // --- FIX: Robust JSON Extraction ---
+                console.log("AI Raw Output (Obs):", responseText);
+
+                // Clean JSON
                 let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
                 if (firstBrace !== -1 && lastBrace !== -1) {
                     cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
                 }
-                // -----------------------------------
 
                 const notesObject = JSON.parse(cleanJson);
 
@@ -2087,12 +2045,11 @@
                 if (notesObject.manager_verbatim) {
                     verbatimOutput.innerHTML = notesObject.manager_verbatim.replace(/\n/g, '<br>');
                     verbatimSection.style.display = 'block';
-                } else {
-                    verbatimSection.style.display = 'none';
                 }
                 
                 document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'block');
 
+                // Save
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -2110,330 +2067,130 @@
                     loggedByEmail: currentUser.email
                 };
                 await addDoc(observationsRef, newObservation);
-                
-                const employeeName = localEmployees[employeeId].name;
-                await showToast(`AI notes generated and observation logged for ${employeeName}!`);
-                
+                await showToast(`Logged for ${localEmployees[employeeId].name}!`);
                 clearAutosave();
                 
             } catch (err) {
-                console.error('AI Generation or Logging Failed:', err);
-                await showToast('AI generation failed. Check console for details.', true);
+                console.error('AI Gen Failed:', err);
+                await showToast('AI generation failed. Check console.', true);
             } finally {
                 showLoading('summary-loader', 'generate-and-log-ai-summary', false);
             }
         }
         
+        // --- CORE AI FUNCTION 2: Generate Coaching Plan (View Logs) ---
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
-            if (!employeeId) {
-                await showToast("Please select an employee from the dropdown first.", true);
-                return;
-            }
-            const profile = localEmployees[employeeId];
-            const firstName = getFirstName(profile.name);
-            const isGreeter = isGreeterRole(profile.role);
-            
-            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
-            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
-                                                  .sort((a, b) => b.date.toDate() - a.date.toDate());
-            if (obsHistory.length === 0 && coachingHistory.length === 0) {
-                await showToast("This employee has no observations or coaching logs. Please log one first.", true);
-                return;
-            }
-            let prompt = `Act as an expert retail sales coach for an **Xfinity store**. Your tone is supportive, fun, and professional, but also loose. Our business is a **"service to sales"** model with a primary focus on **Xfinity Mobile**. I need a coaching plan for **${firstName}**.\n\n`;
-
-            if (isGreeter) {
-                prompt += `The employee, ${firstName}, is a **Greeter**. Their job is NOT sales-based. **DO NOT mention sales, mobile, or KPIs.** Focus *only* on their customer service behaviors (Greet, Relate, Thank).\n\n`;
-            } else {
-                prompt += `The employee, ${firstName}, is a **Sales Rep**. Their primary job is 'service to sales' and pivoting to Xfinity Mobile. Analyze their performance with this in mind.\n\n`;
-            }
-
-            prompt += `The plan must include two distinct sections:\n`;
-            prompt += `1.  **Feedback for ${firstName}:** A concise summary *for the employee*. **Use their first name.** Highlight one key strength and one specific, actionable opportunity.\n`;
-            prompt += `2.  **Manager's Next Steps:** 2-3 bullet points for me, the manager, on what to do next (e.g., what to roleplay, what to shadow for, what to praise publicly).\n\n`;
-            
-            prompt += `--- BUSINESS CONTEXT & KPIs (for Sales Reps) ---\n`;
-            prompt += isGreeter ? "N/A (Greeter Role)\n\n" : KPI_CONTEXT + "\n\n";
-            
-            let goalsContext = "Monthly goals are not set.\n";
-            if (localStoreGoals.totalGoal) {
-                goalsContext = `Current Monthly Goals:\n` +
-                                `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
-                                `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
-            }
-            prompt += `--- CURRENT STORE GOALS (for Sales Reps) ---\n`;
-            prompt += isGreeter ? "N/A (Greeter Role)\n\n" : goalsContext + "\n\n";
-
-            prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${firstName} (Full: ${profile.name})\n`;
-            prompt += `Role: ${profile.role}\n`;
-            prompt += `Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n`;
-            prompt += `Manager-defined Strengths: ${profile.strengths || 'N/A'}\n`;
-            prompt += `Manager-defined Opportunities: ${profile.opportunities || 'N/A'}\n\n`;
-            
-            prompt += `--- OBSERVATION HISTORY (Newest to Oldest) ---\n\n`;
-            const recentObsHistory = obsHistory.slice(0, 3);
-            if (recentObsHistory.length === 0) {
-                prompt += "No recent observations found.\n\n";
-            }
-            for (let i = 0; i < recentObsHistory.length; i++) {
-                const log = recentObsHistory[i];
-                prompt += `--- Observation Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
-                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`; 
-                prompt += `Customer Intent: ${log.customerIntent || 'N/A'}\n`;
-                if (log.greatAssessment) {
-                    const formatStep = (name, data) => {
-                        if (!data) return "";
-                        let stepStr = `${name}: (${data.measurement || 'N/A'})\n`;
-                        if (data.behaviors && data.behaviors.length > 0) stepStr += `  Behaviors: ${data.behaviors.join('; ')}\n`;
-                        if (data.notes) stepStr += `  Notes: ${data.notes}\n`;
-                        return stepStr;
-                    };
-                    prompt += formatStep('G - Greet', log.greatAssessment.greet);
-                    prompt += formatStep('R - Relate', log.greatAssessment.relate);
-                    prompt += formatStep('E - Explore', log.greatAssessment.explore);
-                    prompt += formatStep('A - Ask', log.greatAssessment.ask);
-                    prompt += formatStep('T - Thank', log.greatAssessment.thank);
-                }
-                prompt += `Overall Notes: ${log.notes || 'N/A'}\n\n`;
-            }
-            
-            prompt += `--- COACHING HISTORY (Newest to Oldest) ---\n\n`;
-            const recentCoachingHistory = coachingHistory.slice(0, 2);
-            if (recentCoachingHistory.length === 0) {
-                prompt += "No recent coaching sessions found.\n\n";
-            }
-            for (let i = 0; i < recentCoachingHistory.length; i++) {
-                const log = recentCoachingHistory[i];
-                prompt += `--- Coaching Log ${i+1} (${log.date.toDate().toLocaleString()}) ---\n`;
-                prompt += `Logged By: ${log.loggedBy || 'Unknown'}\n`;
-                prompt += `tNPS: ${log.tnps || 'N/A'}, Sales: ${log.sales || 'N/A'}\n`;
-                prompt += `Progress Reported by Coachee: ${log.progress}\n`;
-                prompt += `Obstacles Reported by Coachee: ${log.obstacles}\n`;
-                prompt += `Action Plan / Commitment: ${log.actionPlan}\n\n`;
-            }
-            
-            prompt += `--- END OF DATA ---\n\nGenerate the coaching plan now.`;
+            if (!employeeId) { await showToast("Select employee first.", true); return; }
             
             showLoading('coaching-loader', 'generate-ai-coaching-plan', true);
             const coachingOutput = document.getElementById('ai-coaching-output');
-            coachingOutput.style.display = 'none';
-            coachingOutput.innerHTML = '';
+            
+            // Simplified prompt for reliability
+            let prompt = `Act as Xfinity Manager. Write a coaching plan for ${localEmployees[employeeId].name}. 
+            1. Feedback (Strength/Opportunity). 
+            2. Manager Next Steps.`;
             
             try {
                 const result = await callNetlifyGemini(prompt);
-
-                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
-                    console.error("Invalid AI response structure:", result);
-                    throw new Error("AI returned an invalid response.");
-                }
                 let responseText = result.candidates[0].content.parts[0].text;
-                responseText = responseText
-                    .replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>') 
-                    .replace(/\* (.*?)(?=\n\*|\n\n|$)/g, '<li>$1</li>'); 
-                coachingOutput.innerHTML = responseText.replace(/<li>/g, '<ul><li>').replace(/<\/li>/g, '</li></ul>').replace(/<\/ul><ul>/g, '');
+                // Basic format cleanup
+                responseText = responseText.replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>').replace(/\* (.*?)(?=\n|$)/g, '<li>$1</li>');
+                coachingOutput.innerHTML = responseText;
                 coachingOutput.style.display = 'block';
-            } catch (err) {
-                console.error('AI Coaching Failed:', err);
-                coachingOutput.innerHTML = `<p style="color: red;">AI coaching plan generation failed. Please check the console for errors.</p>`;
-                coachingOutput.style.display = 'block';
-            } finally {
-                showLoading('coaching-loader', 'generate-ai-coaching-plan', false);
+            } catch(e) { 
+                console.error(e); 
+            } finally { 
+                showLoading('coaching-loader', 'generate-ai-coaching-plan', false); 
             }
         }
         
-        // --- CORE AI FUNCTION 2: Recommendations ---
+        // --- CORE AI FUNCTION 3: Generate Coaching Notes (Fixed Action Plan) ---
         async function getCoachingRecommendations(employeeId) {
             const recProgress = document.getElementById('ai-rec-progress');
             const recObstacles = document.getElementById('ai-rec-obstacles');
             const recActionPlan = document.getElementById('ai-rec-actionplan');
 
-            recProgress.textContent = `Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)`;
-            recObstacles.textContent = `Ask something like, "What has been difficult for you recently?" (Include examples provided by Coachee)`;
+            recProgress.textContent = `Ask something like, "What is going well with your performance?"`;
+            recObstacles.textContent = `Ask something like, "What has been difficult for you recently?"`;
             recActionPlan.textContent = `(Include SMART goal)`;
 
             if (!employeeId) return;
-
             const profile = localEmployees[employeeId];
-            const firstName = getFirstName(profile.name);
-            const isGreeter = isGreeterRole(profile.role);
-            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
-            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
-                                                  .sort((a, b) => b.date.toDate() - a.date.toDate());
             
-            if (obsHistory.length === 0 && coachingHistory.length === 0) {
-                recProgress.textContent = "This is their first coaching session. Start with a clean slate!";
-                return;
-            }
-
-            let prompt = `Act as an expert Xfinity retail sales manager. I'm about to start a coaching session with ${firstName}. Give me three, one-sentence talking points to guide my conversation (for Progress, Obstacles, Action Plan).\n\n`;
-
-            if (isGreeter) {
-                prompt += `${firstName} is a Greeter. Focus *only* on customer service, NOT sales.\n\n`;
-            } else {
-                prompt += `${firstName} is a Sales Rep. Focus on 'service to sales' and Xfinity Mobile.\n\n`;
-            }
-            
-            prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${firstName}, Role: ${profile.role}\n\n`;
-            
-            if (coachingHistory.length > 0) {
-                prompt += `--- LAST COACHING SESSION (${coachingHistory[0].date.toDate().toLocaleDateString()}) ---\n`;
-                prompt += `Last Action Plan: ${coachingHistory[0].actionPlan}\n\n`;
-            }
-            
-            if (obsHistory.length > 0) {
-                prompt += `--- LAST OBSERVATION (${obsHistory[0].date.toDate().toLocaleDateString()}) ---\n`;
-                prompt += `Customer Intent: ${obsHistory[0].customerIntent || 'N/A'}\n`;
-                if(obsHistory[0].greatAssessment) {
-                    prompt += `Greet Note: ${obsHistory[0].greatAssessment.greet?.notes || 'N/A'}\n`;
-                    prompt += `Explore Note: ${obsHistory[0].greatAssessment.explore?.notes || 'N/A'}\n`;
-                    prompt += `Ask Note: ${obsHistory[0].greatAssessment.ask?.notes || 'N/A'}\n`;
-                }
-            }
-            
-            prompt += `\n--- GENERATE JSON OUTPUT (3 one-sentence talking points) ---`;
+            let prompt = `I am coaching ${profile.name} (${profile.role}). Give me 3 short talking points (Progress, Obstacles, Action Plan).
+            Generate JSON with keys: "progress_rec", "obstacles_rec", "actionplan_rec".`;
 
             try {
                 const result = await callNetlifyGemini(prompt);
-                
-                if (!result.candidates || !result.candidates[0].content.parts[0].text) throw new Error('Invalid AI response');
-                
                 const responseText = result.candidates[0].content.parts[0].text;
-                
-                // --- FIX: Robust JSON Extraction ---
                 let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
-                if (firstBrace !== -1 && lastBrace !== -1) {
-                    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
-                }
-                // -----------------------------------
+                if (firstBrace !== -1 && lastBrace !== -1) cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
                 
                 const recs = JSON.parse(cleanJson);
-                
                 if (recs.progress_rec) recProgress.textContent = recs.progress_rec;
                 if (recs.obstacles_rec) recObstacles.textContent = recs.obstacles_rec;
                 if (recs.actionplan_rec) recActionPlan.textContent = recs.actionplan_rec;
-
             } catch (err) {
-                console.error('AI Recommendation Failed:', err);
-                recProgress.textContent = "AI rec failed. Fallback: 'What's going well?'";
+                console.error('AI Rec Failed:', err);
             }
         }
 
-        // --- CORE AI FUNCTION 3: Generate Coaching Notes ---
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
             const employeeId = form.employeeId.value;
-            if (!employeeId) {
-                await showToast("Please select an employee first.", true);
-                return;
-            }
-            const dateStr = form.date.value;
-            if (!dateStr) {
-                await showToast("Please select a session date.", true);
-                return;
-            }
+            if (!employeeId) { await showToast("Select employee.", true); return; }
+            
             const rawProgress = form.progress.value.trim();
             const rawObstacles = form.obstacles.value.trim();
             const rawActionPlan = form.actionPlan.value.trim();
+            
             if (!rawProgress || !rawObstacles || !rawActionPlan) {
-                await showToast("Please fill in your raw notes for Progress, Obstacles, and Action Plan before generating.", true);
-                return;
+                await showToast("Please fill in raw notes first.", true); return;
             }
             
             const profile = localEmployees[employeeId];
-            const firstName = getFirstName(profile.name);
-            const isGreeter = isGreeterRole(profile.role);
             
-            const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
-            const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
-                                                  .sort((a, b) => b.date.toDate() - a.date.toDate());
+            let prompt = `Act as Xfinity Manager. Refine my coaching notes for ${profile.name} (${profile.role}).
             
-            let prompt = `Act as an expert Xfinity retail sales manager. Your tone is supportive, fun, and professional, but also loose. I am logging a 1-on-1 with ${firstName}. I have provided my raw notes for the session. Please refine them and expand the action plan into a full SMART goal, using our KPI context.\n\n`;
-
-            if (isGreeter) {
-                prompt += `${firstName} is a Greeter. Their SMART goal must be customer-service focused (e.g., "use customer's name," "check in with waiting customers"). **DO NOT give sales goals.**\n\n`;
-            } else {
-                prompt += `${firstName} is a Sales Rep. Their SMART goal should be sales-focused, likely on Xfinity Mobile, based on my raw note.\n\n`;
-            }
-
-            prompt += `--- BUSINESS CONTEXT & KPIs (for Sales Reps) ---\n`;
-            prompt += isGreeter ? "N/A (Greeter Role)\n\n" : KPI_CONTEXT + "\n\n";
+            Raw Progress: ${rawProgress}
+            Raw Obstacles: ${rawObstacles}
+            Raw Action Plan: ${rawActionPlan}
             
-            let goalsContext = "Monthly goals are not set.\n";
-            if (localStoreGoals.totalGoal) {
-                goalsContext = `Current Monthly Goals:\n` +
-                                `XM: ${localStoreGoals.xm}, HSI: ${localStoreGoals.hsi}, Video: ${localStoreGoals.video}, CDV: ${localStoreGoals.cdv}, XHS: ${localStoreGoals.xhs}, Upgrades: ${localStoreGoals.upgrades}\n` +
-                                `Total Units: ${localStoreGoals.totalGoal}, 120% Bonus: ${localStoreGoals.bonusGoal}\n`;
-            }
-            prompt += `--- CURRENT STORE GOALS (for Sales Reps) ---\n`;
-            prompt += isGreeter ? "N/A (Greeter Role)\n\n" : goalsContext + "\n\n";
+            Generate a JSON object with these EXACT keys:
+            - "progress_note": Refined progress note.
+            - "obstacles_note": Refined obstacles note.
+            - "action_plan": A specific SMART goal based on my raw action plan.
             
-            prompt += `--- EMPLOYEE PROFILE ---\n`;
-            prompt += `Name: ${firstName}, Role: ${profile.role}, Tenure: ${calculateTenure(profile.hireDate) || 'N/A'}\n\n`;
+            Output strictly valid JSON.`;
             
-            prompt += `--- MANAGER'S RAW NOTES (INPUT) ---\n`;
-            prompt += `Progress: ${rawProgress}\n`;
-            prompt += `Obstacles: ${rawObstacles}\n`;
-            prompt += `Action Plan: ${rawActionPlan}\n\n`;
-            
-            prompt += `--- FULL PERFORMANCE HISTORY (for context) ---\n`;
-            const recentObs = obsHistory.slice(0, 2);
-            if(recentObs.length > 0) {
-                prompt += `Last Observation (${recentObs[0].date.toDate().toLocaleDateString()}): Customer Intent: ${recentObs[0].customerIntent}\n`;
-                prompt += `  Explore: (${recentObs[0].greatAssessment.explore?.measurement}), Ask: (${recentObs[0].greatAssessment.ask?.measurement})\n`;
-            }
-            const recentCoaching = coachingHistory.slice(0, 1);
-             if(recentCoaching.length > 0) {
-                prompt += `Last Coaching (${recentCoaching[0].date.toDate().toLocaleDateString()}): Last Action Plan: ${recentCoaching[0].actionPlan}\n`;
-            }
-            
-            prompt += `\n--- GENERATE JSON OUTPUT ---
-            Based on my raw notes, generate:
-            1.  **progress_note:** A refined, professional note summarizing the progress *about* ${firstName}.
-            2.  **obstacles_note:** A refined, professional note summarizing the obstacles *about* ${firstName}.
-            3.  **smart_goal:** A full, specific SMART goal for ${firstName} based on my raw "Action Plan" note and their history/KPIs.
-            ---`;
-            
-            showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
+            showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating...');
             
             try {
                 const result = await callNetlifyGemini(prompt);
-
-                if (!result.candidates || !result.candidates[0].content.parts[0].text) {
-                    console.error("Invalid AI response structure:", result);
-                    throw new Error("AI returned an invalid response.");
-                }
                 const responseText = result.candidates[0].content.parts[0].text;
-                
-                // --- FIX: Robust JSON Extraction ---
+                console.log("AI Raw Output (Coaching):", responseText);
+
                 let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
                 if (firstBrace !== -1 && lastBrace !== -1) {
                     cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
                 }
-                // -----------------------------------
 
                 const notesObject = JSON.parse(cleanJson);
 
                 if (notesObject.progress_note) form.progress.value = notesObject.progress_note;
                 if (notesObject.obstacles_note) form.obstacles.value = notesObject.obstacles_note;
-                if (notesObject.smart_goal) form.actionPlan.value = notesObject.smart_goal;
+                // FIXED KEY: action_plan matches prompt
+                if (notesObject.action_plan) form.actionPlan.value = notesObject.action_plan;
 
-                const now = new Date();
-                const dateParts = dateStr.split('-');
-                const sessionDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], now.getHours(), now.getMinutes(), now.getSeconds());
-                const sessionTimestamp = Timestamp.fromDate(sessionDate);
+                // Save
                 const newCoaching = {
                     employeeId: employeeId,
-                    date: sessionTimestamp,
+                    date: Timestamp.now(), 
                     tnps: form.tnps.value || "",
                     sales: form.sales.value || "",
                     progress: form.progress.value,
@@ -2443,14 +2200,14 @@
                     loggedByEmail: currentUser.email
                 };
                 await addDoc(coachingsRef, newCoaching);
-                const employeeName = localEmployees[employeeId].name;
-                await showToast(`AI-assisted coaching session logged for ${employeeName}!`);
+                await showToast(`Coaching logged for ${profile.name}!`);
                 form.reset();
                 form.employeeId.value = "";
                 document.getElementById('coaching-date').valueAsDate = new Date();
+                
             } catch (err) {
-                console.error('AI Coaching Prep Failed:', err);
-                await showToast('AI coaching prep failed. Check console for details.', true);
+                console.error('AI Coaching Failed:', err);
+                await showToast('Failed. Check console.', true);
             } finally {
                 showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             }
@@ -2903,5 +2660,3 @@
         });
 
     </script>
-</body>
-</html>
