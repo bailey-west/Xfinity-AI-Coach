@@ -934,12 +934,9 @@
 </head>
 <body>
 
-    <!-- App wrapper, starts as logged-out -->
     <div class="app-layout logged-out" id="app-wrapper">
         
-        <!-- Sidebar Navigation -->
         <nav class="sidebar-nav">
-            <!-- NEW: Toggle Button -->
             <div class="sidebar-toggle" id="sidebar-toggle-btn">
                 <i class="fa-solid fa-chevron-left"></i>
             </div>
@@ -969,7 +966,6 @@
                 <span class="nav-text-group"><i class="fa-solid fa-users"></i> <span class="nav-text">Manage Employees</span></span>
             </a>
             
-            <!-- Sign in/out buttons -->
             <div class="sidebar-footer">
                 <button class="auth-button" id="sign-in-btn">
                     <i class="fa-brands fa-google"></i> <span class="auth-text">Sign In with Google</span>
@@ -980,16 +976,13 @@
             </div>
         </nav>
 
-        <!-- Main Content Area -->
         <main class="main-content">
         
-            <!-- Sign-in splash screen -->
             <div id="sign-in-container">
                 <h2>Welcome to the Retail Coaching Tool</h2>
                 <p>Please sign in with Google to continue.</p>
             </div>
 
-            <!-- PAGE 1: Observation Form -->
             <div id="Observation" class="page-content active">
                 <form id="obsForm">
                     <h2>New Observation</h2>
@@ -1007,10 +1000,8 @@
                     </div>
                     
                     <div id="last-goal-display" class="last-goal-callout">
-                        <!-- Content will be added by JavaScript -->
-                    </div>
+                        </div>
                     
-                    <!-- GREAT Process Form -->
                     <fieldset>
                         <legend>G - Greet</legend>
                         <div class="measurement-group">
@@ -1112,12 +1103,10 @@
                         <textarea id="notes" name="notes" rows="5" placeholder="Overall strengths, opportunities, or AI-generated note..."></textarea>
                     </div>
                     <div class="form-section">
-                        <!-- MODIFIED: This is now the only button -->
                         <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background: var(--gradient-primary); width: 100%; margin-top: 0; font-size: 1.1em; padding: 14px;">Generate AI Notes & Log Observation</button>
                         <div class="loader" id="summary-loader"></div>
                     </div>
                     
-                    <!-- NEW: Verbatim Feedback Section -->
                     <div id="verbatim-feedback-section">
                         <h3>Manager Verbatim (For Employee)</h3>
                         <div class="verbatim-feedback-container">
@@ -1129,7 +1118,6 @@
                 </form>
             </div>
             
-            <!-- PAGE 2: Log Coaching -->
             <div id="Coaching" class="page-content">
                 <form id="coachingForm">
                     <h2>Log Coaching Session</h2>
@@ -1153,9 +1141,7 @@
 
                     <div class="form-grid">
                         <div class="form-section">
-                            <!-- <label for="coaching-tnps">tNPS Score (Optional):</label>
-                            <input type="number" id="coaching-tnps" name="tnps" placeholder="e.g., 63.6"> -->
-                        </div>
+                            </div>
                         <div class="form-section">
                             <label for="coaching-sales">Sales Metric (Optional):</label>
                             <input type="text" id="coaching-sales" name="sales" placeholder="e.g., 10 mobile lines">
@@ -1181,13 +1167,11 @@
                         <textarea id="coaching-actionplan" name="actionPlan" class="profile-notes" rows="3" placeholder="Type a raw SMART goal here... (e.g., 'get 10 mobile lines next week')"></textarea>
                     </div>
 
-                    <!-- MODIFIED: Renamed button and text -->
                     <button type="button" class="ai-button" id="generate-ai-coaching-notes" style="background: var(--gradient-primary); margin-top: 0; margin-bottom: 20px; font-size: 1.1em; padding: 14px;">Generate AI-Assisted Notes & Log Session</button>
                     <div class="loader" id="coaching-notes-loader"></div>
                 </form>
             </div>
             
-            <!-- NEW: PAGE 3: Monthly Tracker -->
             <div id="Tracker" class="page-content">
                 <h2 id="tracker-title">Monthly Goal Tracker</h2>
                 <p id="tracker-subtitle" style="text-align: center; margin-top: -10px; margin-bottom: 20px; font-size: 1.1em; color: var(--text-color-light);"></p>
@@ -1203,13 +1187,11 @@
                             </tr>
                         </thead>
                         <tbody id="tracker-table-body">
-                            <!-- Rows will be added by JavaScript -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- NEW: PAGE 4: Store Goals -->
             <div id="Goals" class="page-content">
                 <form id="goalsForm">
                     <h2>Store Monthly Goals</h2>
@@ -1253,9 +1235,7 @@
                 </form>
             </div>
 
-            <!-- PAGE 5: View Logs -->
             <div id="ViewLogs" class="page-content">
-                <!-- ... existing view logs ... -->
                 <h2>View Performance Logs</h2>
                 <div class="form-section">
                     <label for="log-employee-select">Select Employee:</label>
@@ -1276,9 +1256,7 @@
                 </div>
             </div>
 
-            <!-- PAGE 6: Employee Management -->
             <div id="Employees" class="page-content">
-                <!-- ... existing employee management ... -->
                 <form id="addEmployeeForm">
                     <h2>Add New Employee</h2>
                     <div class="form-grid">
@@ -1303,13 +1281,8 @@
                 </ul>
             </div>
         </main>
-        <!-- End Main Content -->
-    </div>
-    <!-- End App Layout -->
-
-    <!-- Edit Employee Modal -->
+        </div>
     <div id="editEmployeeModal" class="modal">
-        <!-- ... existing modal ... -->
         <div class="modal-content">
             <span class="close-btn" id="modal-close-btn">&times;</span>
             <form id="editEmployeeForm">
@@ -1344,12 +1317,10 @@
         </div>
     </div>
     
-    <!-- NEW: Custom Toast Notification -->
     <div id="toast-notification">
         <span id="toast-message"></span>
     </div>
     
-    <!-- NEW: Custom Prompt Modal (for delete failsafe) -->
     <div id="custom-prompt-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" id="prompt-close-btn">&times;</span>
@@ -1361,13 +1332,9 @@
             </div>
         </div>
     </div>
-
-
-    <!-- JAVASCRIPT SECTION -->
     <script type="module">
         // --- Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // ADDED: getAnalytics
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { 
             getAuth, 
@@ -1388,9 +1355,23 @@
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Gemini API Configuration ---
-        const API_KEY = "AIzaSyAWY5r9ovt_nGjXPXmv0NNjYnDY-B255bc"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        // --- NEW: Netlify Backend Helper ---
+        // This replaces the direct API_KEY variables.
+        async function callNetlifyGemini(promptText) {
+            const response = await fetch('/.netlify/functions/fetch-gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: promptText })
+            });
+            
+            if (!response.ok) {
+                // If Netlify or Google errors out
+                throw new Error(`Netlify Error: ${response.status} ${response.statusText}`);
+            }
+            
+            // Return the exact JSON Google sends back
+            return await response.json();
+        }
         
         // --- UPDATED: KPI Context ---
         const KPI_CONTEXT = `
@@ -2013,7 +1994,7 @@
         }
 
         /**
-         * UPDATED: Added loggedBy, role-awareness, first name, new tone, no-assume logic, no-clear-on-log
+         * UPDATED: Uses callNetlifyGemini() instead of direct fetch
          */
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
@@ -2125,41 +2106,19 @@
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
             
             try {
-                const generationConfig = {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "greet_note": { "type": "STRING" },
-                            "relate_note": { "type": "STRING" },
-                            "explore_note": { "type": "STRING" },
-                            "ask_note": { "type": "STRING" },
-                            "thank_note": { "type": "STRING" },
-                            "manager_verbatim": { "type": "STRING" }
-                        }
-                    }
-                };
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: generationConfig 
-                };
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    console.error('API Error Body:', errorBody);
-                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                }
-                const result = await response.json();
+                // --- MODIFIED: Use new Netlify helper ---
+                const result = await callNetlifyGemini(prompt);
+                // ----------------------------------------
+                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
                 const responseText = result.candidates[0].content.parts[0].text;
-                const notesObject = JSON.parse(responseText);
+                
+                // Clean markdown code blocks if present
+                const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                const notesObject = JSON.parse(cleanJson);
 
                 // NEW: Populate notes into the form, don't clear
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
@@ -2219,7 +2178,9 @@
             }
         }
         
-        // ... generateAICoachingPlan function (unchanged, but uses new helpers) ...
+        /**
+         * UPDATED: Uses callNetlifyGemini()
+         */
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) {
@@ -2231,7 +2192,7 @@
             const isGreeter = isGreeterRole(profile.role);
             
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                               .sort((a, b) => b.date.toDate() - a.date.toDate());
+                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                                   .sort((a, b) => b.date.toDate() - a.date.toDate());
             if (obsHistory.length === 0 && coachingHistory.length === 0) {
@@ -2320,20 +2281,10 @@
             coachingOutput.innerHTML = '';
             
             try {
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }]
-                };
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    console.error('API Error Body:', errorBody);
-                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                }
-                const result = await response.json();
+                // --- MODIFIED: Use new Netlify helper ---
+                const result = await callNetlifyGemini(prompt);
+                // ----------------------------------------
+
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
@@ -2354,7 +2305,7 @@
         }
         
         /**
-         * NEW: Generates AI recommendations for the coaching form
+         * UPDATED: Uses callNetlifyGemini()
          */
         async function getCoachingRecommendations(employeeId) {
             const recProgress = document.getElementById('ai-rec-progress');
@@ -2372,7 +2323,7 @@
             const firstName = getFirstName(profile.name);
             const isGreeter = isGreeterRole(profile.role);
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                               .sort((a, b) => b.date.toDate() - a.date.toDate());
+                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                                   .sort((a, b) => b.date.toDate() - a.date.toDate());
             
@@ -2410,32 +2361,16 @@
             prompt += `\n--- GENERATE JSON OUTPUT (3 one-sentence talking points) ---`;
 
             try {
-                const generationConfig = {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "progress_rec": { "type": "STRING" },
-                            "obstacles_rec": { "type": "STRING" },
-                            "actionplan_rec": { "type": "STRING" }
-                        }
-                    }
-                };
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: generationConfig 
-                };
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error('API failed');
-                const result = await response.json();
+                // --- MODIFIED: Use new Netlify helper ---
+                const result = await callNetlifyGemini(prompt);
+                // ----------------------------------------
+                
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) throw new Error('Invalid AI response');
                 
                 const responseText = result.candidates[0].content.parts[0].text;
-                const recs = JSON.parse(responseText);
+                // Clean markdown code blocks if present
+                const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                const recs = JSON.parse(cleanJson);
                 
                 if (recs.progress_rec) recProgress.textContent = recs.progress_rec;
                 if (recs.obstacles_rec) recObstacles.textContent = recs.obstacles_rec;
@@ -2449,7 +2384,7 @@
 
 
         /**
-         * UPDATED: Added loggedBy, first name, new tone, role-awareness
+         * UPDATED: Uses callNetlifyGemini()
          */
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
@@ -2476,7 +2411,7 @@
             const isGreeter = isGreeterRole(profile.role);
             
             const obsHistory = localObservations.filter(obs => obs.employeeId === employeeId)
-                                               .sort((a, b) => b.date.toDate() - a.date.toDate());
+                                                .sort((a, b) => b.date.toDate() - a.date.toDate());
             const coachingHistory = localCoachings.filter(c => c.employeeId === employeeId)
                                                   .sort((a, b) => b.date.toDate() - a.date.toDate());
             
@@ -2529,38 +2464,17 @@
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating & Logging...');
             
             try {
-                const generationConfig = {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "progress_note": { "type": "STRING" },
-                            "obstacles_note": { "type": "STRING" },
-                            "smart_goal": { "type": "STRING" }
-                        }
-                    }
-                };
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: generationConfig 
-                };
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    console.error('API Error Body:', errorBody);
-                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                }
-                const result = await response.json();
+                // --- MODIFIED: Use new Netlify helper ---
+                const result = await callNetlifyGemini(prompt);
+                // ----------------------------------------
+
                 if (!result.candidates || !result.candidates[0].content.parts[0].text) {
                     console.error("Invalid AI response structure:", result);
                     throw new Error("AI returned an invalid response.");
                 }
                 const responseText = result.candidates[0].content.parts[0].text;
-                const notesObject = JSON.parse(responseText);
+                const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                const notesObject = JSON.parse(cleanJson);
 
                 if (notesObject.progress_note) form.progress.value = notesObject.progress_note;
                 if (notesObject.obstacles_note) form.obstacles.value = notesObject.obstacles_note;
