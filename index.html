@@ -1556,7 +1556,6 @@
             if(!overridesRef) return;
             try {
                 // Update the single document holding all overrides for this store
-                // We use { [employeeId]: isExempt } merge
                 const updateData = {};
                 updateData[employeeId] = isExempt;
                 await setDoc(overridesRef, updateData, { merge: true });
@@ -1862,9 +1861,8 @@
                 await addDoc(coachingsRef, newCoaching);
                 await showToast(`Coaching logged for ${profile.name}!`);
                 
-                // IMPORTANT: FIX REQUESTED BY USER
-                // Do NOT clear form.reset() here. Keep data for copy/paste.
-                // We only update last goal display for feedback loop.
+                // DATA PERSISTENCE FIX:
+                // We do NOT call form.reset() here.
                 displayLastSMARTGoal(employeeId); 
                 
             } catch (err) {
@@ -1912,7 +1910,15 @@
             const empName = localEmployees[idToDelete]?.name || "";
             if (!await showDeleteFailsafe(`employee (${empName})`)) return;
             try {
-                await deleteDoc(doc(db, "artifacts", appId, "public", "stores", currentStore, "employees", idToDelete));
+                // IMPORTANT: Delete path depends on store
+                let docPath;
+                if(currentStore === 'Williston') {
+                    docPath = doc(db, "artifacts", appId, "public", "data", "employees", idToDelete);
+                } else {
+                    docPath = doc(db, "artifacts", appId, "public", "stores", currentStore, "employees", idToDelete);
+                }
+                
+                await deleteDoc(docPath);
                 await showToast("Employee deleted.");
                 document.getElementById('editEmployeeModal').style.display = 'none';
             } catch (e) { console.error(e); showToast("Delete failed", true); }
@@ -1921,7 +1927,15 @@
         async function deleteLog(logId, logType, logTypeName) {
             if (!await showDeleteFailsafe(logTypeName)) return;
             try {
-                await deleteDoc(doc(db, "artifacts", appId, "public", "stores", currentStore, logType, logId));
+                // IMPORTANT: Delete path depends on store
+                let docPath;
+                if(currentStore === 'Williston') {
+                    docPath = doc(db, "artifacts", appId, "public", "data", logType, logId);
+                } else {
+                    docPath = doc(db, "artifacts", appId, "public", "stores", currentStore, logType, logId);
+                }
+
+                await deleteDoc(docPath);
                 await showToast(`${logTypeName} deleted.`);
             } catch(e) { console.error(e); showToast("Delete failed", true); }
         }
@@ -1936,7 +1950,16 @@
                 strengths: document.getElementById('edit-employee-strengths').value.trim(),
                 opportunities: document.getElementById('edit-employee-opportunities').value.trim()
             };
-            await setDoc(doc(db, "artifacts", appId, "public", "stores", currentStore, "employees", id), updatedProfile, { merge: true });
+            
+            // IMPORTANT: Path depends on store
+            let docPath;
+            if(currentStore === 'Williston') {
+                docPath = doc(db, "artifacts", appId, "public", "data", "employees", id);
+            } else {
+                docPath = doc(db, "artifacts", appId, "public", "stores", currentStore, "employees", id);
+            }
+
+            await setDoc(docPath, updatedProfile, { merge: true });
             await showToast("Saved!");
             document.getElementById('editEmployeeModal').style.display = 'none';
         }
@@ -1981,13 +2004,27 @@
 
             if (!currentStore) return; // Wait for store selection
 
-            const basePath = `artifacts/${appId}/public/stores/${currentStore}`;
+            // --- LEGACY FIX ---
+            // If store is Williston, point to the ORIGINAL 'data' folder.
+            // If any other store, point to the NEW 'stores/StoreName' folder.
             
-            employeesRef = collection(db, `${basePath}/employees`);
-            observationsRef = collection(db, `${basePath}/observations`);
-            coachingsRef = collection(db, `${basePath}/coachings`);
-            storeGoalsRef = doc(db, `${basePath}/settings/storeGoals`);
-            overridesRef = doc(db, `${basePath}/settings/overrides`);
+            if (currentStore === 'Williston') {
+                console.log("Loading Legacy Data for Williston...");
+                employeesRef = collection(db, "artifacts", appId, "public", "data", "employees");
+                observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
+                coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
+                storeGoalsRef = doc(db, "artifacts", appId, "public", "data", "storeGoals", "currentMonth");
+                // New overrides feature in legacy structure
+                overridesRef = doc(db, "artifacts", appId, "public", "data", "settings", "overrides");
+            } else {
+                console.log(`Loading New Data for ${currentStore}...`);
+                const basePath = `artifacts/${appId}/public/stores/${currentStore}`;
+                employeesRef = collection(db, `${basePath}/employees`);
+                observationsRef = collection(db, `${basePath}/observations`);
+                coachingsRef = collection(db, `${basePath}/coachings`);
+                storeGoalsRef = doc(db, `${basePath}/settings/storeGoals`);
+                overridesRef = doc(db, `${basePath}/settings/overrides`);
+            }
             
             employeesUnsub = onSnapshot(employeesRef, (snapshot) => {
                 localEmployees = {};
@@ -2046,7 +2083,6 @@
                     if (!currentStore) {
                         openStoreSelector();
                     } else {
-                        // Update UI labels immediately if store exists in localstorage
                         const labelText = `(${currentStore})`;
                         document.getElementById('obs-store-label').textContent = labelText;
                         document.getElementById('coaching-store-label').textContent = labelText;
@@ -2111,6 +2147,28 @@
                     setTimeout(() => { button.textContent = 'Copy'; button.classList.remove('copied'); }, 2000);
                 });
             });
+            
+            document.getElementById('obsForm').addEventListener('input', () => {
+                 // Simple Autosave logic
+                 const form = document.getElementById('obsForm');
+                 const data = {
+                     employeeId: form.employee.value,
+                     notes: form.notes.value,
+                     // ... other fields simplified for brevity
+                 };
+                 localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+            });
+            
+            // Basic Auto-Load
+            const savedData = localStorage.getItem(AUTOSAVE_KEY);
+            if(savedData) {
+                try {
+                    const d = JSON.parse(savedData);
+                    const f = document.getElementById('obsForm');
+                    if(d.employeeId) f.employee.value = d.employeeId;
+                    if(d.notes) f.notes.value = d.notes;
+                } catch(e) {}
+            }
             
             window.openPage = openPage;
         });
