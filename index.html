@@ -8,19 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            /* NEW: Xfinity-inspired Colors */
-            --primary-color: #0061a6; /* Xfinity Blue */
+            /* Xfinity-inspired Colors */
+            --primary-color: #0061a6;
             --primary-color-dark: #004a80;
             --gradient-primary: linear-gradient(90deg, #0061a6, #007bff);
             --light-color: #fff;
-            --text-color: #18181b; /* Darker text */
-            --text-color-light: #a1a1aa; /* Light gray for sidebar */
-            --bg-color: #f4f7fa;     /* Lighter, cooler background */
+            --text-color: #18181b;
+            --text-color-light: #a1a1aa;
+            --bg-color: #f4f7fa;
             --border-color: #e4e4e7;
-            --sidebar-bg: #18181b; /* Dark sidebar */
+            --sidebar-bg: #18181b;
             --card-bg: #ffffff;
             --danger-color: #e74c3c;
             --danger-color-dark: #c0392b;
+            --secondary-color: #6c757d; /* Gray for Clear buttons */
+            --secondary-color-dark: #5a6268;
             --success-color: #007a4a;
             --success-bg: #f0fff8;
             --warn-bg: #fdfae7;
@@ -29,9 +31,8 @@
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07);
 
-            /* NEW: Collapsible Sidebar Variables */
             --sidebar-width-open: 260px;
-            --sidebar-width-closed: 78px; /* Adjusted to fit icons + padding */
+            --sidebar-width-closed: 78px;
         }
 
         body { 
@@ -46,18 +47,15 @@
         /* App Layout */
         .app-layout {
             display: grid;
-            /* NEW: Use sidebar variable */
             grid-template-columns: var(--sidebar-width-open) 1fr;
             grid-template-rows: 1fr;
             min-height: 100vh;
-            transition: grid-template-columns 0.3s ease-in-out; /* NEW */
+            transition: grid-template-columns 0.3s ease-in-out;
         }
         
-        /* NEW: Collapsed state */
         .app-layout.sidebar-collapsed {
             grid-template-columns: var(--sidebar-width-closed) 1fr;
         }
-
 
         /* Sidebar Navigation */
         .sidebar-nav {
@@ -67,12 +65,11 @@
             display: flex;
             flex-direction: column;
             box-shadow: var(--shadow-md);
-            overflow-y: auto; /* For scroll on small screens */
-            overflow-x: hidden; /* NEW: Hide horizontal overflow */
-            transition: width 0.3s ease-in-out; /* NEW */
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: width 0.3s ease-in-out;
         }
         
-        /* NEW: Toggle Button */
         .sidebar-toggle {
             position: absolute;
             top: 25px;
@@ -104,20 +101,19 @@
             padding: 0 10px 20px 10px;
             font-size: 1.5em;
             font-weight: bold;
-            color: var(--light-color); /* White text */
-            border-bottom: 1px solid #3f3f46; /* Dark border */
+            color: var(--light-color);
+            border-bottom: 1px solid #3f3f46;
             margin-bottom: 20px;
-            display: flex; /* NEW */
-            align-items: center; /* NEW */
-            white-space: nowrap; /* NEW */
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
         }
         .sidebar-header .fa-solid {
             margin-right: 10px;
             color: var(--primary-color);
-            min-width: 30px; /* NEW: Align icon */
-            text-align: center; /* NEW */
+            min-width: 30px;
+            text-align: center;
         }
-        /* NEW: Hide header text when collapsed */
         .app-layout.sidebar-collapsed .sidebar-header .header-text {
             display: none;
         }
@@ -128,12 +124,12 @@
             align-items: center;
             padding: 12px 15px;
             text-decoration: none;
-            color: var(--text-color-light); /* Light gray */
+            color: var(--text-color-light);
             font-weight: 500;
             border-radius: 6px;
             margin-bottom: 5px;
             transition: background-color 0.2s, color 0.2s, transform 0.2s;
-            white-space: nowrap; /* NEW */
+            white-space: nowrap;
         }
         .sidebar-nav a .nav-text-group {
             display: flex;
@@ -141,21 +137,19 @@
         }
         .sidebar-nav a i {
             margin-right: 12px;
-            width: 30px; /* NEW: Increased width for alignment */
+            width: 30px;
             text-align: center;
             transition: color 0.2s;
-            font-size: 1.1em; /* NEW: Slightly larger icon */
+            font-size: 1.1em;
         }
-        /* NEW: Center icon when text is hidden */
         .app-layout.sidebar-collapsed .sidebar-nav a i {
             margin-right: 0;
         }
         .sidebar-nav a:hover {
-            background-color: #27272a; /* Slightly lighter dark */
+            background-color: #27272a;
             color: var(--light-color);
-            transform: translateX(3px); /* Hover animation */
+            transform: translateX(3px);
         }
-        /* NEW: Remove transform when collapsed */
         .app-layout.sidebar-collapsed .sidebar-nav a:hover {
             transform: none;
         }
@@ -168,15 +162,13 @@
             color: var(--light-color);
         }
 
-        /* NEW: Hide nav text when collapsed */
         .app-layout.sidebar-collapsed .nav-text,
         .app-layout.sidebar-collapsed .nav-warning-icon {
             display: none;
         }
         
         .nav-warning-icon {
-            /* display: none; */ /* MODIFIED: Handled by collapsed class */
-            color: #facc15; /* Yellow */
+            color: #facc15;
             font-size: 0.9em;
             animation: blink 1.5s linear infinite;
         }
@@ -187,15 +179,14 @@
             50% { opacity: 0.2; }
         }
         
-        /* Sign-in / Sign-out Button */
         .sidebar-footer {
             margin-top: auto;
             padding-top: 15px;
             border-top: 1px solid #3f3f46;
         }
         .auth-button {
-            display: flex; /* MODIFIED */
-            align-items: center; /* NEW */
+            display: flex;
+            align-items: center;
             padding: 12px 15px;
             text-decoration: none;
             color: var(--light-color);
@@ -203,21 +194,20 @@
             border-radius: 6px;
             margin: 5px;
             transition: background-image 0.3s, background-color 0.3s, transform 0.2s;
-            background: var(--gradient-primary); /* Gradient */
+            background: var(--gradient-primary);
             border: none;
             width: calc(100% - 10px);
             cursor: pointer;
             font-size: 15px;
             text-align: left;
-            white-space: nowrap; /* NEW */
+            white-space: nowrap;
         }
         .auth-button i {
-            width: 30px; /* NEW: Align icon */
-            text-align: center; /* NEW */
-            margin-right: 12px; /* NEW */
-            font-size: 1.1em; /* NEW */
+            width: 30px;
+            text-align: center;
+            margin-right: 12px;
+            font-size: 1.1em;
         }
-        /* NEW: Center icon when collapsed */
         .app-layout.sidebar-collapsed .auth-button i {
             margin-right: 0;
         }
@@ -226,6 +216,16 @@
             background-color: var(--danger-color);
             background-image: none;
         }
+        .auth-button.switch-store {
+            background: #4b5563; /* Gray */
+            background-image: none;
+            margin-bottom: 5px;
+        }
+        .auth-button.switch-store:hover {
+            background: #374151;
+            transform: scale(1.02);
+        }
+
         .auth-button:hover {
             transform: scale(1.02);
             box-shadow: var(--shadow-md);
@@ -233,27 +233,20 @@
         .app-layout.sidebar-collapsed .auth-button:hover {
             transform: none;
         }
-
         .auth-button.sign-out:hover {
             background-color: var(--danger-color-dark);
-            transform: scale(1.02);
         }
-        .app-layout.sidebar-collapsed .auth-button.sign-out:hover {
-            transform: none;
-        }
-        /* NEW: Hide button text when collapsed */
         .app-layout.sidebar-collapsed .auth-button .auth-text {
             display: none;
         }
 
-        /* Main Content Area */
+        /* Main Content */
         .main-content {
             background-color: var(--bg-color);
             padding: 20px 30px;
             overflow-y: auto;
         }
         
-        /* NEW: Fade-in animation for pages */
         .page-content {
             display: none;
             animation: fadeIn 0.4s ease-in-out;
@@ -268,9 +261,9 @@
         
         /* Form Styles */
         form { 
-            padding: 25px; /* More padding */
+            padding: 25px;
             background-color: var(--card-bg); 
-            border-radius: 12px; /* Softer corners */
+            border-radius: 12px;
             box-shadow: var(--shadow-lg); 
             border: 1px solid var(--border-color);
         }
@@ -285,7 +278,7 @@
         label { 
             display: block; 
             margin-bottom: 5px; 
-            font-weight: 600; /* Bolder */
+            font-weight: 600;
         }
         label .label-hint {
             font-weight: normal;
@@ -298,9 +291,9 @@
 
         select, textarea, input[type="text"], input[type="number"], input[type="date"] { 
             width: 100%; 
-            padding: 10px; /* Taller inputs */
+            padding: 10px;
             border: 1px solid var(--border-color); 
-            border-radius: 6px; /* Softer */
+            border-radius: 6px;
             box-sizing: border-box;
             font-size: 14px;
             transition: border-color 0.2s, box-shadow 0.2s;
@@ -315,7 +308,7 @@
             min-height: 50px;
             font-size: 13px;
             margin-top: 10px;
-            position: relative; /* For copy button */
+            position: relative;
         }
         .profile-notes {
             min-height: 80px;
@@ -370,7 +363,7 @@
         }
 
         button { 
-            background: var(--gradient-primary); /* Gradient */
+            background: var(--gradient-primary);
             color: var(--light-color); 
             padding: 12px 20px; 
             border: none; 
@@ -399,13 +392,28 @@
         }
         .ai-button:hover {
             background-color: #00633b;
-            transform: scale(1.02);
         }
-        .ai-button:disabled {
-            background-color: #999;
+
+        /* NEW: Button Row for Forms */
+        .form-btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
         }
-        
-        /* Employee Management List */
+        .clear-btn {
+            background: var(--secondary-color);
+            background-image: none;
+            width: auto;
+            flex: 0 0 auto;
+        }
+        .clear-btn:hover {
+            background: var(--secondary-color-dark);
+        }
+        .submit-btn {
+            flex: 1;
+        }
+
+        /* Employee List */
         #employee-list {
             list-style: none;
             padding: 0;
@@ -429,20 +437,11 @@
         #employee-list li:last-child {
             border-bottom: none;
         }
-        .employee-list-name {
-            font-weight: 600;
-        }
-        .employee-list-role {
-            font-size: 0.9em;
-            color: var(--text-color-light);
-        }
-        .employee-list-tenure {
-            font-size: 0.9em;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
+        .employee-list-name { font-weight: 600; }
+        .employee-list-role { font-size: 0.9em; color: var(--text-color-light); }
+        .employee-list-tenure { font-size: 0.9em; color: var(--primary-color); font-weight: 500; }
         
-        /* Observation Log Styles */
+        /* Logs */
         #log-output {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -453,179 +452,56 @@
             overflow-y: auto;
             border: 1px solid var(--border-color);
         }
-        .log-entry {
-            border-bottom: 1px dashed var(--border-color);
-            padding: 15px 0;
-        }
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-        .log-entry p, .log-entry ul {
-            margin: 5px 0;
-        }
-        .log-entry-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .log-entry-date {
-            font-weight: bold;
-            font-size: 0.9em;
-            color: var(--text-color-light);
-        }
-        /* NEW: Byline for who logged */
-        .log-byline {
-            font-size: 0.9em;
-            font-style: italic;
-            color: var(--text-color-light);
-            margin-top: -10px;
-        }
-        .log-byline strong {
-            color: var(--text-color-light);
-            font-weight: 600;
-        }
+        .log-entry { border-bottom: 1px dashed var(--border-color); padding: 15px 0; }
+        .log-entry:last-child { border-bottom: none; }
+        .log-entry-header { display: flex; justify-content: space-between; align-items: center; }
+        .log-entry-date { font-weight: bold; font-size: 0.9em; color: var(--text-color-light); }
+        .log-byline { font-size: 0.9em; font-style: italic; color: var(--text-color-light); margin-top: -10px; }
+        .log-delete-btn { background: none; border: none; color: var(--text-color-light); cursor: pointer; font-size: 0.9em; padding: 5px; width: auto; border-radius: 4px; }
+        .log-delete-btn:hover { color: var(--danger-color); background-color: #fdf2f2; transform: none; box-shadow: none; }
         
-        .log-delete-btn {
+        .log-entry-coaching { background-color: #f0f8ff; border-left: 4px solid var(--primary-color); padding: 10px 15px; border-radius: 4px; }
+        .log-entry-great { margin-top: 10px; }
+        .log-entry-great strong { color: var(--primary-color); font-size: 1.1em; }
+        .log-step-notes { background: #f9f9f9; border-left: 3px solid #eee; padding: 5px 10px; font-size: 0.95em; font-style: italic; margin-top: 8px; }
+        .log-customer-intent { font-weight: 600; background-color: var(--warn-bg); border: 1px solid var(--warn-border); padding: 8px 12px; border-radius: 4px; }
+
+        /* Tracker */
+        #tracker-table-container {
+            background-color: var(--light-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        #tracker-table { width: 100%; border-collapse: collapse; }
+        #tracker-table th, #tracker-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        #tracker-table th { background-color: #f9f9f9; }
+        .status-complete { color: var(--success-color); font-weight: bold; }
+        .status-progress { color: var(--text-color-light); font-weight: bold; }
+        .progress-pips { display: flex; gap: 5px; position: relative; cursor: default; }
+        .progress-pip { width: 14px; height: 14px; border-radius: 50%; background-color: var(--border-color); }
+        .progress-pip.filled { background-color: var(--success-color); }
+        .progress-pips .tooltip-content { display: none; position: absolute; bottom: 125%; left: 0; background-color: var(--sidebar-bg); color: var(--light-color); padding: 10px; border-radius: 6px; font-size: 0.9em; width: 250px; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+        .progress-pips:hover .tooltip-content { display: block; opacity: 1; }
+
+        /* NEW: Tracker Override Button */
+        .tracker-action-btn {
             background: none;
             border: none;
             color: var(--text-color-light);
             cursor: pointer;
-            font-size: 0.9em;
             padding: 5px;
             width: auto;
-            border-radius: 4px;
+            transition: color 0.2s;
         }
-        .log-delete-btn:hover {
-            color: var(--danger-color);
-            background-color: #fdf2f2;
-        }
-        
-        .log-entry-coaching {
-            background-color: #f0f8ff;
-            border-left: 4px solid var(--primary-color);
-            padding: 10px 15px;
-            border-radius: 4px;
-        }
-        .log-entry-coaching h4 {
-            margin: 0 0 10px 0;
+        .tracker-action-btn:hover {
             color: var(--primary-color);
-        }
-        .log-entry-coaching p {
-            margin: 8px 0;
-            font-size: 0.95em;
-            line-height: 1.4;
-        }
-        .log-entry-coaching strong {
-            color: var(--text-color);
-        }
-
-        .log-entry-great {
-            margin-top: 10px;
-        }
-        .log-entry-great strong {
-            color: var(--primary-color);
-            font-size: 1.1em;
-        }
-        .log-entry-great ul {
-            list-style-type: disc;
-            margin: 5px 0 5px 25px;
-            padding: 0;
-        }
-        .log-entry-great li {
-            /* font-style: italic; */ /* REMOVED Italic */
-            color: var(--text-color);
-            margin-bottom: 3px;
-        }
-        .log-step-measurement {
-            font-weight: bold;
-            font-size: 0.9em;
-            text-transform: uppercase;
-        }
-        .log-step-notes {
-            background: #f9f9f9;
-            border-left: 3px solid #eee;
-            padding: 5px 10px;
-            font-size: 0.95em;
-            font-style: italic;
-            margin-top: 8px;
-        }
-        .log-customer-intent {
-            font-weight: 600;
-            background-color: var(--warn-bg);
-            border: 1px solid var(--warn-border);
-            padding: 8px 12px;
-            border-radius: 4px;
-        }
-
-        /* AI Coaching Plan Output */
-        #ai-coaching-output {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 0 20px 20px 20px;
-            margin-top: 20px;
-            box-shadow: var(--shadow-md);
-        }
-        #ai-coaching-output h3 {
-            color: var(--primary-color);
-            border-bottom: 2px solid #f4f4f9;
-            padding-bottom: 10px;
-        }
-        #ai-coaching-output p, #ai-coaching-output li {
-            line-height: 1.6;
-        }
-        
-        /* NEW: Verbatim Feedback Output */
-        #verbatim-feedback-section {
-            display: none; /* Hidden until AI runs */
-            background-color: var(--success-bg);
-            border: 1px solid var(--success-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            position: relative;
-        }
-        #verbatim-feedback-section h3 {
-            color: var(--success-color);
-            margin-top: 0;
-        }
-        #verbatim-feedback-output {
-            font-size: 1.1em;
-            line-height: 1.6;
-            font-style: italic;
-            color: #333;
-        }
-        
-        /* NEW: Copy Button */
-        .copy-btn {
-            display: none; /* Hidden by default */
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 8px;
-            cursor: pointer;
-            font-size: 0.8em;
-            font-weight: bold;
-            width: auto;
-            transition: background-color 0.2s;
-        }
-        .copy-btn:hover {
-            background-color: var(--primary-color-dark);
             transform: none;
             box-shadow: none;
         }
-        .copy-btn.copied {
-            background-color: var(--success-color);
-        }
-        .step-notes-container, .verbatim-feedback-container {
-            position: relative;
-        }
-        
-        /* Simple Loading Spinner */
+
+        /* Loading Spinner */
         .loader {
             display: none;
             font-size: 10px;
@@ -645,7 +521,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* MODAL (POP-UP) STYLES */
+        /* Modals */
         .modal {
             display: none; 
             position: fixed; 
@@ -656,283 +532,128 @@
             height: 100%; 
             overflow: auto; 
             background-color: rgba(0,0,0,0.4); 
-            backdrop-filter: blur(3px); /* Blur background */
+            backdrop-filter: blur(3px);
             animation: fadeIn 0.3s ease;
         }
         .modal-content {
             background-color: #fefefe;
-            margin: 10% auto; /* Centered */
+            margin: 10% auto;
             padding: 25px;
             border: 1px solid #888;
             border-radius: 12px;
             width: 90%;
-            max-width: 500px; /* Base modal width */
+            max-width: 500px;
             box-shadow: var(--shadow-lg);
         }
-        /* Make Edit Employee modal wider */
-        #editEmployeeModal .modal-content {
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .close-btn:hover { color: black; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-span-2 { grid-column: span 2; }
+        
+        /* NEW: Store Selector Modal Styles */
+        #store-selector-modal .modal-content {
+            text-align: center;
             max-width: 600px;
         }
-        
-        .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            line-height: 1;
-        }
-        .close-btn:hover,
-        .close-btn:focus {
-            color: black;
-        }
-        .delete-btn {
-            background: var(--danger-color);
-            background-image: none;
-            margin-top: 15px;
-            width: auto;
-        }
-        .delete-btn:hover {
-            background-color: var(--danger-color-dark);
-            transform: scale(1.02);
-        }
-        .form-grid {
+        .store-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
+            margin-top: 20px;
         }
-        .grid-span-2 {
-            grid-column: span 2;
-        }
-        
-        /* Sign-in container */
-        #sign-in-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            flex-direction: column;
-            text-align: center;
-        }
-        #sign-in-container h2 {
-            color: var(--text-color-light);
-        }
-        
-        /* Hide app when logged out */
-        .app-layout.logged-out .main-content,
-        .app-layout.logged-out .sidebar-toggle { /* NEW: Hide toggle */
-            display: none;
-        }
-        .app-layout.logged-out .sidebar-nav a,
-        .app-layout.logged-out .sidebar-footer button.sign-out {
-            display: none;
-        }
-        /* FIX: Hide sign-in button when logged in */
-        .app-layout:not(.logged-out) .sidebar-footer button#sign-in-btn {
-            display: none;
-        }
-        .app-layout.logged-out .sidebar-footer button#sign-out-btn {
-            display: none;
-        }
-        /* END FIX */
-        
-        .app-layout:not(.logged-out) #sign-in-container {
-            display: none;
-        }
-        
-        /* Last SMART Goal Callout */
-        .last-goal-callout {
-            display: none; /* Hidden by default */
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            background-color: #f0f8ff;
-            border-left: 5px solid var(--primary-color);
-            font-size: 0.95em;
-            line-height: 1.5;
-        }
-        .last-goal-callout strong {
-            color: var(--primary-color);
-            display: block;
-            margin-bottom: 5px;
-        }
-        .last-goal-callout em {
-            color: var(--text-color-light);
-        }
-        
-        /* Tracker Table */
-        #tracker-table-container {
-            background-color: var(--light-color);
-            border-radius: 12px;
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-        #tracker-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        #tracker-table th, #tracker-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-        #tracker-table th {
-            background-color: #f9f9f9;
-        }
-        #tracker-table tr:last-child td {
-            border-bottom: none;
-        }
-        .status-complete {
-            color: var(--success-color);
-            font-weight: bold;
-        }
-        .status-progress {
-            color: var(--text-color-light);
-            font-weight: bold;
-        }
-        #tracker-table .fa-check-circle {
-            margin-right: 5px;
-        }
-        
-        /* NEW: Tracker Progress Pips & Tooltip */
-        .progress-pips {
-            display: flex;
-            gap: 5px;
-            position: relative; /* For tooltip */
-            cursor: default;
-        }
-        .progress-pip {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background-color: var(--border-color);
-        }
-        .progress-pip.filled {
-            background-color: var(--success-color);
-        }
-        .progress-pips .tooltip-content {
-            display: none;
-            position: absolute;
-            bottom: 125%; /* Position above the pips */
-            left: 0;
-            background-color: var(--sidebar-bg);
-            color: var(--light-color);
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.9em;
-            width: 250px; /* Set a width */
-            white-space: pre-wrap; /* Allow newlines */
-            z-index: 10;
-            box-shadow: var(--shadow-md);
-            pointer-events: none; /* Allow hover-through */
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .progress-pips:hover .tooltip-content {
-            display: block;
-            opacity: 1;
-        }
-        
-        /* Store Goals Page */
-        .goals-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .goals-summary {
-            background-color: #f9f9f9;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+        .store-btn {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
             padding: 20px;
-            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .goals-summary h3 {
-            margin-top: 0;
+        .store-btn i {
+            font-size: 1.5em;
+            margin-bottom: 10px;
             color: var(--primary-color);
         }
-        .goals-summary p {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 10px 0;
+        .store-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f8ff;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
-        #goals-last-updated {
-            font-size: 0.9em;
-            color: var(--text-color-light);
-            font-style: italic;
-        }
-        
-        /* NEW: Custom Toast (Alert) Notification */
+
+        /* Toast & Copy */
         #toast-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--success-color);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: var(--shadow-lg);
-            z-index: 9999;
-            font-weight: 500;
-            display: none;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.4s ease;
+            position: fixed; top: 20px; right: 20px; background-color: var(--success-color); color: white; padding: 15px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 9999; font-weight: 500; display: none; opacity: 0; transform: translateX(100%); transition: all 0.4s ease;
         }
-        #toast-notification.show {
-            display: block;
-            opacity: 1;
-            transform: translateX(0);
-        }
-        #toast-notification.error {
-            background-color: var(--danger-color);
-        }
+        #toast-notification.show { display: block; opacity: 1; transform: translateX(0); }
+        #toast-notification.error { background-color: var(--danger-color); }
         
-        /* NEW: Custom Prompt Modal */
-        #custom-prompt-modal .modal-content {
-            max-width: 450px;
-        }
-        #custom-prompt-modal p {
-            font-size: 1.1em;
-            line-height: 1.5;
-            margin-top: 0;
-        }
-        #custom-prompt-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-buttons button {
-            width: auto;
-            padding: 10px 15px;
-            font-size: 14px;
-        }
-        .modal-buttons .confirm-btn {
-            background: var(--danger-color);
-        }
-        .modal-buttons .confirm-btn:hover {
-            background: var(--danger-color-dark);
-        }
-        .modal-buttons .cancel-btn {
-            background: #aaa;
-        }
-        .modal-buttons .cancel-btn:hover {
-            background: #888;
-        }
+        .copy-btn { display: none; position: absolute; top: 10px; right: 10px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-size: 0.8em; font-weight: bold; width: auto; transition: background-color 0.2s; }
+        .copy-btn:hover { background-color: var(--primary-color-dark); transform: none; box-shadow: none; }
+        .copy-btn.copied { background-color: var(--success-color); }
+        .step-notes-container, .verbatim-feedback-container { position: relative; }
+
+        /* Login Screen */
+        #sign-in-container { display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; text-align: center; }
+        .app-layout.logged-out .main-content, .app-layout.logged-out .sidebar-toggle { display: none; }
+        .app-layout.logged-out .sidebar-nav a, .app-layout.logged-out .sidebar-footer button.sign-out, .app-layout.logged-out .sidebar-footer button.switch-store { display: none; }
+        .app-layout:not(.logged-out) .sidebar-footer button#sign-in-btn { display: none; }
+        .app-layout.logged-out .sidebar-footer button#sign-out-btn { display: none; }
+        .app-layout:not(.logged-out) #sign-in-container { display: none; }
+        
+        #ai-coaching-output { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 20px 20px 20px; margin-top: 20px; box-shadow: var(--shadow-md); }
+        #ai-coaching-output h3 { color: var(--primary-color); border-bottom: 2px solid #f4f4f9; padding-bottom: 10px; }
+        #verbatim-feedback-section { display: none; background-color: var(--success-bg); border: 1px solid var(--success-color); border-radius: 12px; padding: 20px; margin-top: 20px; position: relative; }
+        #verbatim-feedback-output { font-size: 1.1em; line-height: 1.6; font-style: italic; color: #333; }
+        .goals-summary { background-color: #f9f9f9; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-top: 20px; }
+        .last-goal-callout { display: none; padding: 10px 15px; margin-bottom: 20px; border-radius: 4px; background-color: #f0f8ff; border-left: 5px solid var(--primary-color); font-size: 0.95em; line-height: 1.5; }
+
+        /* Overrides Modal */
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 24px; margin-right: 10px; vertical-align: middle; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .override-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
 
     </style>
 </head>
 <body>
+
+    <div id="store-selector-modal" class="modal" style="display: none; z-index: 200;">
+        <div class="modal-content">
+            <h2>Select Store Location</h2>
+            <p>Please choose your store to load the correct data.</p>
+            <div class="store-grid">
+                <button class="store-btn" onclick="selectStore('Williston')">
+                    <i class="fa-solid fa-store"></i> Williston
+                </button>
+                <button class="store-btn" onclick="selectStore('Nashua')">
+                    <i class="fa-solid fa-store"></i> Nashua
+                </button>
+                <button class="store-btn" onclick="selectStore('Manchester')">
+                    <i class="fa-solid fa-store"></i> Manchester
+                </button>
+                <button class="store-btn" onclick="selectStore('Rutland')">
+                    <i class="fa-solid fa-store"></i> Rutland
+                </button>
+                <button class="store-btn" onclick="selectStore('Gilford')">
+                    <i class="fa-solid fa-store"></i> Gilford
+                </button>
+                <button class="store-btn" onclick="selectStore('Brunswick')">
+                    <i class="fa-solid fa-store"></i> Brunswick
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="app-layout logged-out" id="app-wrapper">
         
@@ -967,6 +688,9 @@
             </a>
             
             <div class="sidebar-footer">
+                <button class="auth-button switch-store" id="switch-store-btn" onclick="openStoreSelector()">
+                    <i class="fa-solid fa-map-location-dot"></i> <span class="auth-text">Switch Store</span>
+                </button>
                 <button class="auth-button" id="sign-in-btn">
                     <i class="fa-brands fa-google"></i> <span class="auth-text">Sign In with Google</span>
                 </button>
@@ -975,17 +699,16 @@
                 </button>
             </div>
         </nav>
-
         <main class="main-content">
         
             <div id="sign-in-container">
-                <h2>Welcome to the Retail Coaching Tool</h2>
+                <h2 id="welcome-header">Welcome to the Retail Coaching Tool</h2>
                 <p>Please sign in with Google to continue.</p>
             </div>
 
             <div id="Observation" class="page-content active">
                 <form id="obsForm">
-                    <h2>New Observation</h2>
+                    <h2>New Observation <span id="obs-store-label" style="font-size: 0.6em; color: var(--primary-color); vertical-align: middle;"></span></h2>
                     
                     <div class="form-section">
                         <label for="customer-intent">Customer Intent:</label>
@@ -1103,7 +826,10 @@
                         <textarea id="notes" name="notes" rows="5" placeholder="Overall strengths, opportunities, or AI-generated note..."></textarea>
                     </div>
                     <div class="form-section">
-                        <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background: var(--gradient-primary); width: 100%; margin-top: 0; font-size: 1.1em; padding: 14px;">Generate AI Notes & Log Observation</button>
+                        <div class="form-btn-row">
+                            <button type="button" class="clear-btn" onclick="resetObsForm(true)">Clear Form</button>
+                            <button type="button" class="ai-button submit-btn" id="generate-and-log-ai-summary">Generate AI Notes & Log Observation</button>
+                        </div>
                         <div class="loader" id="summary-loader"></div>
                     </div>
                     
@@ -1120,7 +846,7 @@
             
             <div id="Coaching" class="page-content">
                 <form id="coachingForm">
-                    <h2>Log Coaching Session</h2>
+                    <h2>Log Coaching Session <span id="coaching-store-label" style="font-size: 0.6em; color: var(--primary-color); vertical-align: middle;"></span></h2>
                     <div class="form-section">
                         <label for="coaching-employee-select">Employee:</label>
                         <select id="coaching-employee-select" name="employeeId" required>
@@ -1167,7 +893,10 @@
                         <textarea id="coaching-actionplan" name="actionPlan" class="profile-notes" rows="3" placeholder="Type a raw SMART goal here... (e.g., 'get 10 mobile lines next week')"></textarea>
                     </div>
 
-                    <button type="button" class="ai-button" id="generate-ai-coaching-notes" style="background: var(--gradient-primary); margin-top: 0; margin-bottom: 20px; font-size: 1.1em; padding: 14px;">Generate AI-Assisted Notes & Log Session</button>
+                    <div class="form-btn-row" style="margin-bottom: 20px;">
+                        <button type="button" class="clear-btn" onclick="resetCoachingForm()">Clear Form</button>
+                        <button type="button" class="ai-button submit-btn" id="generate-ai-coaching-notes">Generate AI-Assisted Notes & Log Session</button>
+                    </div>
                     <div class="loader" id="coaching-notes-loader"></div>
                 </form>
             </div>
@@ -1175,6 +904,11 @@
             <div id="Tracker" class="page-content">
                 <h2 id="tracker-title">Monthly Goal Tracker</h2>
                 <p id="tracker-subtitle" style="text-align: center; margin-top: -10px; margin-bottom: 20px; font-size: 1.1em; color: var(--text-color-light);"></p>
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <button class="auth-button switch-store" style="width: auto; display: inline-flex;" onclick="openOverrideModal()">
+                        <i class="fa-solid fa-list-check"></i> Manage Overrides / LOA
+                    </button>
+                </div>
                 <div id="tracker-table-container">
                     <table id="tracker-table">
                         <thead>
@@ -1248,7 +982,7 @@
                     <button type="button" class="ai-button" id="generate-ai-coaching-plan" style="width: 100%; margin-top: 0;">Generate AI Coaching Plan</button>
                     <div class="loader" id="coaching-loader"></div>
                 </div>
-                <div id="ai-coaching-output" class="ai-coaching-output">
+                <div id="ai-coaching-output" class="ai-coaching-output" style="display:none;">
                 </div>
                 
                 <div id="log-output">
@@ -1282,6 +1016,7 @@
             </div>
         </main>
         </div>
+        
     <div id="editEmployeeModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" id="modal-close-btn">&times;</span>
@@ -1314,6 +1049,17 @@
                 <button type="submit">Save Changes</button>
                 <button type="button" class="delete-btn" id="delete-employee-btn">Delete Employee</button>
             </form>
+        </div>
+    </div>
+    
+    <div id="trackerOverrideModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-btn" onclick="closeOverrideModal()">&times;</span>
+            <h2>Manage Overrides / LOA</h2>
+            <p style="font-size: 0.9em; color: #666;">Toggle "Exempt" for employees on Leave or Vacation. This removes them from goal calculations.</p>
+            <div id="override-list" style="margin-top: 20px; max-height: 400px; overflow-y: auto;">
+                </div>
+            <button type="button" onclick="closeOverrideModal()" style="margin-top: 20px;">Done</button>
         </div>
     </div>
     
@@ -1352,46 +1098,31 @@
             collection, 
             onSnapshot, 
             Timestamp,
-            setLogLevel
+            setLogLevel,
+            getDoc 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Netlify Backend Helper (Replaces Google Fetch) ---
+        // --- Netlify Backend Helper ---
         async function callNetlifyGemini(promptText) {
             console.log("Sending prompt to AI..."); 
-            const response = await fetch('/.netlify/functions/fetch-gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: promptText })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Netlify Error: ${response.status} ${response.statusText}`);
+            try {
+                const response = await fetch('/.netlify/functions/fetch-gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Netlify Error: ${response.status} ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Netlify Call Error:", error);
+                throw error;
             }
-            
-            return await response.json();
         }
         
-        // --- KPI Context ---
-        const KPI_CONTEXT = `
-            Please use the following Xfinity retail KPIs and expectations when generating SMART goals:
-            - Reps are full-time, 5x8-hour shifts.
-            - tNPS score goal: 75
-            - XM% to goal: 100%
-            - XM conversion rate: 10%
-            - HSD to goal: 100%
-            - Gigabit+ sell in: 50%
-            - Video/CDV/XH unit % to goal: 100%
-            - Wablets: Watch/Tablet sale: minimum 2 per week, recommended 4 per week, with attach rate of 45%
-            - XMC attach: 60%
-            - Unlimited Premium (higher mobile plan) attach: 45%
-            - New/New (New mobile line attach on a new internet sale, same day): 30% attach
-            - Monthly Mobile Line (LA) Goal: 40 per rep (approx 10-15 per week).
-            - Total Monthly Unit Goal: Varies, but hitting 120% of this total (e.g., HSI+Video+XM+etc) gives a 20% commission bonus.
-            - 'Service to sales' means every service interaction (like a bill pay or equipment swap)
-              is an opportunity to perform an account review and pivot to a sale (especially Xfinity Mobile).
-        `;
-
-        // --- Firebase Config & App Variables ---
+        // --- Firebase Config ---
         const firebaseConfig = {
             apiKey: "AIzaSyDaRTH_-SrDMlKePFfKUaUa0FeGDD1-KIA",
             authDomain: "retail-coaching-tool.firebaseapp.com",
@@ -1407,17 +1138,24 @@
         const AUTOSAVE_KEY = "obsFormAutosave"; 
 
         let db, auth, userId, googleProvider, app, analytics, currentUser; 
-        let employeesRef, observationsRef, coachingsRef, storeGoalsRef; 
-        let employeesListener = null;
-        let observationsListener = null;
-        let coachingsListener = null;
-        let storeGoalsListener = null; 
+        
+        // --- Store Management Variables ---
+        let currentStore = localStorage.getItem('retailCoachingStore') || null;
+        
+        // --- Refs & Listeners (Dynamic based on Store) ---
+        let employeesRef, observationsRef, coachingsRef, storeGoalsRef, overridesRef; 
+        let employeesUnsub = null;
+        let observationsUnsub = null;
+        let coachingsUnsub = null;
+        let storeGoalsUnsub = null; 
+        let overridesUnsub = null;
 
         // Global state variables
         let localEmployees = {};
         let localObservations = [];
         let localCoachings = [];
         let localStoreGoals = {}; 
+        let localOverrides = {}; // { employeeId: true/false }
         
         const OBS_GOAL = 4;
         const COACH_GOAL = 2;
@@ -1435,10 +1173,7 @@
                     const parts = fullName.trim().split(' ');
                     return parts[0];
                 }
-            } catch (e) {
-                console.error("Error parsing name:", e);
-                return fullName; 
-            }
+            } catch (e) { return fullName; }
         }
         
         function isGreeterRole(role) {
@@ -1453,10 +1188,7 @@
             end.setMinutes(end.getMinutes() - end.getTimezoneOffset());
             let years = end.getFullYear() - start.getFullYear();
             let months = end.getMonth() - start.getMonth();
-            if (months < 0) {
-                years--;
-                months += 12;
-            }
+            if (months < 0) { years--; months += 12; }
             let tenureStr = "";
             if (years > 0) tenureStr += `${years} yr${years > 1 ? 's' : ''}`;
             if (months > 0) {
@@ -1481,19 +1213,13 @@
                 endYear = date.getFullYear();
                 startMonth = date.getMonth() - 1;
                 startYear = date.getFullYear();
-                if (startMonth < 0) {
-                    startMonth = 11; // December
-                    startYear -= 1;
-                }
+                if (startMonth < 0) { startMonth = 11; startYear -= 1; }
             } else {
                 startMonth = date.getMonth();
                 startYear = date.getFullYear();
                 endMonth = date.getMonth() + 1;
                 endYear = date.getFullYear();
-                if (endMonth > 11) {
-                    endMonth = 0; // January
-                    endYear += 1;
-                }
+                if (endMonth > 11) { endMonth = 0; endYear += 1; }
             }
             const startDate = new Date(startYear, startMonth, 22, 0, 0, 0);
             const endDate = new Date(endYear, endMonth, 21, 23, 59, 59);
@@ -1502,7 +1228,26 @@
             return { startDate, endDate, name: fiscalMonthName };
         }
 
-        // --- Page Building Functions ---
+        // --- Store Selector Logic ---
+        window.openStoreSelector = function() {
+            document.getElementById('store-selector-modal').style.display = 'block';
+        }
+
+        window.selectStore = function(storeName) {
+            currentStore = storeName;
+            localStorage.setItem('retailCoachingStore', storeName);
+            document.getElementById('store-selector-modal').style.display = 'none';
+            
+            // Update UI Labels
+            const labelText = storeName ? `(${storeName})` : '';
+            document.getElementById('obs-store-label').textContent = labelText;
+            document.getElementById('coaching-store-label').textContent = labelText;
+            
+            setupFirestoreListeners(); // Reload data for new store
+            showToast(`Switched to ${storeName} store.`);
+        }
+
+        // --- Core UI Builders ---
         function populateEmployeeDropdown(selectId) {
             const employeeSelect = document.getElementById(selectId);
             const selectedValue = employeeSelect.value;
@@ -1539,9 +1284,7 @@
                 tenureSpan.textContent = calculateTenure(profile.hireDate);
                 infoDiv.appendChild(tenureSpan);
                 li.appendChild(infoDiv);
-                li.addEventListener('click', () => {
-                    openEditModal(id, profile);
-                });
+                li.addEventListener('click', () => openEditModal(id, profile));
                 employeeList.appendChild(li);
             }
         }
@@ -1643,9 +1386,9 @@
                         <h4>Coaching Session Log</h4>
                         <p><strong>tNPS Logged:</strong> ${log.tnps || 'N/A'}</p>
                         <p><strong>Sales Logged:</strong> ${log.sales || 'N/A'}</p>
-                        <p><strong>Progress Since Last Session:</strong> ${log.progress || 'N/A'}</p>
-                        <p><strong>Challenges Experienced:</strong> ${log.obstacles || 'N/A'}</p>
-                        <p><strong>Action Plan / Commitment:</strong> ${log.actionPlan || 'N/A'}</p>
+                        <p><strong>Progress:</strong> ${log.progress || 'N/A'}</p>
+                        <p><strong>Challenges:</strong> ${log.obstacles || 'N/A'}</p>
+                        <p><strong>Action Plan:</strong> ${log.actionPlan || 'N/A'}</p>
                     `;
                     entryDiv.appendChild(coachingDiv);
                 }
@@ -1674,48 +1417,10 @@
                 const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
 
                 for (const [id, profile] of sortedEmployees) {
-                    const employeeObs = obsInMonth.filter(obs => obs.employeeId === id);
-                    const employeeCoaching = coachingInMonth.filter(c => c.employeeId === id);
-                    
-                    const obsCount = employeeObs.length;
-                    const coachCount = employeeCoaching.length;
-                    
-                    const obsMet = obsCount >= OBS_GOAL;
-                    const coachMet = coachCount >= COACH_GOAL;
-                    const isComplete = obsMet && coachMet;
-                    
                     const tr = document.createElement('tr');
                     
-                    let statusClass = isComplete ? 'status-complete' : 'status-progress';
-                    let statusText = isComplete ? '<i class="fa-solid fa-check-circle"></i> Complete' : 'In Progress';
-                    
-                    const obsPips = document.createElement('div');
-                    obsPips.className = 'progress-pips';
-                    let obsTooltip = `Observations (${obsCount}/${OBS_GOAL}):\n`;
-                    for(let i = 0; i < obsCount; i++) {
-                        const log = employeeObs[i];
-                        obsPips.innerHTML += `<span class="progress-pip filled"></span>`;
-                        obsTooltip += `• ${log.date.toDate().toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
-                    }
-                    for(let i = obsCount; i < OBS_GOAL; i++) {
-                        obsPips.innerHTML += `<span class="progress-pip"></span>`;
-                    }
-                    if(obsCount === 0) obsTooltip = `No observations logged this fiscal month.`;
-                    obsPips.innerHTML += `<span class="tooltip-content">${obsTooltip.trim()}</span>`;
-                    
-                    const coachPips = document.createElement('div');
-                    coachPips.className = 'progress-pips';
-                    let coachTooltip = `Coaching (${coachCount}/${COACH_GOAL}):\n`;
-                    for(let i = 0; i < coachCount; i++) {
-                        const log = employeeCoaching[i];
-                        coachPips.innerHTML += `<span class="progress-pip filled"></span>`;
-                        coachTooltip += `• ${log.date.toDate().toLocaleDateString()} by ${log.loggedBy || 'Unknown'}\n`;
-                    }
-                    for(let i = coachCount; i < COACH_GOAL; i++) {
-                        coachPips.innerHTML += `<span class="progress-pip"></span>`;
-                    }
-                    if(coachCount === 0) coachTooltip = `No coaching logged this fiscal month.`;
-                    coachPips.innerHTML += `<span class="tooltip-content">${coachTooltip.trim()}</span>`;
+                    // CHECK OVERRIDE
+                    const isExempt = localOverrides[id] === true;
 
                     const nameCell = document.createElement('td');
                     nameCell.textContent = profile.name;
@@ -1725,23 +1430,139 @@
                     roleCell.textContent = profile.role;
                     tr.appendChild(roleCell);
 
-                    const obsCell = document.createElement('td');
-                    obsCell.appendChild(obsPips);
-                    tr.appendChild(obsCell);
-                    
-                    const coachCell = document.createElement('td');
-                    coachCell.appendChild(coachPips);
-                    tr.appendChild(coachCell);
-                    
-                    const statusCell = document.createElement('td');
-                    statusCell.className = statusClass;
-                    statusCell.innerHTML = statusText;
-                    tr.appendChild(statusCell);
+                    if (isExempt) {
+                        // Exempt Row Logic
+                        const exemptCell = document.createElement('td');
+                        exemptCell.colSpan = 3;
+                        exemptCell.style.textAlign = 'center';
+                        exemptCell.style.fontStyle = 'italic';
+                        exemptCell.style.color = '#999';
+                        exemptCell.textContent = "Exempt (LOA / Vacation)";
+                        tr.appendChild(exemptCell);
+                    } else {
+                        // Standard Calculation Logic
+                        const employeeObs = obsInMonth.filter(obs => obs.employeeId === id);
+                        const employeeCoaching = coachingInMonth.filter(c => c.employeeId === id);
+                        
+                        const obsCount = employeeObs.length;
+                        const coachCount = employeeCoaching.length;
+                        const isComplete = obsCount >= OBS_GOAL && coachCount >= COACH_GOAL;
+                        let statusClass = isComplete ? 'status-complete' : 'status-progress';
+                        let statusText = isComplete ? '<i class="fa-solid fa-check-circle"></i> Complete' : 'In Progress';
+
+                        // Obs Cell
+                        const obsCell = document.createElement('td');
+                        const obsPips = document.createElement('div');
+                        obsPips.className = 'progress-pips';
+                        let obsTooltip = `Observations (${obsCount}/${OBS_GOAL}):\n`;
+                        for(let i = 0; i < obsCount; i++) {
+                            obsPips.innerHTML += `<span class="progress-pip filled"></span>`;
+                            obsTooltip += `• ${employeeObs[i].date.toDate().toLocaleDateString()}\n`;
+                        }
+                        for(let i = obsCount; i < OBS_GOAL; i++) obsPips.innerHTML += `<span class="progress-pip"></span>`;
+                        obsPips.innerHTML += `<span class="tooltip-content">${obsTooltip}</span>`;
+                        obsCell.appendChild(obsPips);
+                        tr.appendChild(obsCell);
+
+                        // Coach Cell
+                        const coachCell = document.createElement('td');
+                        const coachPips = document.createElement('div');
+                        coachPips.className = 'progress-pips';
+                        let coachTooltip = `Coaching (${coachCount}/${COACH_GOAL}):\n`;
+                        for(let i = 0; i < coachCount; i++) {
+                            coachPips.innerHTML += `<span class="progress-pip filled"></span>`;
+                            coachTooltip += `• ${employeeCoaching[i].date.toDate().toLocaleDateString()}\n`;
+                        }
+                        for(let i = coachCount; i < COACH_GOAL; i++) coachPips.innerHTML += `<span class="progress-pip"></span>`;
+                        coachPips.innerHTML += `<span class="tooltip-content">${coachTooltip}</span>`;
+                        coachCell.appendChild(coachPips);
+                        tr.appendChild(coachCell);
+
+                        // Status Cell
+                        const statusCell = document.createElement('td');
+                        statusCell.className = statusClass;
+                        statusCell.innerHTML = statusText;
+                        tr.appendChild(statusCell);
+                    }
                     
                     tableBody.appendChild(tr);
                 }
-            } catch (error) {
-                console.error("Error updating tracker tab:", error);
+            } catch (error) { console.error("Error updating tracker:", error); }
+        }
+
+        // --- Override Modal Logic ---
+        window.openOverrideModal = function() {
+            const listDiv = document.getElementById('override-list');
+            listDiv.innerHTML = '';
+            
+            const sortedEmployees = Object.entries(localEmployees).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+            
+            if (sortedEmployees.length === 0) {
+                listDiv.innerHTML = '<p>No employees found.</p>';
+            } else {
+                sortedEmployees.forEach(([id, profile]) => {
+                    const row = document.createElement('div');
+                    row.className = 'override-row';
+                    
+                    const nameLabel = document.createElement('span');
+                    nameLabel.textContent = profile.name;
+                    nameLabel.style.fontWeight = 'bold';
+                    
+                    const toggleDiv = document.createElement('div');
+                    
+                    const label = document.createElement('label');
+                    label.className = 'toggle-switch';
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.checked = localOverrides[id] === true;
+                    input.onchange = (e) => toggleOverride(id, e.target.checked);
+                    
+                    const slider = document.createElement('span');
+                    slider.className = 'slider';
+                    
+                    label.appendChild(input);
+                    label.appendChild(slider);
+                    
+                    // Status text
+                    const statusSpan = document.createElement('span');
+                    statusSpan.style.fontSize = '0.85em';
+                    statusSpan.style.color = input.checked ? 'var(--primary-color)' : '#999';
+                    statusSpan.textContent = input.checked ? 'Exempt' : 'Active';
+                    statusSpan.id = `status-${id}`;
+
+                    input.addEventListener('change', (e) => {
+                         const s = document.getElementById(`status-${id}`);
+                         s.textContent = e.target.checked ? 'Exempt' : 'Active';
+                         s.style.color = e.target.checked ? 'var(--primary-color)' : '#999';
+                    });
+
+                    toggleDiv.appendChild(label);
+                    toggleDiv.appendChild(statusSpan);
+
+                    row.appendChild(nameLabel);
+                    row.appendChild(toggleDiv);
+                    listDiv.appendChild(row);
+                });
+            }
+
+            document.getElementById('trackerOverrideModal').style.display = 'block';
+        }
+
+        window.closeOverrideModal = function() {
+            document.getElementById('trackerOverrideModal').style.display = 'none';
+        }
+
+        window.toggleOverride = async function(employeeId, isExempt) {
+            if(!overridesRef) return;
+            try {
+                // Update the single document holding all overrides for this store
+                // We use { [employeeId]: isExempt } merge
+                const updateData = {};
+                updateData[employeeId] = isExempt;
+                await setDoc(overridesRef, updateData, { merge: true });
+            } catch(e) {
+                console.error("Error setting override:", e);
+                showToast("Failed to update status", true);
             }
         }
         
@@ -1786,31 +1607,23 @@
             populateEmployeeList(); 
             displayEmployeeLogs(document.getElementById('log-employee-select').value);
             
-            if(document.getElementById('Tracker').classList.contains('active')) {
-                updateTrackerTab();
-            }
-            if(document.getElementById('Goals').classList.contains('active')) {
-                displayStoreGoals();
-            }
+            if(document.getElementById('Tracker').classList.contains('active')) updateTrackerTab();
+            if(document.getElementById('Goals').classList.contains('active')) displayStoreGoals();
             checkGoalDate();
         }
 
-        // --- Event Handling Functions ---
+        // --- Interaction Functions ---
         let toastTimeout;
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast-notification');
             const toastMessage = document.getElementById('toast-message');
             toastMessage.textContent = message;
             toast.className = 'show';
-            if (isError) {
-                toast.classList.add('error');
-            }
-            if (toastTimeout) {
-                clearTimeout(toastTimeout);
-            }
+            if (isError) toast.classList.add('error');
+            else toast.classList.remove('error');
+            if (toastTimeout) clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
-                toast.classList.remove('error');
             }, 3000); 
         }
 
@@ -1828,104 +1641,45 @@
             return new Promise((resolve) => {
                 const close = (value) => {
                     modal.style.display = 'none';
-                    confirmBtn.onclick = null;
-                    cancelBtn.onclick = null;
-                    closeBtn.onclick = null;
-                    inputEl.onkeydown = null;
+                    confirmBtn.onclick = null; cancelBtn.onclick = null; closeBtn.onclick = null; inputEl.onkeydown = null;
                     resolve(value);
                 };
                 confirmBtn.onclick = () => close(inputEl.value);
                 cancelBtn.onclick = () => close(null);
                 closeBtn.onclick = () => close(null);
                 inputEl.onkeydown = (e) => {
-                    if (e.key === 'Enter') {
-                        close(inputEl.value);
-                    } else if (e.key === 'Escape') {
-                        close(null);
-                    }
+                    if (e.key === 'Enter') close(inputEl.value);
+                    else if (e.key === 'Escape') close(null);
                 };
             });
         }
         
         async function showDeleteFailsafe(actionName) {
-            const message = `This action is permanent and cannot be undone.\n\nTo delete this ${actionName}, please type the failsafe code: ${DELETE_FAILSAFE_CODE}`;
+            const message = `To delete this ${actionName}, type code: ${DELETE_FAILSAFE_CODE}`;
             const userInput = await showCustomPrompt(message);
-            if (userInput === DELETE_FAILSAFE_CODE) {
-                return true;
-            } else if (userInput !== null) { 
-                await showToast("Incorrect code. Deletion cancelled.", true);
-            }
+            if (userInput === DELETE_FAILSAFE_CODE) return true;
+            else if (userInput !== null) await showToast("Incorrect code.", true);
             return false;
         }
         
-        async function addEmployee(event) {
-            event.preventDefault();
-            const nameInput = document.getElementById('new-employee-name');
-            const roleInput = document.getElementById('new-employee-role');
-            const hireDateInput = document.getElementById('new-employee-hire-date');
-            const newName = nameInput.value.trim();
-            const newRole = roleInput.value.trim();
-            const newHireDate = hireDateInput.value;
-            if (newName && newRole && newHireDate) {
-                if (Object.values(localEmployees).find(emp => emp.name.toLowerCase() === newName.toLowerCase())) {
-                    await showToast("An employee with this name already exists.", true);
-                    return;
-                }
-                const newEmployee = {
-                    name: newName,
-                    role: newRole,
-                    hireDate: newHireDate,
-                    strengths: "",
-                    opportunities: ""
-                };
-                try {
-                    await addDoc(employeesRef, newEmployee);
-                    await showToast("Employee added successfully!");
-                    nameInput.value = '';
-                    roleInput.value = '';
-                    hireDateInput.value = '';
-                } catch (e) {
-                    console.error("Error adding employee:", e);
-                    await showToast("Failed to add employee. See console for details.", true);
-                }
-            } else {
-                await showToast("Please fill out Name, Role, and Hire Date.", true);
-            }
+        // --- Form Logic ---
+        window.resetObsForm = function(fullReset = false) {
+            const form = document.getElementById('obsForm');
+            form.reset();
+            if (fullReset) form.employee.value = "";
+            form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
+            document.getElementById('last-goal-display').style.display = 'none';
+            document.getElementById('verbatim-feedback-section').style.display = 'none';
+            document.getElementById('verbatim-feedback-output').innerHTML = '';
+            document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'none');
+            if (fullReset) localStorage.removeItem(AUTOSAVE_KEY);
         }
 
-        async function deleteEmployee(idToDelete) {
-            const employeeName = localEmployees[idToDelete]?.name || "this employee";
-            if (!await showDeleteFailsafe(`employee (${employeeName}) and ALL their logs`)) {
-                return;
-            }
-            try {
-                await deleteDoc(doc(db, "artifacts", appId, "public", "data", "employees", idToDelete));
-                await showToast("Employee deleted.");
-                closeEditModal();
-            } catch (e) {
-                console.error("Error deleting employee:", e);
-                await showToast("Failed to delete employee. See console for details.", true);
-            }
-        }
-
-        async function deleteLog(logId, logType, logTypeName) {
-            if (!await showDeleteFailsafe(logTypeName)) {
-                return;
-            }
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", logType, logId);
-                await deleteDoc(docRef);
-                await showToast(`${logTypeName} deleted.`);
-                console.log(`${logTypeName} deleted: ${logId}`);
-            } catch(e) {
-                console.error(`Error deleting ${logTypeName}:`, e);
-                await showToast(`Failed to delete ${logTypeName}. See console for details.`, true);
-            }
-        }
-        
-        function getRadioValue(form, name) {
-            const radio = form.querySelector(`input[name="${name}"]:checked`);
-            return radio ? radio.value : "N/A";
+        window.resetCoachingForm = function() {
+            const form = document.getElementById('coachingForm');
+            form.reset();
+            form.employeeId.value = "";
+            document.getElementById('coaching-date').valueAsDate = new Date();
         }
         
         function showLoading(loaderId, buttonId, isLoading, loadingText = null) {
@@ -1947,91 +1701,48 @@
             }
         }
 
-        // --- CORE AI FUNCTION 1: Generate Observation ---
+        // --- Generation Functions ---
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
             const customerIntent = form.customerIntent.value.trim();
-            if (!employeeId) { await showToast("Please select an employee first.", true); return; }
-            if (!customerIntent) { await showToast("Please enter the customer intent first.", true); return; }
+            if (!employeeId) { await showToast("Please select an employee.", true); return; }
+            if (!customerIntent) { await showToast("Please enter customer intent.", true); return; }
             
             const profile = localEmployees[employeeId];
             const firstName = getFirstName(profile.name);
-            const isGreeter = isGreeterRole(profile.role);
+            const getRadioValue = (form, name) => {
+                const radio = form.querySelector(`input[name="${name}"]:checked`);
+                return radio ? radio.value : "N/A";
+            };
 
             const greatData = {
-                greet: {
-                    measurement: getRadioValue(form, 'great_g_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
-                    notes: form.notes_g.value.trim()
-                },
-                relate: {
-                    measurement: getRadioValue(form, 'great_r_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
-                    notes: form.notes_r.value.trim()
-                },
-                explore: {
-                    measurement: getRadioValue(form, 'great_e_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
-                    notes: form.notes_e.value.trim()
-                },
-                ask: {
-                    measurement: getRadioValue(form, 'great_a_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
-                    notes: form.notes_a.value.trim()
-                },
-                thank: {
-                    measurement: getRadioValue(form, 'great_t_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
-                    notes: form.notes_t.value.trim()
-                }
+                greet: { measurement: getRadioValue(form, 'great_g_measure'), behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value) },
+                relate: { measurement: getRadioValue(form, 'great_r_measure'), behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value) },
+                explore: { measurement: getRadioValue(form, 'great_e_measure'), behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value) },
+                ask: { measurement: getRadioValue(form, 'great_a_measure'), behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value) },
+                thank: { measurement: getRadioValue(form, 'great_t_measure'), behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value) }
             };
             
-            // --- AI Prompt (Clean & Robust) ---
-            let prompt = `Act as a retail sales manager for an **Xfinity store**. Your tone is supportive, fun, and professional. 
-            I am observing ${firstName}. 
-            
-            Based on the inputs below, generate a JSON object with these EXACT keys:
-            - "greet_note": A 1-2 sentence note about the Greet step.
-            - "relate_note": A 1-2 sentence note about the Relate step.
-            - "explore_note": A 1-2 sentence note about the Explore step.
-            - "ask_note": A 1-2 sentence note about the Ask step.
-            - "thank_note": A 1-2 sentence note about the Thank step.
-            - "manager_verbatim": A short paragraph script of what I should say to the employee.
-
-            IMPORTANT: 
-            - If a step is marked "Partial" or "Did Not Demonstrate" and has no behaviors checked, state that it was missed or not observed.
-            - Focus on Xfinity Mobile and "Service to Sales" unless the role is Greeter.
-            
-            --- INPUTS ---
+            let prompt = `Act as a retail sales manager for an **Xfinity store**.
+            I am observing ${firstName}.
+            Generate JSON with these keys: "greet_note", "relate_note", "explore_note", "ask_note", "thank_note", "manager_verbatim".
             Employee Role: ${profile.role}
             Customer Intent: ${customerIntent}
-            
-            G - Greet: ${greatData.greet.measurement}, Behaviors: ${greatData.greet.behaviors.join(', ')}
-            R - Relate: ${greatData.relate.measurement}, Behaviors: ${greatData.relate.behaviors.join(', ')}
-            E - Explore: ${greatData.explore.measurement}, Behaviors: ${greatData.explore.behaviors.join(', ')}
-            A - Ask: ${greatData.ask.measurement}, Behaviors: ${greatData.ask.behaviors.join(', ')}
-            T - Thank: ${greatData.thank.measurement}, Behaviors: ${greatData.thank.behaviors.join(', ')}
-            
+            G: ${greatData.greet.measurement}, Behaviors: ${greatData.greet.behaviors.join(', ')}
+            R: ${greatData.relate.measurement}, Behaviors: ${greatData.relate.behaviors.join(', ')}
+            E: ${greatData.explore.measurement}, Behaviors: ${greatData.explore.behaviors.join(', ')}
+            A: ${greatData.ask.measurement}, Behaviors: ${greatData.ask.behaviors.join(', ')}
+            T: ${greatData.thank.measurement}, Behaviors: ${greatData.thank.behaviors.join(', ')}
             Output strictly valid JSON.`;
             
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
-            
             try {
                 const result = await callNetlifyGemini(prompt);
-                
-                // Debug log to see raw output
-                const responseText = result.candidates[0].content.parts[0].text;
-                console.log("AI Raw Output (Obs):", responseText);
-
-                // Clean JSON
-                let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                let cleanJson = result.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
-                if (firstBrace !== -1 && lastBrace !== -1) {
-                    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
-                }
-
+                if (firstBrace !== -1 && lastBrace !== -1) cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
                 const notesObject = JSON.parse(cleanJson);
 
                 if (notesObject.greet_note) form.notes_g.value = notesObject.greet_note;
@@ -2040,13 +1751,11 @@
                 if (notesObject.ask_note) form.notes_a.value = notesObject.ask_note;
                 if (notesObject.thank_note) form.notes_t.value = notesObject.thank_note;
                 
-                const verbatimSection = document.getElementById('verbatim-feedback-section');
-                const verbatimOutput = document.getElementById('verbatim-feedback-output');
                 if (notesObject.manager_verbatim) {
+                    const verbatimOutput = document.getElementById('verbatim-feedback-output');
                     verbatimOutput.innerHTML = notesObject.manager_verbatim.replace(/\n/g, '<br>');
-                    verbatimSection.style.display = 'block';
+                    document.getElementById('verbatim-feedback-section').style.display = 'block';
                 }
-                
                 document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'block');
 
                 // Save
@@ -2068,8 +1777,7 @@
                 };
                 await addDoc(observationsRef, newObservation);
                 await showToast(`Logged for ${localEmployees[employeeId].name}!`);
-                clearAutosave();
-                
+                localStorage.removeItem(AUTOSAVE_KEY);
             } catch (err) {
                 console.error('AI Gen Failed:', err);
                 await showToast('AI generation failed. Check console.', true);
@@ -2078,116 +1786,68 @@
             }
         }
         
-        // --- CORE AI FUNCTION 2: Generate Coaching Plan (View Logs) ---
         async function generateAICoachingPlan() {
             const employeeId = document.getElementById('log-employee-select').value;
             if (!employeeId) { await showToast("Select employee first.", true); return; }
-            
             showLoading('coaching-loader', 'generate-ai-coaching-plan', true);
             const coachingOutput = document.getElementById('ai-coaching-output');
-            
-            // Simplified prompt for reliability
-            let prompt = `Act as Xfinity Manager. Write a coaching plan for ${localEmployees[employeeId].name}. 
-            1. Feedback (Strength/Opportunity). 
-            2. Manager Next Steps.`;
-            
+            let prompt = `Act as Xfinity Manager. Write a coaching plan for ${localEmployees[employeeId].name}. 1. Feedback. 2. Next Steps.`;
             try {
                 const result = await callNetlifyGemini(prompt);
                 let responseText = result.candidates[0].content.parts[0].text;
-                // Basic format cleanup
                 responseText = responseText.replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>').replace(/\* (.*?)(?=\n|$)/g, '<li>$1</li>');
                 coachingOutput.innerHTML = responseText;
                 coachingOutput.style.display = 'block';
-            } catch(e) { 
-                console.error(e); 
-            } finally { 
-                showLoading('coaching-loader', 'generate-ai-coaching-plan', false); 
-            }
+            } catch(e) { console.error(e); } 
+            finally { showLoading('coaching-loader', 'generate-ai-coaching-plan', false); }
         }
-        
-        // --- CORE AI FUNCTION 3: Generate Coaching Notes (Fixed Action Plan) ---
+
         async function getCoachingRecommendations(employeeId) {
-            const recProgress = document.getElementById('ai-rec-progress');
-            const recObstacles = document.getElementById('ai-rec-obstacles');
-            const recActionPlan = document.getElementById('ai-rec-actionplan');
-
-            recProgress.textContent = `Ask something like, "What is going well with your performance?"`;
-            recObstacles.textContent = `Ask something like, "What has been difficult for you recently?"`;
-            recActionPlan.textContent = `(Include SMART goal)`;
-
             if (!employeeId) return;
             const profile = localEmployees[employeeId];
-            
-            let prompt = `I am coaching ${profile.name} (${profile.role}). Give me 3 short talking points (Progress, Obstacles, Action Plan).
-            Generate JSON with keys: "progress_rec", "obstacles_rec", "actionplan_rec".`;
-
+            let prompt = `I am coaching ${profile.name} (${profile.role}). Give me 3 short talking points. JSON keys: "progress_rec", "obstacles_rec", "actionplan_rec".`;
             try {
                 const result = await callNetlifyGemini(prompt);
-                const responseText = result.candidates[0].content.parts[0].text;
-                let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                let cleanJson = result.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
                 if (firstBrace !== -1 && lastBrace !== -1) cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
-                
                 const recs = JSON.parse(cleanJson);
-                if (recs.progress_rec) recProgress.textContent = recs.progress_rec;
-                if (recs.obstacles_rec) recObstacles.textContent = recs.obstacles_rec;
-                if (recs.actionplan_rec) recActionPlan.textContent = recs.actionplan_rec;
-            } catch (err) {
-                console.error('AI Rec Failed:', err);
-            }
+                if (recs.progress_rec) document.getElementById('ai-rec-progress').textContent = recs.progress_rec;
+                if (recs.obstacles_rec) document.getElementById('ai-rec-obstacles').textContent = recs.obstacles_rec;
+                if (recs.actionplan_rec) document.getElementById('ai-rec-actionplan').textContent = recs.actionplan_rec;
+            } catch (err) { console.error('AI Rec Failed:', err); }
         }
 
         async function generateAndLogCoachingNotes() {
             const form = document.getElementById('coachingForm');
             const employeeId = form.employeeId.value;
             if (!employeeId) { await showToast("Select employee.", true); return; }
-            
             const rawProgress = form.progress.value.trim();
             const rawObstacles = form.obstacles.value.trim();
             const rawActionPlan = form.actionPlan.value.trim();
-            
-            if (!rawProgress || !rawObstacles || !rawActionPlan) {
-                await showToast("Please fill in raw notes first.", true); return;
-            }
+            if (!rawProgress || !rawObstacles || !rawActionPlan) { await showToast("Please fill in raw notes first.", true); return; }
             
             const profile = localEmployees[employeeId];
-            
-            let prompt = `Act as Xfinity Manager. Refine my coaching notes for ${profile.name} (${profile.role}).
-            
+            let prompt = `Act as Xfinity Manager. Refine coaching notes for ${profile.name} (${profile.role}).
             Raw Progress: ${rawProgress}
             Raw Obstacles: ${rawObstacles}
             Raw Action Plan: ${rawActionPlan}
-            
-            Generate a JSON object with these EXACT keys:
-            - "progress_note": Refined progress note.
-            - "obstacles_note": Refined obstacles note.
-            - "action_plan": A specific SMART goal based on my raw action plan.
-            
-            Output strictly valid JSON.`;
+            Generate JSON keys: "progress_note", "obstacles_note", "action_plan" (SMART goal).`;
             
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating...');
-            
             try {
                 const result = await callNetlifyGemini(prompt);
-                const responseText = result.candidates[0].content.parts[0].text;
-                console.log("AI Raw Output (Coaching):", responseText);
-
-                let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
+                let cleanJson = result.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
-                if (firstBrace !== -1 && lastBrace !== -1) {
-                    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
-                }
-
+                if (firstBrace !== -1 && lastBrace !== -1) cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
                 const notesObject = JSON.parse(cleanJson);
 
                 if (notesObject.progress_note) form.progress.value = notesObject.progress_note;
                 if (notesObject.obstacles_note) form.obstacles.value = notesObject.obstacles_note;
-                // FIXED KEY: action_plan matches prompt
                 if (notesObject.action_plan) form.actionPlan.value = notesObject.action_plan;
 
-                // Save
                 const newCoaching = {
                     employeeId: employeeId,
                     date: Timestamp.now(), 
@@ -2201,9 +1861,11 @@
                 };
                 await addDoc(coachingsRef, newCoaching);
                 await showToast(`Coaching logged for ${profile.name}!`);
-                form.reset();
-                form.employeeId.value = "";
-                document.getElementById('coaching-date').valueAsDate = new Date();
+                
+                // IMPORTANT: FIX REQUESTED BY USER
+                // Do NOT clear form.reset() here. Keep data for copy/paste.
+                // We only update last goal display for feedback loop.
+                displayLastSMARTGoal(employeeId); 
                 
             } catch (err) {
                 console.error('AI Coaching Failed:', err);
@@ -2212,7 +1874,23 @@
                 showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             }
         }
-        
+
+        // --- Standard Database Ops ---
+        async function addEmployee(event) {
+            event.preventDefault();
+            const name = document.getElementById('new-employee-name').value.trim();
+            const role = document.getElementById('new-employee-role').value.trim();
+            const hireDate = document.getElementById('new-employee-hire-date').value;
+            if (name && role && hireDate) {
+                if (Object.values(localEmployees).find(emp => emp.name.toLowerCase() === name.toLowerCase())) {
+                    await showToast("Employee name exists.", true); return;
+                }
+                await addDoc(employeesRef, { name, role, hireDate, strengths: "", opportunities: "" });
+                await showToast("Employee added!");
+                document.getElementById('addEmployeeForm').reset();
+            }
+        }
+
         async function saveStoreGoals(event) {
             event.preventDefault();
             const form = document.getElementById('goalsForm');
@@ -2224,284 +1902,48 @@
                 xhs: Number(form.xhs.value) || 0,
                 upgrades: Number(form.upgrades.value) || 0,
             };
-            const total = goals.xm + goals.hsi + goals.video + goals.cdv + goals.xhs + goals.upgrades;
+            const total = Object.values(goals).reduce((a, b) => a + b, 0);
             const bonus = Math.ceil(total * 1.2);
-            const goalsToSave = {
-                ...goals,
-                totalGoal: total,
-                bonusGoal: bonus,
-                lastUpdated: Timestamp.now()
-            };
+            await setDoc(storeGoalsRef, { ...goals, totalGoal: total, bonusGoal: bonus, lastUpdated: Timestamp.now() });
+            await showToast("Goals saved!");
+        }
+
+        async function deleteEmployee(idToDelete) {
+            const empName = localEmployees[idToDelete]?.name || "";
+            if (!await showDeleteFailsafe(`employee (${empName})`)) return;
             try {
-                await setDoc(storeGoalsRef, goalsToSave);
-                await showToast("Monthly goals have been saved!");
-                displayStoreGoals(); 
-                checkGoalDate(); 
-            } catch (e) {
-                console.error("Error saving goals:", e);
-                await showToast("Failed to save goals. Check console.", true);
-            }
-        }
-
-        function openPage(event, pageName) {
-            const pageContents = document.getElementsByClassName('page-content');
-            for (let i = 0; i < pageContents.length; i++) {
-                pageContents[i].style.display = 'none';
-            }
-            const navLinks = document.getElementsByClassName('nav-link');
-            for (let i = 0; i < navLinks.length; i++) {
-                navLinks[i].className = navLinks[i].className.replace(' active', '');
-            }
-            document.getElementById(pageName).style.display = 'block';
-            event.currentTarget.className += ' active';
-            
-            if (pageName !== 'Observation') {
-                resetObsForm(true); 
-            }
-            if (pageName !== 'Coaching') {
-                resetCoachingForm();
-            }
-            
-            if (pageName === 'Tracker') {
-                updateTrackerTab();
-            }
-            if (pageName === 'Goals') {
-                displayStoreGoals();
-            }
+                await deleteDoc(doc(db, "artifacts", appId, "public", "stores", currentStore, "employees", idToDelete));
+                await showToast("Employee deleted.");
+                document.getElementById('editEmployeeModal').style.display = 'none';
+            } catch (e) { console.error(e); showToast("Delete failed", true); }
         }
         
-        function saveToAutosave() {
+        async function deleteLog(logId, logType, logTypeName) {
+            if (!await showDeleteFailsafe(logTypeName)) return;
             try {
-                const form = document.getElementById('obsForm');
-                const formData = {
-                    customerIntent: form.customerIntent.value,
-                    employeeId: form.employee.value,
-                    great_g_measure: getRadioValue(form, 'great_g_measure'),
-                    great_g_behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
-                    notes_g: form.notes_g.value,
-                    great_r_measure: getRadioValue(form, 'great_r_measure'),
-                    great_r_behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
-                    notes_r: form.notes_r.value,
-                    great_e_measure: getRadioValue(form, 'great_e_measure'),
-                    great_e_behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
-                    notes_e: form.notes_e.value,
-                    great_a_measure: getRadioValue(form, 'great_a_measure'),
-                    great_a_behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
-                    notes_a: form.notes_a.value,
-                    great_t_measure: getRadioValue(form, 'great_t_measure'),
-                    great_t_behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
-                    notes_t: form.notes_t.value,
-                    notes: form.notes.value
-                };
-                localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(formData));
-            } catch (e) {
-                console.warn("Autosave failed:", e);
-            }
-        }
-
-        function loadFromAutosave() {
-            try {
-                const savedData = localStorage.getItem(AUTOSAVE_KEY);
-                if (!savedData) return;
-                
-                const formData = JSON.parse(savedData);
-                const form = document.getElementById('obsForm');
-                
-                form.customerIntent.value = formData.customerIntent || '';
-                form.employee.value = formData.employeeId || '';
-                form.notes_g.value = formData.notes_g || '';
-                form.notes_r.value = formData.notes_r || '';
-                form.notes_e.value = formData.notes_e || '';
-                form.notes_a.value = formData.notes_a || '';
-                form.notes_t.value = formData.notes_t || '';
-                form.notes.value = formData.notes || '';
-
-                const setRadio = (name, value) => {
-                    if (value) {
-                        const radio = form.querySelector(`input[name="${name}"][value="${value}"]`);
-                        if (radio) radio.checked = true;
-                    }
-                };
-                setRadio('great_g_measure', formData.great_g_measure);
-                setRadio('great_r_measure', formData.great_r_measure);
-                setRadio('great_e_measure', formData.great_e_measure);
-                setRadio('great_a_measure', formData.great_a_measure);
-                setRadio('great_t_measure', formData.great_t_measure);
-
-                const setCheckboxes = (name, values) => {
-                    if (values) {
-                        values.forEach(value => {
-                            const cb = form.querySelector(`input[name="${name}"][value="${value}"]`);
-                            if (cb) cb.checked = true;
-                        });
-                    }
-                };
-                setCheckboxes('great_g', formData.great_g_behaviors);
-                setCheckboxes('great_r', formData.great_r_behaviors);
-                setCheckboxes('great_e', formData.great_e_behaviors);
-                setCheckboxes('great_a', formData.great_a_behaviors);
-                setCheckboxes('great_t', formData.great_t_behaviors);
-
-                console.log("Loaded data from autosave.");
-                displayLastSMARTGoal(formData.employeeId);
-
-            } catch (e) {
-                console.error("Failed to load from autosave:", e);
-                clearAutosave();
-            }
+                await deleteDoc(doc(db, "artifacts", appId, "public", "stores", currentStore, logType, logId));
+                await showToast(`${logTypeName} deleted.`);
+            } catch(e) { console.error(e); showToast("Delete failed", true); }
         }
         
-        function clearAutosave() {
-            localStorage.removeItem(AUTOSAVE_KEY);
-            console.log("Autosave cleared.");
-        }
-        
-        function resetObsForm(fullReset = false) {
-            const form = document.getElementById('obsForm');
-            form.reset();
-            
-            if (fullReset) {
-                form.employee.value = "";
-            }
-            
-            form.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
-            
-            document.getElementById('last-goal-display').style.display = 'none';
-            document.getElementById('verbatim-feedback-section').style.display = 'none';
-            document.getElementById('verbatim-feedback-output').innerHTML = '';
-            document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'none');
-            
-            if (fullReset) {
-                clearAutosave();
-            }
-        }
-        
-        function resetCoachingForm() {
-            const form = document.getElementById('coachingForm');
-            form.reset();
-            form.employeeId.value = "";
-            document.getElementById('coaching-date').valueAsDate = new Date();
-            
-            document.getElementById('ai-rec-progress').textContent = `Ask something like, "What is going well with your performance?" (Don't forget to document Coachee's perspective)`;
-            document.getElementById('ai-rec-obstacles').textContent = `Ask something like, "What has been difficult for you recently?" (Include examples provided by Coachee)`;
-            document.getElementById('ai-rec-actionplan').textContent = `(Include SMART goal)`;
-        }
-
-
-        // --- MODAL Functions ---
-        const modal = document.getElementById('editEmployeeModal');
-        const editForm = document.getElementById('editEmployeeForm');
-        function openEditModal(id, profile) {
-            editForm.id.value = id;
-            editForm.name.value = profile.name;
-            editForm.role.value = profile.role || '';
-            editForm.hireDate.value = profile.hireDate || '';
-            editForm.strengths.value = profile.strengths || '';
-            editForm.opportunities.value = profile.opportunities || '';
-            modal.style.display = 'block';
-        }
-        function closeEditModal() {
-            modal.style.display = 'none';
-            editForm.reset();
-        }
         async function saveEmployeeChanges(event) {
             event.preventDefault();
-            const id = editForm.id.value;
+            const id = document.getElementById('edit-employee-id').value;
             const updatedProfile = {
-                name: editForm.name.value.trim(),
-                role: editForm.role.value.trim(),
-                hireDate: editForm.hireDate.value,
-                strengths: editForm.strengths.value.trim(),
-                opportunities: editForm.opportunities.value.trim()
+                name: document.getElementById('edit-employee-name').value.trim(),
+                role: document.getElementById('edit-employee-role').value.trim(),
+                hireDate: document.getElementById('edit-employee-hire-date').value,
+                strengths: document.getElementById('edit-employee-strengths').value.trim(),
+                opportunities: document.getElementById('edit-employee-opportunities').value.trim()
             };
-            try {
-                const docRef = doc(db, "artifacts", appId, "public", "data", "employees", id);
-                await setDoc(docRef, updatedProfile, { merge: true });
-                await showToast("Employee details saved!");
-                closeEditModal();
-            } catch (e) {
-                console.error("Error saving changes:", e);
-                await showToast("Failed to save changes. See console for details.", true);
-            }
-        }
-        
-        // --- Auth Functions ---
-        async function signInWithGoogle() {
-            try {
-                await signInWithPopup(auth, googleProvider);
-            } catch (error) {
-                console.error("Google Sign-in Error:", error);
-                await showToast("Could not sign in with Google. Check console.", true);
-            }
-        }
-        async function signOutUser() {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Sign-out Error:", error);
-            }
-        }
-        
-        // --- Setup Listeners ---
-        function setupFirestoreListeners() {
-            if (employeesListener) employeesListener();
-            if (observationsListener) observationsListener();
-            if (coachingsListener) coachingsListener();
-            if (storeGoalsListener) storeGoalsListener(); 
-            employeesRef = collection(db, "artifacts", appId, "public", "data","employees");
-            observationsRef = collection(db, "artifacts", appId, "public", "data", "observations");
-            coachingsRef = collection(db, "artifacts", appId, "public", "data", "coachings");
-            storeGoalsRef = doc(db, "artifacts", appId, "public", "data", "storeGoals", "currentMonth");
-            employeesListener = onSnapshot(employeesRef, (snapshot) => {
-                console.log("Firebase: Employees snapshot received");
-                localEmployees = {};
-                snapshot.forEach((doc) => {
-                    localEmployees[doc.id] = { ...doc.data(), id: doc.id };
-                });
-                console.log("Local employees updated:", localEmployees);
-                refreshUI();
-            }, (error) => {
-                console.error("Error listening to employees:", error);
-            });
-            observationsListener = onSnapshot(observationsRef, (snapshot) => {
-                console.log("Firebase: Observations snapshot received");
-                localObservations = [];
-                snapshot.forEach((doc) => {
-                    localObservations.push({ ...doc.data(), id: doc.id });
-                });
-                console.log("Local observations updated:", localObservations.length);
-                displayEmployeeLogs(document.getElementById('log-employee-select').value);
-            }, (error) => {
-                console.error("Error listening to observations:", error);
-            });
-            coachingsListener = onSnapshot(coachingsRef, (snapshot) => {
-                console.log("Firebase: Coachings snapshot received");
-                localCoachings = [];
-                snapshot.forEach((doc) => {
-                    localCoachings.push({ ...doc.data(), id: doc.id });
-                });
-                console.log("Local coachings updated:", localCoachings.length);
-                displayLastSMARTGoal(document.getElementById('employee').value);
-                displayEmployeeLogs(document.getElementById('log-employee-select').value);
-            }, (error) => {
-                console.error("Error listening to coachings:", error);
-            });
-            storeGoalsListener = onSnapshot(storeGoalsRef, (doc) => {
-                console.log("Firebase: Store goals snapshot received");
-                localStoreGoals = doc.data() || {};
-                console.log("Local store goals updated:", localStoreGoals);
-                refreshUI(); // Will call checkGoalDate
-            }, (error) => {
-                console.error("Error listening to store goals:", error);
-            });
+            await setDoc(doc(db, "artifacts", appId, "public", "stores", currentStore, "employees", id), updatedProfile, { merge: true });
+            await showToast("Saved!");
+            document.getElementById('editEmployeeModal').style.display = 'none';
         }
         
         function displayLastSMARTGoal(employeeId) {
             const goalDisplay = document.getElementById('last-goal-display');
-            if (!employeeId) {
-                goalDisplay.style.display = 'none';
-                return;
-            }
+            if (!employeeId) { goalDisplay.style.display = 'none'; return; }
             const recentCoaching = localCoachings
                 .filter(c => c.employeeId === employeeId && c.actionPlan)
                 .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; 
@@ -2509,19 +1951,74 @@
                 goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toDate().toLocaleDateString()}):</strong> ${recentCoaching.actionPlan}`;
                 goalDisplay.style.display = 'block';
             } else {
-                goalDisplay.innerHTML = `<em>No previous SMART goals found for this employee.</em>`;
+                goalDisplay.innerHTML = `<em>No previous SMART goals found.</em>`;
                 goalDisplay.style.display = 'block';
             }
         }
-
-
-        // --- Page Load ---
-        document.addEventListener('DOMContentLoaded', async () => {
+        
+        function openPage(event, pageName) {
+            const pageContents = document.getElementsByClassName('page-content');
+            for (let i = 0; i < pageContents.length; i++) pageContents[i].style.display = 'none';
+            const navLinks = document.getElementsByClassName('nav-link');
+            for (let i = 0; i < navLinks.length; i++) navLinks[i].className = navLinks[i].className.replace(' active', '');
+            document.getElementById(pageName).style.display = 'block';
+            event.currentTarget.className += ' active';
             
+            if (pageName !== 'Observation') resetObsForm(true); 
+            if (pageName !== 'Coaching') resetCoachingForm();
+            if (pageName === 'Tracker') updateTrackerTab();
+            if (pageName === 'Goals') displayStoreGoals();
+        }
+
+        // --- Setup & Init ---
+        function setupFirestoreListeners() {
+            // Detach old listeners if exist
+            if (employeesUnsub) employeesUnsub();
+            if (observationsUnsub) observationsUnsub();
+            if (coachingsUnsub) coachingsUnsub();
+            if (storeGoalsUnsub) storeGoalsUnsub();
+            if (overridesUnsub) overridesUnsub();
+
+            if (!currentStore) return; // Wait for store selection
+
+            const basePath = `artifacts/${appId}/public/stores/${currentStore}`;
+            
+            employeesRef = collection(db, `${basePath}/employees`);
+            observationsRef = collection(db, `${basePath}/observations`);
+            coachingsRef = collection(db, `${basePath}/coachings`);
+            storeGoalsRef = doc(db, `${basePath}/settings/storeGoals`);
+            overridesRef = doc(db, `${basePath}/settings/overrides`);
+            
+            employeesUnsub = onSnapshot(employeesRef, (snapshot) => {
+                localEmployees = {};
+                snapshot.forEach((doc) => localEmployees[doc.id] = { ...doc.data(), id: doc.id });
+                refreshUI();
+            });
+            observationsUnsub = onSnapshot(observationsRef, (snapshot) => {
+                localObservations = [];
+                snapshot.forEach((doc) => localObservations.push({ ...doc.data(), id: doc.id }));
+                refreshUI();
+            });
+            coachingsUnsub = onSnapshot(coachingsRef, (snapshot) => {
+                localCoachings = [];
+                snapshot.forEach((doc) => localCoachings.push({ ...doc.data(), id: doc.id }));
+                refreshUI();
+            });
+            storeGoalsUnsub = onSnapshot(storeGoalsRef, (doc) => {
+                localStoreGoals = doc.data() || {};
+                refreshUI();
+            });
+            overridesUnsub = onSnapshot(overridesRef, (doc) => {
+                localOverrides = doc.data() || {};
+                refreshUI();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             const appWrapper = document.getElementById('app-wrapper');
             const signInBtn = document.getElementById('sign-in-btn');
             const signOutBtn = document.getElementById('sign-out-btn');
-            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn'); 
+            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
             
             try {
                 app = initializeApp(firebaseConfig);
@@ -2532,46 +2029,45 @@
                 googleProvider.addScope('profile'); 
                 googleProvider.addScope('email');   
                 setLogLevel('Debug');
-                
             } catch (e) {
-                console.error("Firebase initialization failed:", e);
-                await showToast("FATAL ERROR: Could not connect to database.", true);
+                console.error("Firebase init failed:", e);
                 return;
             }
 
             onAuthStateChanged(auth, (user) => {
                 currentUser = user; 
                 if (user) {
-                    console.log("Firebase: User authenticated:", user.uid);
                     userId = user.uid;
                     appWrapper.classList.remove('logged-out'); 
-                    
                     signInBtn.style.display = 'none'; 
                     signOutBtn.style.display = 'flex'; 
                     signOutBtn.querySelector('.auth-text').textContent = `Sign Out (${user.displayName || user.email})`;
                     
-                    setupFirestoreListeners();
+                    if (!currentStore) {
+                        openStoreSelector();
+                    } else {
+                        // Update UI labels immediately if store exists in localstorage
+                        const labelText = `(${currentStore})`;
+                        document.getElementById('obs-store-label').textContent = labelText;
+                        document.getElementById('coaching-store-label').textContent = labelText;
+                        setupFirestoreListeners();
+                    }
                 } else {
-                    console.log("Firebase: User signed out.");
                     userId = null;
                     appWrapper.classList.add('logged-out'); 
-                    
                     signInBtn.style.display = 'flex'; 
                     signOutBtn.style.display = 'none'; 
                     signOutBtn.querySelector('.auth-text').textContent = `Sign Out`;
                     
-                    if (employeesListener) employeesListener();
-                    if (observationsListener) observationsListener();
-                    if (coachingsListener) coachingsListener();
-                    if (storeGoalsListener) storeGoalsListener();
+                    if (employeesUnsub) employeesUnsub();
+                    if (observationsUnsub) observationsUnsub();
                 }
             });
 
-            // --- Add All UI Event Listeners ---
+            // Event Listeners
             document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee);
             document.getElementById('coachingForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                showToast("Please use the 'Generate AI Notes & Log Session' button to log this coaching.", true);
+                 e.preventDefault(); showToast("Use 'Generate AI Notes & Log' button.", true); 
             });
             document.getElementById('goalsForm').addEventListener('submit', saveStoreGoals);
             
@@ -2579,84 +2075,45 @@
             document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
             document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
 
-            document.getElementById('employee').addEventListener('change', (event) => {
-                const employeeId = event.target.value;
-                displayLastSMARTGoal(employeeId);
-                // Clear old AI outputs
-                document.getElementById('verbatim-feedback-section').style.display = 'none';
-                document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'none');
-            });
+            document.getElementById('employee').addEventListener('change', (event) => displayLastSMARTGoal(event.target.value));
+            document.getElementById('coaching-employee-select').addEventListener('change', (event) => getCoachingRecommendations(event.target.value));
+            document.getElementById('log-employee-select').addEventListener('change', (event) => displayEmployeeLogs(event.target.value));
             
-            document.getElementById('coaching-employee-select').addEventListener('change', (event) => {
-                getCoachingRecommendations(event.target.value);
-            });
+            document.getElementById('sign-in-btn').addEventListener('click', () => signInWithPopup(auth, googleProvider));
+            document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
             
-            document.getElementById('log-employee-select').addEventListener('change', (event) => {
-                displayEmployeeLogs(event.target.value);
-            });
-            
-            document.getElementById('sign-in-btn').addEventListener('click', signInWithGoogle);
-            document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
-            
-            document.getElementById('modal-close-btn').addEventListener('click', closeEditModal);
+            document.getElementById('modal-close-btn').addEventListener('click', () => document.getElementById('editEmployeeModal').style.display = 'none');
             document.getElementById('editEmployeeForm').addEventListener('submit', saveEmployeeChanges);
-            document.getElementById('delete-employee-btn').addEventListener('click', () => {
-                const id = document.getElementById('edit-employee-id').value;
-                deleteEmployee(id);
-            });
+            document.getElementById('delete-employee-btn').addEventListener('click', () => deleteEmployee(document.getElementById('edit-employee-id').value));
             
             window.addEventListener('click', (event) => {
-                if (event.target == modal) {
-                    closeEditModal();
-                }
+                if (event.target == document.getElementById('editEmployeeModal')) document.getElementById('editEmployeeModal').style.display = 'none';
             });
             
-            document.getElementById('prompt-close-btn').addEventListener('click', () => {
-                document.getElementById('custom-prompt-modal').style.display = 'none';
-            });
-            document.getElementById('prompt-cancel-btn').addEventListener('click', () => {
-                document.getElementById('custom-prompt-modal').style.display = 'none';
-            });
+            document.getElementById('prompt-close-btn').addEventListener('click', () => document.getElementById('custom-prompt-modal').style.display = 'none');
+            document.getElementById('prompt-cancel-btn').addEventListener('click', () => document.getElementById('custom-prompt-modal').style.display = 'none');
             
-            sidebarToggleBtn.addEventListener('click', () => {
-                appWrapper.classList.toggle('sidebar-collapsed');
-            });
+            sidebarToggleBtn.addEventListener('click', () => appWrapper.classList.toggle('sidebar-collapsed'));
             
             document.querySelectorAll('.copy-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     const targetId = button.dataset.target;
                     const targetElement = document.getElementById(targetId);
-                    let textToCopy = '';
-
-                    if (targetElement.tagName === 'TEXTAREA') {
-                        textToCopy = targetElement.value;
-                    } else { 
-                        textToCopy = targetElement.innerText; 
-                    }
-                    
+                    let textToCopy = targetElement.tagName === 'TEXTAREA' ? targetElement.value : targetElement.innerText;
                     const tempText = document.createElement('textarea');
                     tempText.value = textToCopy;
                     document.body.appendChild(tempText);
                     tempText.select();
                     document.execCommand('copy');
                     document.body.removeChild(tempText);
-
                     button.textContent = 'Copied!';
                     button.classList.add('copied');
-                    setTimeout(() => {
-                        button.textContent = 'Copy';
-                        button.classList.remove('copied');
-                    }, 2000);
+                    setTimeout(() => { button.textContent = 'Copy'; button.classList.remove('copied'); }, 2000);
                 });
             });
             
-            document.getElementById('obsForm').addEventListener('input', saveToAutosave);
-            
-            document.querySelectorAll('input[value="Partial"]').forEach(radio => radio.checked = true);
-            document.getElementById('coaching-date').valueAsDate = new Date();
-            loadFromAutosave(); 
-            
             window.openPage = openPage;
         });
-
     </script>
+</body>
+</html>
