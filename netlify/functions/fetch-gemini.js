@@ -1,92 +1,73 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
 exports.handler = async (event, context) => {
-  // 1. Handle Preflight (CORS) requests
+  // 1. Handling CORS (So your website can talk to this function)
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
+
+  // Handle browser "pre-flight" checks
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
-  // 2. Only allow POST requests
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method Not Allowed' })
-    };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   try {
-    // 3. Parse the incoming body
+    // 2. Get the prompt and API Key
     const data = JSON.parse(event.body);
-    const prompt = data.prompt;
-
-    if (!prompt) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Prompt is required' })
-      };
-    }
-
-    // 4. Check for API Key
     const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!data.prompt) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Prompt is required' }) };
+    }
     if (!apiKey) {
-      console.error("Missing GEMINI_API_KEY environment variable");
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server Config Error: API Key missing' }) };
+    }
+
+    // 3. Call Google API DIRECTLY (Bypassing the broken SDK)
+    // Note: We use "v1beta" which guarantees access to the Flash model
+    // To use Gemini 2.0 Flash (Experimental), change "gemini-1.5-flash" to "gemini-2.0-flash-exp" below.
+    const model = "gemini-2.0-flash-exp"; 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const googleResponse = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: data.prompt }]
+        }]
+      })
+    });
+
+    const googleData = await googleResponse.json();
+
+    // 4. Handle Google's Response
+    if (!googleResponse.ok) {
+      console.error("Google API Error:", googleData);
       return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'Server misconfiguration: API Key missing' })
+        statusCode: googleResponse.status,
+        headers,
+        body: JSON.stringify({ error: 'AI Provider Error', details: googleData })
       };
     }
 
-    // 5. Initialize Gemini
-    const genAI = new GoogleGenerativeAI(apiKey);
-    // Use 'gemini-pro' or 'gemini-1.5-flash' depending on your preference/availability
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    // 6. Generate Content
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    // 7. Return success
+    // 5. Send data back to your website
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*', // Allow all origins (or specify your domain)
-        'Content-Type': 'application/json'
-      },
-      // Mimic the structure the frontend expects: { candidates: [ { content: { parts: [ { text: ... } ] } } ] }
-      // Or simply return the text if you adjust the frontend. 
-      // YOUR FRONTEND expects the raw Google structure based on your code: 
-      // "result.candidates[0].content.parts[0].text"
-      // So we will return the raw response structure or reconstruct it to match.
-      body: JSON.stringify({
-        candidates: [
-            {
-                content: {
-                    parts: [
-                        { text: text }
-                    ]
-                }
-            }
-        ]
-      })
+      headers,
+      body: JSON.stringify(googleData)
     };
 
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Function Error:", error);
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ error: 'Failed to generate content', details: error.message })
+      headers,
+      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
     };
   }
 };
