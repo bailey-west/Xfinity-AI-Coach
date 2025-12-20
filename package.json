@@ -1,0 +1,9 @@
+{
+  "name": "retail-coaching-tool",
+  "version": "1.0.0",
+  "description": "Backend for Retail Coaching Tool",
+  "main": "functions/fetch-gemini.js",
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3"
+  }
+}
