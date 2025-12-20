@@ -16,78 +16,83 @@ exports.handler = async (event, context) => {
 
   try {
     const data = JSON.parse(event.body);
-    // TRIM the key to remove accidental whitespace/newlines
+    // Trim key to remove accidental spaces
     const apiKey = (process.env.GEMINI_API_KEY || "").trim();
 
     if (!data.prompt) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Prompt is required' }) };
     }
     if (!apiKey) {
-      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Configuration Error: GEMINI_API_KEY is missing in Netlify' }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Configuration Error: GEMINI_API_KEY is missing' }) };
     }
 
-    // 2. SMART MODEL LIST
-    // We will try these in order. If the first fails, we try the next.
-    const modelsToTry = [
-      "gemini-1.5-flash",       // Standard Flash
-      "gemini-1.5-flash-latest", // Alternate Flash alias
-      "gemini-pro"              // Robust fallback
-    ];
+    // --- STEP A: ASK GOOGLE WHICH MODELS ARE AVAILABLE ---
+    // This fixes the "404 Model Not Found" by only using models we KNOW exist for your key.
+    console.log("Fetching available models for this key...");
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    
+    const listResponse = await fetch(listUrl);
+    const listData = await listResponse.json();
 
-    let successData = null;
-    let lastError = null;
-
-    // 3. LOOP THROUGH MODELS
-    for (const model of modelsToTry) {
-      console.log(`Trying model: ${model}...`);
-      
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: data.prompt }] }]
-          })
-        });
-
-        const json = await response.json();
-
-        if (response.ok) {
-          successData = json;
-          console.log(`Success with ${model}`);
-          break; // Stop looping, we found a winner
-        } else {
-          console.warn(`Failed ${model}:`, json.error?.message || json);
-          lastError = json;
-        }
-      } catch (err) {
-        console.error(`Network error with ${model}:`, err);
-        lastError = { message: err.message };
-      }
-    }
-
-    // 4. RESULT
-    if (successData) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(successData)
-      };
-    } else {
+    if (!listResponse.ok) {
+      console.error("API Key Access Error:", listData);
       return {
         statusCode: 500,
         headers,
         body: JSON.stringify({ 
-          error: 'All models failed.', 
-          details: lastError 
+          error: 'Your API Key is invalid or does not have the Generative Language API enabled.',
+          details: listData 
         })
       };
     }
 
+    // --- STEP B: PICK THE BEST MODEL ---
+    // Look for 'gemini-1.5-flash', then 'gemini-pro', then any 'generateContent' capable model
+    const models = listData.models || [];
+    let chosenModel = models.find(m => m.name.includes("gemini-1.5-flash"))?.name ||
+                      models.find(m => m.name.includes("gemini-pro"))?.name ||
+                      models.find(m => m.supportedGenerationMethods?.includes("generateContent"))?.name;
+
+    if (!chosenModel) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'No text-generation models found for this API Key.' })
+      };
+    }
+
+    console.log(`Auto-selected model: ${chosenModel}`);
+
+    // --- STEP C: GENERATE CONTENT ---
+    // Note: chosenModel comes with 'models/' prefix, e.g., 'models/gemini-pro'
+    const genUrl = `https://generativelanguage.googleapis.com/v1beta/${chosenModel}:generateContent?key=${apiKey}`;
+
+    const genResponse = await fetch(genUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: data.prompt }] }]
+      })
+    });
+
+    const genData = await genResponse.json();
+
+    if (!genResponse.ok) {
+      return {
+        statusCode: genResponse.status,
+        headers,
+        body: JSON.stringify({ error: 'Generation Failed', details: genData })
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(genData)
+    };
+
   } catch (error) {
-    console.error("Global Handler Error:", error);
+    console.error("Function Error:", error);
     return {
       statusCode: 500,
       headers,
