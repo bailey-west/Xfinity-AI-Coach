@@ -1,79 +1,80 @@
-// The async handler function for the Netlify Function
-exports.handler = async function (event, context) {
-  // 1. Check for the correct HTTP method
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405, // Method Not Allowed
-      body: JSON.stringify({ error: 'Only POST requests are allowed' }),
-    };
+exports.handler = async (event, context) => {
+  // 1. CORS Headers (Allows your site to talk to this function)
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
+
+  // 2. Handle Browser "Pre-flight" checks
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
   }
 
-  // 2. Retrieve the API key from environment variables
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-
-  if (!apiKey) {
-    // This error means the API key's VALUE is missing in the Netlify settings.
-    console.error("ERROR: GOOGLE_AI_API_KEY was not found in process.env.");
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'API key is not set' }),
-    };
+  // 3. Block anything that isn't a POST request
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   try {
-    // 3. Parse the incoming request body to get the prompt
-    const { prompt } = JSON.parse(event.body);
+    // 4. Parse inputs
+    const data = JSON.parse(event.body);
+    const apiKey = (process.env.GEMINI_API_KEY || "").trim();
 
-    if (!prompt) {
-      return {
-        statusCode: 400, // Bad Request
-        body: JSON.stringify({ error: 'Prompt is missing from request body' }),
-      };
+    if (!data.prompt) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Prompt is required' }) };
+    }
+    if (!apiKey) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server Config Error: GEMINI_API_KEY is missing' }) };
     }
 
-    // 4. Prepare the payload for the Google AI API
-    const payload = {
-      contents: [{
-        role: "user",
-        parts: [{ text: prompt }],
-      }],
-    };
-    
-    // *** THIS IS THE CORRECTED LINE ***
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+    // 5. CALL GOOGLE DIRECTLY (Gemini 1.5 Flash)
+    // We use "v1beta" as it is the most compatible endpoint for Flash.
+    const model = "gemini-1.5-flash"; 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-    // 5. Make the fetch request to the Google AI API
-    const response = await fetch(apiUrl, {
+    console.log(`Sending request to ${model}...`);
+
+    const googleResponse = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: data.prompt }]
+        }]
+      })
     });
 
-    if (!response.ok) {
-      // If the API returns an error, pass it along
-      const errorData = await response.text();
-      console.error("API Error Details:", errorData); // Added more logging
+    const googleData = await googleResponse.json();
+
+    // 6. Handle Errors from Google (like 404s or 429s)
+    if (!googleResponse.ok) {
+      console.error("Google API Error:", JSON.stringify(googleData, null, 2));
+      
+      // Pass the specific Google error back to the frontend so we can see it
       return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: 'API request failed', details: errorData }),
+        statusCode: googleResponse.status,
+        headers,
+        body: JSON.stringify({ 
+          error: 'AI Provider Error', 
+          details: googleData.error || googleData 
+        })
       };
     }
 
-    const result = await response.json();
-    const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
-
-    // 6. Send the successful response back to the webpage
+    // 7. Success! Send the answer back.
     return {
       statusCode: 200,
-      body: JSON.stringify({ text: generatedText }),
+      headers,
+      body: JSON.stringify(googleData)
     };
 
   } catch (error) {
-    // Catch any other errors (e.g., JSON parsing)
-    console.error('Error in Netlify function:', error);
+    console.error("Internal Function Error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'An internal server error occurred.' }),
+      headers,
+      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
     };
   }
 };
