@@ -1,25 +1,21 @@
 exports.handler = async (event, context) => {
-  // 1. CORS Headers (Allows your site to talk to this function)
+  // 1. CORS Headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
 
-  // 2. Handle Browser "Pre-flight" checks
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
 
-  // 3. Block anything that isn't a POST request
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
   try {
-    // 4. Parse inputs
     const data = JSON.parse(event.body);
-    // Trim invisible spaces from the key (common copy-paste error)
     const apiKey = (process.env.GEMINI_API_KEY || "").trim();
 
     if (!data.prompt) {
@@ -29,45 +25,75 @@ exports.handler = async (event, context) => {
       return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server Config Error: GEMINI_API_KEY is missing' }) };
     }
 
-    // 5. CALL GOOGLE DIRECTLY (Gemini 1.5 Flash)
-    // We use the "v1beta" endpoint which is the standard for 1.5 Flash.
-    const model = "gemini-1.5-flash"; 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // --- STEP 1: DISCOVER AVAILABLE MODELS ---
+    // Instead of guessing "gemini-1.5-flash", we ask Google what is allowed.
+    console.log("Discovering available models...");
+    
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    const listResponse = await fetch(listUrl);
+    const listData = await listResponse.json();
 
-    console.log(`Sending request to ${model}...`);
-
-    const googleResponse = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: data.prompt }]
-        }]
-      })
-    });
-
-    const googleData = await googleResponse.json();
-
-    // 6. Handle Errors from Google (like 404s or 429s)
-    if (!googleResponse.ok) {
-      console.error("Google API Error:", JSON.stringify(googleData, null, 2));
-      
-      // Pass the specific Google error back to the frontend so we can see it
+    // ERROR CHECK: If we can't even list models, the Key is the problem.
+    if (!listResponse.ok) {
+      console.error("API Key Access Failed:", listData);
       return {
-        statusCode: googleResponse.status,
+        statusCode: 500,
         headers,
         body: JSON.stringify({ 
-          error: 'AI Provider Error', 
-          details: googleData.error || googleData 
+          error: 'API Key Rejected', 
+          message: 'Google rejected this API Key. Ensure "Generative Language API" is enabled in Google Cloud Console.',
+          googleDetails: listData 
         })
       };
     }
 
-    // 7. Success! Send the answer back.
+    // --- STEP 2: SELECT BEST MODEL ---
+    // listData.models contains everything available. We prioritize Flash.
+    const availableModels = listData.models || [];
+    
+    // Logic: Look for "flash", then "pro", then fallback to anything that supports generation
+    let chosenModelObj = availableModels.find(m => m.name.includes("gemini-1.5-flash")) ||
+                         availableModels.find(m => m.name.includes("gemini-pro")) ||
+                         availableModels.find(m => m.supportedGenerationMethods?.includes("generateContent"));
+
+    if (!chosenModelObj) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'No text-generation models found for this API Key.' })
+      };
+    }
+
+    // The name comes back as "models/gemini-1.5-flash-001" etc.
+    const modelName = chosenModelObj.name; 
+    console.log(`Auto-selected model: ${modelName}`);
+
+    // --- STEP 3: GENERATE CONTENT ---
+    // Note: modelName already includes "models/", so we don't add it again.
+    const genUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`;
+
+    const genResponse = await fetch(genUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: data.prompt }] }]
+      })
+    });
+
+    const genData = await genResponse.json();
+
+    if (!genResponse.ok) {
+      return {
+        statusCode: genResponse.status,
+        headers,
+        body: JSON.stringify({ error: 'Generation Failed', details: genData })
+      };
+    }
+
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(googleData)
+      body: JSON.stringify(genData)
     };
 
   } catch (error) {
