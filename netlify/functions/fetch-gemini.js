@@ -19,6 +19,7 @@ exports.handler = async (event, context) => {
   try {
     // 4. Parse inputs
     const data = JSON.parse(event.body);
+    // Trim invisible spaces from the key (common copy-paste error)
     const apiKey = (process.env.GEMINI_API_KEY || "").trim();
 
     if (!data.prompt) {
@@ -29,7 +30,7 @@ exports.handler = async (event, context) => {
     }
 
     // 5. CALL GOOGLE DIRECTLY (Gemini 1.5 Flash)
-    // We use "v1beta" as it is the most compatible endpoint for Flash.
+    // We use the "v1beta" endpoint which is the standard for 1.5 Flash.
     const model = "gemini-1.5-flash"; 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
