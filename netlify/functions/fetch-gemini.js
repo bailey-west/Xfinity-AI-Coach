@@ -30,7 +30,7 @@ exports.handler = async (event, context) => {
     // 3. Call Google API DIRECTLY (Bypassing the broken SDK)
     // Note: We use "v1beta" which guarantees access to the Flash model
     // To use Gemini 2.0 Flash (Experimental), change "gemini-1.5-flash" to "gemini-2.0-flash-exp" below.
-    const model = "gemini-2.0-flash-exp"; 
+    const model = "gemini-1.5-flash"; 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const googleResponse = await fetch(url, {
