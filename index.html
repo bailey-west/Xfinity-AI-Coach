@@ -1008,8 +1008,8 @@
             
             <div class="store-selector-container">
                 <select id="store-selector" class="store-select">
-                    <option value="williston">Williston (Current)</option>
-                    <option value="nashua">Nashua (New)</option>
+                    <option value="williston">Williston</option>
+                    <option value="nashua">Nashua</option>
                 </select>
             </div>
             
@@ -1425,6 +1425,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Netlify Backend Helper ---
+        // Keeps API keys hidden on the server side
         async function callNetlifyGemini(promptText) {
             console.log("Sending prompt to AI..."); 
             const response = await fetch('/.netlify/functions/fetch-gemini', {
@@ -1434,7 +1435,8 @@
             });
             
             if (!response.ok) {
-                throw new Error(`Netlify Error: ${response.status} ${response.statusText}`);
+                const errText = await response.text();
+                throw new Error(`Netlify Error: ${response.status} ${response.statusText} - ${errText}`);
             }
             
             return await response.json();
@@ -1451,7 +1453,7 @@
             measurementId: "G-K8RYLXRG5H"
         };
         
-        // --- INITIALIZE FIREBASE (THE FIX: Done immediately) ---
+        // --- INITIALIZE FIREBASE (Top Level Fix) ---
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
@@ -1979,7 +1981,9 @@
                     opportunities: ""
                 };
                 try {
-                    await addDoc(employeesRef, newEmployee);
+                    // Uses getStorePath for correct context
+                    const storePath = getStorePath(currentStoreId);
+                    await addDoc(collection(db, "artifacts", appId, storePath, "data","employees"), newEmployee);
                     await showToast("Employee added successfully!");
                     nameInput.value = '';
                     roleInput.value = '';
@@ -2193,7 +2197,7 @@
                 
             } catch (err) {
                 console.error('AI Gen Failed:', err);
-                await showToast('AI generation failed. Check console.', true);
+                await showToast('AI generation failed. Check console for details.', true);
             } finally {
                 showLoading('summary-loader', 'generate-and-log-ai-summary', false);
             }
@@ -2350,7 +2354,9 @@
                 lastUpdated: Timestamp.now()
             };
             try {
-                await setDoc(storeGoalsRef, goalsToSave);
+                // Uses getStorePath
+                const storePath = getStorePath(currentStoreId);
+                await setDoc(doc(db, "artifacts", appId, storePath, "data", "storeGoals", "currentMonth"), goalsToSave);
                 await showToast("Monthly goals have been saved!");
                 displayStoreGoals(); 
                 checkGoalDate(); 
@@ -2372,14 +2378,6 @@
             document.getElementById(pageName).style.display = 'block';
             event.currentTarget.className += ' active';
             
-            // Note: We no longer auto-reset on page switch based on your preference for persistence,
-            // but usually it's safer to clear Observsations. I will leave Obs reset enabled, but Coaching disabled?
-            // User requested: "Coaching fields... stay on page after submission".
-            if (pageName === 'Observation') {
-                 // Optional: resetObsForm(false); 
-                 // Keeping Obs form active allows jumping back and forth.
-            }
-
             if (pageName === 'Tracker') {
                 updateTrackerTab();
             }
@@ -2532,9 +2530,9 @@
                 opportunities: editForm.opportunities.value.trim()
             };
             try {
+                // Uses getStorePath
                 const storePath = getStorePath(currentStoreId);
-                const docRef = doc(db, "artifacts", appId, storePath, "data", "employees", id);
-                await setDoc(docRef, updatedProfile, { merge: true });
+                await setDoc(doc(db, "artifacts", appId, storePath, "data", "employees", id), updatedProfile, { merge: true });
                 await showToast("Employee details saved!");
                 closeEditModal();
             } catch (e) {
@@ -2546,7 +2544,7 @@
         // --- Auth Functions ---
         async function signInWithGoogle() {
             try {
-                // Now uses the top-level 'auth' variable which is already initialized
+                // Now uses the top-level 'auth' variable
                 await signInWithPopup(auth, googleProvider);
             } catch (error) {
                 console.error("Google Sign-in Error:", error);
@@ -2643,8 +2641,6 @@
             const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn'); 
             const storeSelector = document.getElementById('store-selector');
             
-            // Initialization has moved to top level!
-
             onAuthStateChanged(auth, (user) => {
                 currentUser = user; 
                 if (user) {
@@ -2673,7 +2669,7 @@
 
             // --- Add All UI Event Listeners ---
             
-            // NEW: Store Selector Change
+            // Store Selector Change
             storeSelector.addEventListener('change', (e) => {
                 currentStoreId = e.target.value;
                 if(currentUser) {
