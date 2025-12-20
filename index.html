@@ -1034,10 +1034,10 @@
             </a>
             
             <div class="sidebar-footer">
-                <button class="auth-button" id="sign-in-btn">
+                <button type="button" class="auth-button" id="sign-in-btn">
                     <i class="fa-brands fa-google"></i> <span class="auth-text">Sign In with Google</span>
                 </button>
-                <button class="auth-button sign-out" id="sign-out-btn">
+                <button type="button" class="auth-button sign-out" id="sign-out-btn">
                     <i class="fa-solid fa-right-from-bracket"></i> <span class="auth-text">Sign Out</span>
                 </button>
             </div>
@@ -1451,11 +1451,23 @@
             measurementId: "G-K8RYLXRG5H"
         };
         
+        // --- INITIALIZE FIREBASE (THE FIX: Done immediately) ---
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider(); 
+        googleProvider.addScope('profile'); 
+        googleProvider.addScope('email');   
+        setLogLevel('Debug');
+
         const appId = firebaseConfig.projectId || 'default-app-id';
         const DELETE_FAILSAFE_CODE = "DELETE-1234"; 
         const AUTOSAVE_KEY = "obsFormAutosave"; 
 
-        let db, auth, userId, googleProvider, app, analytics, currentUser; 
+        // Global State
+        let currentUser; 
+        let userId;
         
         // References & Listeners
         let employeesRef, observationsRef, coachingsRef, storeGoalsRef; 
@@ -1464,7 +1476,7 @@
         let coachingsListener = null;
         let storeGoalsListener = null; 
 
-        // Global state variables
+        // Data Containers
         let currentStoreId = "williston"; // Default
         let localEmployees = {};
         let localObservations = [];
@@ -1481,7 +1493,6 @@
         }
 
         // --- Helper Functions ---
-        
         function getFirstName(fullName) {
             if (!fullName) return "the employee";
             try {
@@ -1683,7 +1694,8 @@
                             const ul = document.createElement('ul');
                             for (const val of data.behaviors) {
                                 const li = document.createElement('li');
-                                li.textContent = val;<br>                                ul.appendChild(li);
+                                li.textContent = val;
+                                ul.appendChild(li);
                             }
                             p.appendChild(ul);
                         }
@@ -2534,6 +2546,7 @@
         // --- Auth Functions ---
         async function signInWithGoogle() {
             try {
+                // Now uses the top-level 'auth' variable which is already initialized
                 await signInWithPopup(auth, googleProvider);
             } catch (error) {
                 console.error("Google Sign-in Error:", error);
@@ -2630,21 +2643,7 @@
             const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn'); 
             const storeSelector = document.getElementById('store-selector');
             
-            try {
-                app = initializeApp(firebaseConfig);
-                analytics = getAnalytics(app);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                googleProvider = new GoogleAuthProvider(); 
-                googleProvider.addScope('profile'); 
-                googleProvider.addScope('email');   
-                setLogLevel('Debug');
-                
-            } catch (e) {
-                console.error("Firebase initialization failed:", e);
-                await showToast("FATAL ERROR: Could not connect to database.", true);
-                return;
-            }
+            // Initialization has moved to top level!
 
             onAuthStateChanged(auth, (user) => {
                 currentUser = user; 
