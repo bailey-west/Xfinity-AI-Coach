@@ -1,12 +1,12 @@
 exports.handler = async (event, context) => {
-  // 1. Handling CORS (So your website can talk to this function)
+  // 1. CORS Headers (Allows your site to talk to this function)
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
 
-  // Handle browser "pre-flight" checks
+  // 2. Handle Pre-flight checks
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
@@ -16,7 +16,6 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // 2. Get the prompt and API Key
     const data = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -24,46 +23,64 @@ exports.handler = async (event, context) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Prompt is required' }) };
     }
     if (!apiKey) {
-      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server Config Error: API Key missing' }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server Error: API Key missing' }) };
     }
 
-    // 3. Call Google API DIRECTLY (Bypassing the broken SDK)
-    // Note: We use "v1beta" which guarantees access to the Flash model
-    // To use Gemini 2.0 Flash (Experimental), change "gemini-1.5-flash" to "gemini-2.0-flash-exp" below.
-    const model = "gemini-1.5-flash"; 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // 3. DEFINE MODELS
+    // Primary: The specific, stable version of Flash 1.5 (Fixes the 404 error)
+    const primaryModel = "gemini-1.5-flash-001";
+    // Backup: The older stable Pro model (Failsafe)
+    const backupModel = "gemini-pro";
 
-    const googleResponse = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: data.prompt }]
-        }]
-      })
-    });
-
-    const googleData = await googleResponse.json();
-
-    // 4. Handle Google's Response
-    if (!googleResponse.ok) {
-      console.error("Google API Error:", googleData);
-      return {
-        statusCode: googleResponse.status,
-        headers,
-        body: JSON.stringify({ error: 'AI Provider Error', details: googleData })
-      };
+    // Helper function to call Google
+    async function generate(modelName) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: data.prompt }] }]
+        })
+      });
+      return { response, json: await response.json() };
     }
 
-    // 5. Send data back to your website
+    // 4. ATTEMPT PRIMARY MODEL
+    console.log(`Attempting generation with ${primaryModel}...`);
+    let result = await generate(primaryModel);
+
+    // 5. IF FAILED (404), TRY BACKUP
+    if (!result.response.ok) {
+      console.warn(`${primaryModel} failed (${result.response.status}). Trying backup ${backupModel}...`);
+      const backupResult = await generate(backupModel);
+      
+      // If backup succeeds, use it
+      if (backupResult.response.ok) {
+        result = backupResult;
+      } else {
+        // If both fail, return the error from the PRIMARY attempt (it's more useful)
+        console.error("Backup also failed.");
+        return {
+          statusCode: result.response.status,
+          headers,
+          body: JSON.stringify({ 
+            error: 'AI Provider Error', 
+            details: result.json,
+            note: "Both Flash and Pro models failed."
+          })
+        };
+      }
+    }
+
+    // 6. SUCCESS
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(googleData)
+      body: JSON.stringify(result.json)
     };
 
   } catch (error) {
-    console.error("Function Error:", error);
+    console.error("Internal Function Error:", error);
     return {
       statusCode: 500,
       headers,
