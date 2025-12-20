@@ -4,6 +4,6 @@
   "description": "Backend for Retail Coaching Tool",
   "main": "functions/fetch-gemini.js",
   "dependencies": {
-    "@google/generative-ai": "^0.1.3"
+    "@google/generative-ai": "^0.21.0"
   }
 }
