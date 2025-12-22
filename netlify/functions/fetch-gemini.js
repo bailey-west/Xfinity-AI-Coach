@@ -1,89 +1,57 @@
-exports.handler = async (event, context) => {
-  // VERSION: FINAL_STABLE_V3
-  
-  // 1. CORS Headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
-  };
+// File: netlify/functions/fetch-gemini.js
 
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+exports.handler = async (event) => {
+  // 1. Security: Only allow POST requests
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
 
+  // 2. Parse the incoming prompt from your frontend
+  let body;
   try {
-    const data = JSON.parse(event.body);
-    const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+    body = JSON.parse(event.body);
+  } catch (e) {
+    return { statusCode: 400, body: 'Invalid JSON' };
+  }
 
-    if (!data.prompt) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Prompt is required' }) };
-    if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: 'Configuration Error: GEMINI_API_KEY is missing' }) };
+  // 3. Get your API Key from Netlify Environment Variables
+  const apiKey = process.env.GEMINI_API_KEY;
 
-    // 2. MODEL DEFINITION
-    // We use 'gemini-1.5-flash' which is the standard free model for AI Studio keys.
-    const model = "gemini-1.5-flash";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  if (!apiKey) {
+    return { statusCode: 500, body: 'Server Error: API Key missing' };
+  }
 
-    console.log(`[v3] Sending request to ${model}...`);
-
-    const googleResponse = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: data.prompt }]
-        }]
-      })
-    });
-
-    const googleData = await googleResponse.json();
-
-    // 3. ERROR HANDLING
-    if (!googleResponse.ok) {
-      console.error("Google API Error:", JSON.stringify(googleData, null, 2));
-      
-      // Specific handling for common errors
-      if (googleResponse.status === 404) {
-        return {
-          statusCode: 404,
-          headers,
-          body: JSON.stringify({ 
-            error: 'Model Not Found (404)', 
-            details: 'The API Key is valid, but cannot access "gemini-1.5-flash". Please ensure you are using a key from Google AI Studio (aistudio.google.com), NOT Google Cloud Console.' 
-          })
-        };
+  // 4. Call Google Gemini API directly from the backend
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: body.prompt }] }]
+        }),
       }
+    );
 
-      if (googleResponse.status === 429) {
-        return {
-          statusCode: 429,
-          headers,
-          body: JSON.stringify({ 
-            error: 'Rate Limit Exceeded', 
-            details: 'You are generating too fast. Please wait 1 minute and try again.' 
-          })
-        };
-      }
+    const data = await response.json();
 
-      return {
-        statusCode: googleResponse.status,
-        headers,
-        body: JSON.stringify({ error: 'AI Provider Error', details: googleData })
-      };
-    }
-
-    // 4. SUCCESS
+    // 5. Send the result back to your frontend
     return {
       statusCode: 200,
-      headers,
-      body: JSON.stringify(googleData)
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     };
 
   } catch (error) {
-    console.error("Internal Error:", error);
+    console.error("Backend Error:", error);
     return {
       statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
+      body: JSON.stringify({ error: 'Failed to fetch from Google AI' }),
     };
   }
 };
