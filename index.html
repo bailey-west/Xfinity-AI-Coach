@@ -2149,7 +2149,20 @@
             
             try {
                 const result = await callNetlifyGemini(prompt);
-                const responseText = result.candidates[0].content.parts[0].text;
+
+console.log("Full AI Response:", result); // <--- THIS WILL SHOW THE REAL ERROR IN CONSOLE
+
+// Check if the backend returned an error
+if (result.error) {
+    throw new Error(`Backend Error: ${result.error}`);
+}
+
+// Check if the AI response is valid
+if (!result.candidates || !result.candidates[0]) {
+    throw new Error("AI returned no candidates. (Safety filter or quota issue?)");
+}
+
+const responseText = result.candidates[0].content.parts[0].text;
                 let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
