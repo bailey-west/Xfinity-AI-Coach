@@ -22,9 +22,10 @@ exports.handler = async (event) => {
   }
 
   // 4. Call Google Gemini API directly from the backend
+  // FIXED: Changed model to 'gemini-1.5-flash' (removed -001)
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -38,7 +39,15 @@ exports.handler = async (event) => {
 
     const data = await response.json();
 
-    // 5. Send the result back to your frontend
+    // 5. Check if Google sent back an error (like Quota Exceeded)
+    if (data.error) {
+      return {
+        statusCode: data.error.code || 500,
+        body: JSON.stringify({ error: data.error.message }),
+      };
+    }
+
+    // 6. Send the successful result back to your frontend
     return {
       statusCode: 200,
       headers: {
@@ -51,7 +60,7 @@ exports.handler = async (event) => {
     console.error("Backend Error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to fetch from Google AI' }),
+      body: JSON.stringify({ error: 'Failed to connect to Google AI' }),
     };
   }
 };
