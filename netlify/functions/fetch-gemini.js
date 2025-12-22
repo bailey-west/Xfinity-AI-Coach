@@ -20,11 +20,11 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: 'Server Error: API Key missing' };
   }
 
-  // 4. Call Google Gemini API (Using 'gemini-pro' as the failsafe)
+  // 4. Call Google Gemini API
+  // Using 'gemini-1.5-flash' which is the standard, fastest model for this API
   try {
-    // FIXED: Switched to 'gemini-pro' which is the most stable/available model
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -36,7 +36,7 @@ exports.handler = async (event) => {
 
     const data = await response.json();
 
-    // 5. Handle Google Errors (like Quota or Permissions)
+    // 5. Handle Errors from Google (e.g., if model is still not found)
     if (data.error) {
       console.error("Google API Error:", data.error);
       return {
