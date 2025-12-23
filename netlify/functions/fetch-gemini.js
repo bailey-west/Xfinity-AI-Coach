@@ -36,7 +36,7 @@ exports.handler = async (event) => {
             content: body.prompt
           }
         ],
-        model: "llama3-8b-8192", // Fast, efficient model good for summaries
+        model: "llama-3.3-70b-versatile", // Fast, efficient model good for summaries
         temperature: 0.7
       })
     });
