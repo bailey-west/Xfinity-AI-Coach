@@ -1964,20 +1964,25 @@
             return radio ? radio.value : "N/A";
         }
         
+        // --- FIXED: Ensure Button Resets ---
         function showLoading(loaderId, buttonId, isLoading, loadingText = null) {
             const loader = document.getElementById(loaderId);
             const button = document.getElementById(buttonId);
             if (isLoading) {
                 loader.style.display = 'block';
                 button.disabled = true;
-                if (loadingText) {
+                // Store original text if not already stored
+                if (!button.dataset.originalText) {
                     button.dataset.originalText = button.innerHTML;
+                }
+                if (loadingText) {
                     button.innerHTML = loadingText;
                 }
             } else {
                 loader.style.display = 'none';
                 button.disabled = false;
-                if (loadingText && button.dataset.originalText) {
+                // Always restore text if available
+                if (button.dataset.originalText) {
                     button.innerHTML = button.dataset.originalText;
                 }
             }
@@ -2018,21 +2023,21 @@
                 }
             };
             
-            // --- UPDATED PROMPT: Specifics + GREAT Definitions ---
-            let prompt = `Act as a supportive, professional Retail Sales Manager for Xfinity. You are directly coaching **${firstName}**.
+            // --- UPDATED PROMPT: Third Person & Elaborate ---
+            let prompt = `Act as a supportive, professional Retail Sales Manager for Xfinity. You are documenting an observation for **${firstName}**.
             
             I have observed ${firstName} during a customer interaction. 
             Customer Intent: "${customerIntent}"
             Employee Role: ${profile.role}
 
-            Based on the "GREAT" sales model, I will provide the rating (Effective, Partial, Did Not Demonstrate) and specific notes for each step. 
+            Based on the "GREAT" sales model, I will provide the rating and my raw notes.
             
             **GREAT Definitions to Reference:**
-            1. **GREET:** Creating excitement! Acknowledging customers within 6 feet, introducing self, and mentioning Xfinity Rewards[cite: 52, 53].
-            2. **RELATE:** Building trust and common ground[cite: 31]. Asking "tell me more" questions[cite: 74].
-            3. **EXPLORE:** Uncovering needs[cite: 33]. Using T-Charts [cite: 95] and Championing Xfinity Mobile[cite: 98].
-            4. **ASK:** Confidently proposing a solution and asking for the sale[cite: 36, 125].
-            5. **THANK:** Expressing genuine gratitude [cite: 38] and asking for referrals[cite: 151].
+            1. **GREET:** Creating excitement! Acknowledging customers within 6 feet, introducing self, and mentioning Xfinity Rewards.
+            2. **RELATE:** Building trust and common ground. Asking "tell me more" questions.
+            3. **EXPLORE:** Uncovering needs. Using T-Charts and Championing Xfinity Mobile.
+            4. **ASK:** Confidently proposing a solution and asking for the sale.
+            5. **THANK:** Expressing genuine gratitude and asking for referrals.
 
             **OBSERVATION DATA:**
             - Greet: ${greatData.greet.measurement}. Notes: "${greatData.greet.notes}"
@@ -2044,8 +2049,13 @@
 
             **INSTRUCTIONS:**
             Generate a JSON object with these EXACT keys. 
-            For each "*_note" key, write 1-2 sentences elaborating on the feedback. 
-            *Crucial:* If I provided specific notes in the input above, YOU MUST USE THEM to personalize the output. If a step was "Effective", praise specifically. If "Partial" or "Did Not Demonstrate", coach on what was missed based on the GREAT definitions.
+            
+            For each "*_note" key: 
+            - Write in the **THIRD PERSON** (e.g., "${firstName} welcomed the customer..." or "${firstName} effectively built rapport...").
+            - Be **ELABORATE and DETAILED**. Use 2-3 sentences per step.
+            - If I provided notes, expand on them. If I didn't, infer standard Xfinity behaviors based on the rating. 
+            - If a step was "Effective", praise specifically. 
+            - If "Partial" or "Did Not Demonstrate", explain what ${firstName} missed based on the GREAT definitions.
 
             Keys required:
             - "greet_note"
@@ -2109,7 +2119,7 @@
                     date: Timestamp.now(),
                     customerIntent: customerIntent,
                     greatAssessment: greatAssessmentWithAINotes, 
-                    notes: form.notes.value.trim(), // Keep original raw notes too? Or AI summary? Let's keep raw input for record.
+                    notes: form.notes.value.trim(), // Keep original raw notes for record.
                     loggedBy: currentUser.displayName || currentUser.email,
                     loggedByEmail: currentUser.email
                 };
@@ -2394,6 +2404,9 @@
             const form = document.getElementById('obsForm');
             form.reset();
             
+            // Failsafe: Reset button states if stuck
+            showLoading('summary-loader', 'generate-and-log-ai-summary', false);
+            
             if (fullReset) {
                 form.employee.value = "";
             }
@@ -2415,6 +2428,9 @@
             form.reset();
             form.employeeId.value = "";
             document.getElementById('coaching-date').valueAsDate = new Date();
+            
+            // Failsafe: Reset button states
+            showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             
             document.getElementById('ai-rec-progress').textContent = `Ask: "What is going well with your performance?"`;
             document.getElementById('ai-rec-obstacles').textContent = `Ask: "What has been difficult for you recently?"`;
