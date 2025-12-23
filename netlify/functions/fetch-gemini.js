@@ -1,4 +1,5 @@
 // File: netlify/functions/fetch-gemini.js
+// (Renamed logic to use Groq, but keeping filename to prevent frontend errors)
 
 exports.handler = async (event) => {
   // 1. Security: Only allow POST requests
@@ -14,49 +15,69 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
-  // 3. Get your API Key
-  const apiKey = process.env.GEMINI_API_KEY;
+  // 3. Get your Groq API Key
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return { statusCode: 500, body: 'Server Error: API Key missing' };
+    return { statusCode: 500, body: 'Server Error: GROQ_API_KEY is missing' };
   }
 
-  // 4. Call Google Gemini API
-  // Using 'gemini-1.5-flash' which is the standard, fastest model for this API
+  // 4. Call Groq API
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: body.prompt }] }]
-        }),
-      }
-    );
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: body.prompt
+          }
+        ],
+        model: "llama3-8b-8192", // Fast, efficient model good for summaries
+        temperature: 0.7
+      })
+    });
 
     const data = await response.json();
 
-    // 5. Handle Errors from Google (e.g., if model is still not found)
+    // 5. Handle Groq Errors
     if (data.error) {
-      console.error("Google API Error:", data.error);
+      console.error("Groq API Error:", data.error);
       return {
-        statusCode: data.error.code || 500,
-        body: JSON.stringify({ error: `Google Error: ${data.error.message}` }),
+        statusCode: 500,
+        body: JSON.stringify({ error: `Groq Error: ${data.error.message}` }),
       };
     }
 
-    // 6. Success
+    // 6. Format response to match what your frontend expects
+    // Groq returns OpenAI format, but your frontend expects Gemini format.
+    // We map it here so you don't have to change your index.html.
+    const mappedResponse = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              { text: data.choices[0].message.content }
+            ]
+          }
+        }
+      ]
+    };
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(mappedResponse),
     };
 
   } catch (error) {
     console.error("Backend Error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to connect to Google AI' }),
+      body: JSON.stringify({ error: 'Failed to connect to Groq AI' }),
     };
   }
 };
