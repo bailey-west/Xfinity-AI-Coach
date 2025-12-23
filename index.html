@@ -8,16 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            /* NEW: Xfinity-inspired Colors */
+            /* Xfinity-inspired Colors */
             --primary-color: #0061a6; /* Xfinity Blue */
             --primary-color-dark: #004a80;
             --gradient-primary: linear-gradient(90deg, #0061a6, #007bff);
             --light-color: #fff;
-            --text-color: #18181b; /* Darker text */
-            --text-color-light: #a1a1aa; /* Light gray for sidebar */
-            --bg-color: #f4f7fa;     /* Lighter, cooler background */
+            --text-color: #18181b; 
+            --text-color-light: #a1a1aa; 
+            --bg-color: #f4f7fa;     
             --border-color: #e4e4e7;
-            --sidebar-bg: #18181b; /* Dark sidebar */
+            --sidebar-bg: #18181b; 
             --card-bg: #ffffff;
             --danger-color: #e74c3c;
             --danger-color-dark: #c0392b;
@@ -29,9 +29,9 @@
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.07);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07);
 
-            /* NEW: Collapsible Sidebar Variables */
+            /* Collapsible Sidebar Variables */
             --sidebar-width-open: 260px;
-            --sidebar-width-closed: 78px; /* Adjusted to fit icons + padding */
+            --sidebar-width-closed: 78px; 
         }
 
         body { 
@@ -46,18 +46,16 @@
         /* App Layout */
         .app-layout {
             display: grid;
-            /* NEW: Use sidebar variable */
             grid-template-columns: var(--sidebar-width-open) 1fr;
             grid-template-rows: 1fr;
             min-height: 100vh;
-            transition: grid-template-columns 0.3s ease-in-out; /* NEW */
+            transition: grid-template-columns 0.3s ease-in-out; 
         }
         
-        /* NEW: Collapsed state */
+        /* Collapsed state */
         .app-layout.sidebar-collapsed {
             grid-template-columns: var(--sidebar-width-closed) 1fr;
         }
-
 
         /* Sidebar Navigation */
         .sidebar-nav {
@@ -67,12 +65,12 @@
             display: flex;
             flex-direction: column;
             box-shadow: var(--shadow-md);
-            overflow-y: auto; /* For scroll on small screens */
-            overflow-x: hidden; /* NEW: Hide horizontal overflow */
-            transition: width 0.3s ease-in-out; /* NEW */
+            overflow-y: auto; 
+            overflow-x: hidden; 
+            transition: width 0.3s ease-in-out; 
         }
         
-        /* NEW: Toggle Button */
+        /* Toggle Button */
         .sidebar-toggle {
             position: absolute;
             top: 25px;
@@ -104,24 +102,24 @@
             padding: 0 10px 20px 10px;
             font-size: 1.5em;
             font-weight: bold;
-            color: var(--light-color); /* White text */
+            color: var(--light-color); 
             margin-bottom: 20px;
-            display: flex; /* NEW */
-            align-items: center; /* NEW */
-            white-space: nowrap; /* NEW */
+            display: flex; 
+            align-items: center; 
+            white-space: nowrap; 
         }
         .sidebar-header .fa-solid {
             margin-right: 10px;
             color: var(--primary-color);
-            min-width: 30px; /* NEW: Align icon */
-            text-align: center; /* NEW */
+            min-width: 30px; 
+            text-align: center; 
         }
-        /* NEW: Hide header text when collapsed */
+        
         .app-layout.sidebar-collapsed .sidebar-header .header-text {
             display: none;
         }
         
-        /* NEW: Store Selector Styles */
+        /* Store Selector Styles */
         .store-selector-container {
             padding: 0 10px 20px 10px;
             border-bottom: 1px solid #3f3f46;
@@ -151,12 +149,12 @@
             align-items: center;
             padding: 12px 15px;
             text-decoration: none;
-            color: var(--text-color-light); /* Light gray */
+            color: var(--text-color-light); 
             font-weight: 500;
             border-radius: 6px;
             margin-bottom: 5px;
             transition: background-color 0.2s, color 0.2s, transform 0.2s;
-            white-space: nowrap; /* NEW */
+            white-space: nowrap; 
         }
         .sidebar-nav a .nav-text-group {
             display: flex;
@@ -164,21 +162,21 @@
         }
         .sidebar-nav a i {
             margin-right: 12px;
-            width: 30px; /* NEW: Increased width for alignment */
+            width: 30px; 
             text-align: center;
             transition: color 0.2s;
-            font-size: 1.1em; /* NEW: Slightly larger icon */
+            font-size: 1.1em; 
         }
-        /* NEW: Center icon when text is hidden */
+        
         .app-layout.sidebar-collapsed .sidebar-nav a i {
             margin-right: 0;
         }
         .sidebar-nav a:hover {
-            background-color: #27272a; /* Slightly lighter dark */
+            background-color: #27272a; 
             color: var(--light-color);
-            transform: translateX(3px); /* Hover animation */
+            transform: translateX(3px); 
         }
-        /* NEW: Remove transform when collapsed */
+        
         .app-layout.sidebar-collapsed .sidebar-nav a:hover {
             transform: none;
         }
@@ -191,15 +189,13 @@
             color: var(--light-color);
         }
 
-        /* NEW: Hide nav text when collapsed */
         .app-layout.sidebar-collapsed .nav-text,
         .app-layout.sidebar-collapsed .nav-warning-icon {
             display: none;
         }
         
         .nav-warning-icon {
-            /* display: none; */ /* MODIFIED: Handled by collapsed class */
-            color: #facc15; /* Yellow */
+            color: #facc15; 
             font-size: 0.9em;
             animation: blink 1.5s linear infinite;
         }
@@ -217,8 +213,8 @@
             border-top: 1px solid #3f3f46;
         }
         .auth-button {
-            display: flex; /* MODIFIED */
-            align-items: center; /* NEW */
+            display: flex; 
+            align-items: center; 
             padding: 12px 15px;
             text-decoration: none;
             color: var(--light-color);
@@ -226,21 +222,21 @@
             border-radius: 6px;
             margin: 5px;
             transition: background-image 0.3s, background-color 0.3s, transform 0.2s;
-            background: var(--gradient-primary); /* Gradient */
+            background: var(--gradient-primary); 
             border: none;
             width: calc(100% - 10px);
             cursor: pointer;
             font-size: 15px;
             text-align: left;
-            white-space: nowrap; /* NEW */
+            white-space: nowrap; 
         }
         .auth-button i {
-            width: 30px; /* NEW: Align icon */
-            text-align: center; /* NEW */
-            margin-right: 12px; /* NEW */
-            font-size: 1.1em; /* NEW */
+            width: 30px; 
+            text-align: center; 
+            margin-right: 12px; 
+            font-size: 1.1em; 
         }
-        /* NEW: Center icon when collapsed */
+        
         .app-layout.sidebar-collapsed .auth-button i {
             margin-right: 0;
         }
@@ -264,7 +260,7 @@
         .app-layout.sidebar-collapsed .auth-button.sign-out:hover {
             transform: none;
         }
-        /* NEW: Hide button text when collapsed */
+        
         .app-layout.sidebar-collapsed .auth-button .auth-text {
             display: none;
         }
@@ -276,7 +272,6 @@
             overflow-y: auto;
         }
         
-        /* NEW: Fade-in animation for pages */
         .page-content {
             display: none;
             animation: fadeIn 0.4s ease-in-out;
@@ -291,9 +286,9 @@
         
         /* Form Styles */
         form { 
-            padding: 25px; /* More padding */
+            padding: 25px; 
             background-color: var(--card-bg); 
-            border-radius: 12px; /* Softer corners */
+            border-radius: 12px; 
             box-shadow: var(--shadow-lg); 
             border: 1px solid var(--border-color);
         }
@@ -308,7 +303,7 @@
         label { 
             display: block; 
             margin-bottom: 5px; 
-            font-weight: 600; /* Bolder */
+            font-weight: 600; 
         }
         label .label-hint {
             font-weight: normal;
@@ -321,9 +316,9 @@
 
         select, textarea, input[type="text"], input[type="number"], input[type="date"] { 
             width: 100%; 
-            padding: 10px; /* Taller inputs */
+            padding: 10px; 
             border: 1px solid var(--border-color); 
-            border-radius: 6px; /* Softer */
+            border-radius: 6px; 
             box-sizing: border-box;
             font-size: 14px;
             transition: border-color 0.2s, box-shadow 0.2s;
@@ -338,7 +333,7 @@
             min-height: 50px;
             font-size: 13px;
             margin-top: 10px;
-            position: relative; /* For copy button */
+            position: relative; 
         }
         .profile-notes {
             min-height: 80px;
@@ -360,7 +355,6 @@
         
         .measurement-group {
             padding-bottom: 10px;
-            border-bottom: 1px dashed #eee;
             margin-bottom: 10px;
         }
         .measurement-group label {
@@ -373,27 +367,8 @@
             vertical-align: middle;
         }
 
-        .checkbox-group {
-            margin-bottom: 10px;
-        }
-        .checkbox-group label { 
-            display: block;
-            font-weight: normal; 
-            margin-top: 10px; 
-            line-height: 1.4;
-        }
-        .checkbox-group input {
-            margin-right: 8px;
-            vertical-align: top;
-        }
-        .checkbox-group label {
-            display: inline-block;
-            vertical-align: middle;
-            width: calc(100% - 25px);
-        }
-
         button { 
-            background: var(--gradient-primary); /* Gradient */
+            background: var(--gradient-primary); 
             color: var(--light-color); 
             padding: 12px 20px; 
             border: none; 
@@ -428,7 +403,6 @@
             background-color: #999;
         }
 
-        /* NEW: Clear Form Button */
         .clear-btn {
             background: #e4e4e7;
             color: var(--text-color);
@@ -509,7 +483,7 @@
             font-size: 0.9em;
             color: var(--text-color-light);
         }
-        /* NEW: Byline for who logged */
+        
         .log-byline {
             font-size: 0.9em;
             font-style: italic;
@@ -568,7 +542,6 @@
             padding: 0;
         }
         .log-entry-great li {
-            /* font-style: italic; */ /* REMOVED Italic */
             color: var(--text-color);
             margin-bottom: 3px;
         }
@@ -611,9 +584,8 @@
             line-height: 1.6;
         }
         
-        /* NEW: Verbatim Feedback Output */
         #verbatim-feedback-section {
-            display: none; /* Hidden until AI runs */
+            display: none; 
             background-color: var(--success-bg);
             border: 1px solid var(--success-color);
             border-radius: 12px;
@@ -632,9 +604,8 @@
             color: #333;
         }
         
-        /* NEW: Copy Button */
         .copy-btn {
-            display: none; /* Hidden by default */
+            display: none; 
             position: absolute;
             top: 10px;
             right: 10px;
@@ -692,20 +663,19 @@
             height: 100%; 
             overflow: auto; 
             background-color: rgba(0,0,0,0.4); 
-            backdrop-filter: blur(3px); /* Blur background */
+            backdrop-filter: blur(3px); 
             animation: fadeIn 0.3s ease;
         }
         .modal-content {
             background-color: #fefefe;
-            margin: 10% auto; /* Centered */
+            margin: 10% auto; 
             padding: 25px;
             border: 1px solid #888;
             border-radius: 12px;
             width: 90%;
-            max-width: 500px; /* Base modal width */
+            max-width: 500px; 
             box-shadow: var(--shadow-lg);
         }
-        /* Make Edit Employee modal wider */
         #editEmployeeModal .modal-content {
             max-width: 600px;
         }
@@ -741,7 +711,6 @@
             grid-column: span 2;
         }
         
-        /* Sign-in container */
         #sign-in-container {
             display: flex;
             justify-content: center;
@@ -754,23 +723,20 @@
             color: var(--text-color-light);
         }
         
-        /* Hide app when logged out */
         .app-layout.logged-out .main-content,
-        .app-layout.logged-out .sidebar-toggle { /* NEW: Hide toggle */
+        .app-layout.logged-out .sidebar-toggle { 
             display: none;
         }
         .app-layout.logged-out .sidebar-nav a,
         .app-layout.logged-out .sidebar-footer button.sign-out {
             display: none;
         }
-        /* FIX: Hide sign-in button when logged in */
         .app-layout:not(.logged-out) .sidebar-footer button#sign-in-btn {
             display: none;
         }
         .app-layout.logged-out .sidebar-footer button#sign-out-btn {
             display: none;
         }
-        /* END FIX */
         
         .app-layout:not(.logged-out) #sign-in-container {
             display: none;
@@ -778,7 +744,7 @@
         
         /* Last SMART Goal Callout */
         .last-goal-callout {
-            display: none; /* Hidden by default */
+            display: none; 
             padding: 10px 15px;
             margin-bottom: 20px;
             border-radius: 4px;
@@ -831,13 +797,13 @@
             margin-right: 5px;
         }
         
-        /* NEW: Tracker Progress Pips & Tooltip */
+        /* Tracker Progress Pips & Tooltip */
         .progress-pips {
             display: flex;
             gap: 5px;
-            position: relative; /* For tooltip */
+            position: relative; 
             cursor: default;
-            align-items: center; /* Center items including the add button */
+            align-items: center; 
         }
         .progress-pip {
             width: 14px;
@@ -851,18 +817,18 @@
         .progress-pips .tooltip-content {
             display: none;
             position: absolute;
-            bottom: 125%; /* Position above the pips */
+            bottom: 125%; 
             left: 0;
             background-color: var(--sidebar-bg);
             color: var(--light-color);
             padding: 10px;
             border-radius: 6px;
             font-size: 0.9em;
-            width: 250px; /* Set a width */
-            white-space: pre-wrap; /* Allow newlines */
+            width: 250px; 
+            white-space: pre-wrap; 
             z-index: 10;
             box-shadow: var(--shadow-md);
-            pointer-events: none; /* Allow hover-through */
+            pointer-events: none; 
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -871,7 +837,6 @@
             opacity: 1;
         }
         
-        /* NEW: Manual Add Button in Tracker */
         .manual-add-btn {
             background: none;
             border: none;
@@ -922,7 +887,7 @@
             font-style: italic;
         }
         
-        /* NEW: Custom Toast (Alert) Notification */
+        /* Custom Toast (Alert) Notification */
         #toast-notification {
             position: fixed;
             top: 20px;
@@ -948,7 +913,7 @@
             background-color: var(--danger-color);
         }
         
-        /* NEW: Custom Prompt Modal */
+        /* Custom Prompt Modal */
         #custom-prompt-modal .modal-content {
             max-width: 450px;
         }
@@ -1076,15 +1041,8 @@
                             <label><input type="radio" name="great_g_measure" value="Partial" checked> Partial</label>
                             <label><input type="radio" name="great_g_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
                         </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="g1" name="great_g" value="EA: Be personable, introduce yourself, exchange names and make a positive connection."><label for="g1">EA: Be personable, introduce yourself, exchange names and make a positive connection.</label>
-                            <input type="checkbox" id="g2" name="great_g" value="EA: Acknowledge every customer within 6 feet of you."><label for="g2">EA: Acknowledge every customer within 6 feet of you.</label>
-                            <input type="checkbox" id="g3" name="great_g" value="EA: Smile, make eye contact, and say 'Welcome to Xfinity!'"><label for="g3">EA: Smile, make eye contact, and say "Welcome to Xfinity!"</label>
-                            <input type="checkbox" id="g4" name="great_g" value="ME: Introduce relevant self-service options to improve the experience."><label for="g4">ME: Introduce relevant self-service options to improve the experience.</label>
-                            <input type="checkbox" id="g5" name="great_g" value="SA: Introduce Xfinity Rewards or acknowledge existing enrollment."><label for="g5">SA: Introduce Xfinity Rewards or acknowledge existing enrollment.</label>
-                        </div>
                         <div class="step-notes-container">
-                            <textarea id="notes_g" name="notes_g" class="step-notes" placeholder="Notes for Greet..."></textarea>
+                            <textarea id="notes_g" name="notes_g" class="step-notes" placeholder="Notes for Greet... (e.g., Did they welcome warmly?)"></textarea>
                             <button type="button" class="copy-btn" id="copy-g" data-target="notes_g">Copy</button>
                         </div>
                     </fieldset>
@@ -1096,14 +1054,8 @@
                             <label><input type="radio" name="great_r_measure" value="Partial" checked> Partial</label>
                             <label><input type="radio" name="great_r_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
                         </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="r1" name="great_r" value="EA: Build rapport by sharing your own similar experiences."><label for="r1">EA: Build rapport by sharing your own similar experiences.</label>
-                            <input type="checkbox" id="r2" name="great_r" value="OI: Take ownership of the situation to ensure you understand the intent of the customer's visit."><label for="r2">OI: Take ownership of the situation to ensure you understand the intent of the customer's visit.</label>
-                            <input type="checkbox" id="r3" name="great_r" value="DN: Learn what products and experiences are most valuable to the customer by asking 'tell me more' questions."><label for="r3">DN: Learn what products and experiences are most valuable to the customer by asking "tell me more" questions.</label>
-                            <input type="checkbox" id="r4" name="great_r" value="ME: Provide information in a simple, relevant and easy to understand way."><label for="r4">ME: Provide information in a simple, relevant and easy to understand way.</label>
-                        </div>
                         <div class="step-notes-container">
-                            <textarea id="notes_r" name="notes_r" class="step-notes" placeholder="Notes for Relate..."></textarea>
+                            <textarea id="notes_r" name="notes_r" class="step-notes" placeholder="Notes for Relate... (e.g., Did they build rapport/trust?)"></textarea>
                             <button type="button" class="copy-btn" id="copy-r" data-target="notes_r">Copy</button>
                         </div>
                     </fieldset>
@@ -1115,13 +1067,8 @@
                             <label><input type="radio" name="great_e_measure" value="Partial" checked> Partial</label>
                             <label><input type="radio" name="great_e_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
                         </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="e1" name="great_e" value="DN: Use T-charts: Capture the details of what the customer shares and then use those details to identify potential solutions to explore."><label for="e1">DN: Use T-charts: Capture the details of what the customer shares and then use those details to identify potential solutions to explore.</label>
-                            <input type="checkbox" id="e2" name="great_e" value="OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products."><label for="e2">OI: Conduct a proactive review of the customer's entire account and demonstrate your expertise of the products.</label>
-                            <input type="checkbox" id="e3" name="great_e" value="BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time."><label for="e3">BA: Personalize product benefits and add value by tying back to the customer's needs. Champion Mobile every time.</label>
-                        </div>
                         <div class="step-notes-container">
-                            <textarea id="notes_e" name="notes_e" class="step-notes" placeholder="Notes for Explore..."></textarea>
+                            <textarea id="notes_e" name="notes_e" class="step-notes" placeholder="Notes for Explore... (e.g., T-Chart used? Championed Mobile?)"></textarea>
                             <button type="button" class="copy-btn" id="copy-e" data-target="notes_e">Copy</button>
                         </div>
                     </fieldset>
@@ -1133,14 +1080,8 @@
                             <label><input type="radio" name="great_a_measure" value="Partial" checked> Partial</label>
                             <label><input type="radio" name="great_a_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
                         </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="a1" name="great_a" value="OI: Use T-Charts: Present a set of personalized options for your customer based on needs discussed."><label for="a1">OI: Use T-Charts: Present a set of personalized options for your customer based on needs discussed.</label>
-                            <input type="checkbox" id="a2" name="great_a" value="OI: Stay engaged by explaining the steps you are taking while processing your customer's transaction."><label for="a2">OI: Stay engaged by explaining the steps you are taking while processing your customer's transaction.</label>
-                            <input type="checkbox" id="a3" name="great_a" value="EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections."><label for="a3">EA: Listen actively to navigate your customer's questions and be ready to respond appropriately to overcome objections.</label>
-                            <input type="checkbox" id="a4" name="great_a" value="BA: Confidently position your solution and ask for the sale/agreement."><label for="a4">BA: Confidently position your solution and ask for the sale/agreement.</label>
-                        </div>
                         <div class="step-notes-container">
-                            <textarea id="notes_a" name="notes_a" class="step-notes" placeholder="Notes for Ask..."></textarea>
+                            <textarea id="notes_a" name="notes_a" class="step-notes" placeholder="Notes for Ask... (e.g., Proposed solution? Overcame objections?)"></textarea>
                             <button type="button" class="copy-btn" id="copy-a" data-target="notes_a">Copy</button>
                         </div>
                     </fieldset>
@@ -1152,22 +1093,15 @@
                             <label><input type="radio" name="great_t_measure" value="Partial" checked> Partial</label>
                             <label><input type="radio" name="great_t_measure" value="Did Not Demonstrate"> Did Not Demonstrate</label>
                         </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="t1" name="great_t" value="SA: Thank the customer for their visit today, use their name, smile, and make eye contact."><label for="t1">SA: Thank the customer for their visit today, use their name, smile, and make eye contact.</label>
-                            <input type="checkbox" id="t2" name="great_t" value="OI: Recap the solution, provide next steps, and set clear expectations."><label for="t2">OI: Recap the solution, provide next steps, and set clear expectations.</label>
-                            <input type="checkbox" id="t3" name="great_t" value="ME: Educate the customer on the ability to book an appointment for future visits online or on the Xfinity app."><label for="t3">ME: Educate the customer on the ability to book an appointment for future visits online or on the Xfinity app.</label>
-                            <input type="checkbox" id="t4" name="great_t" value="BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience."><label for="t4">BA: Reinforce Xfinity Rewards benefits to improve the customer's ongoing experience.</label>
-                            <input type="checkbox" id="t5" name="great_t" value="BA: Ask your customer to refer Xfinity to friends and family."><label for="t5">BA: Ask your customer to refer Xfinity to friends and family.</label>
-                        </div>
                         <div class="step-notes-container">
-                            <textarea id="notes_t" name="notes_t" class="step-notes" placeholder="Notes for Thank..."></textarea>
+                            <textarea id="notes_t" name="notes_t" class="step-notes" placeholder="Notes for Thank... (e.g., Mentioned Rewards? Walked to door?)"></textarea>
                             <button type="button" class="copy-btn" id="copy-t" data-target="notes_t">Copy</button>
                         </div>
                     </fieldset>
                     
                     <div class="form-section">
                         <label for="notes">Overall Summary Notes:</label>
-                        <textarea id="notes" name="notes" rows="5" placeholder="Overall strengths, opportunities, or AI-generated note..."></textarea>
+                        <textarea id="notes" name="notes" rows="5" placeholder="Overall strengths, opportunities, or specific feedback for AI to use..."></textarea>
                     </div>
                     <div class="form-section">
                         <button type="button" class="ai-button" id="generate-and-log-ai-summary" style="background: var(--gradient-primary); width: 100%; margin-top: 0; font-size: 1.1em; padding: 14px;">Generate AI Notes & Log Observation</button>
@@ -1400,8 +1334,7 @@
                 <button type="button" class="cancel-btn" id="prompt-cancel-btn">Cancel</button>
                 <button type="button" class="confirm-btn" id="prompt-confirm-btn">Confirm</button>
             </div>
-        </div>
-        <script type="module">
+            <script type="module">
         // --- Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
@@ -1425,7 +1358,6 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Netlify Backend Helper ---
-        // Keeps API keys hidden on the server side
         async function callNetlifyGemini(promptText) {
             console.log("Sending prompt to AI..."); 
             const response = await fetch('/.netlify/functions/fetch-gemini', {
@@ -1453,14 +1385,13 @@
             measurementId: "G-K8RYLXRG5H"
         };
         
-        // --- INITIALIZE FIREBASE (Top Level Fix) ---
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider(); 
         googleProvider.addScope('profile'); 
-        googleProvider.addScope('email');   
+        googleProvider.addScope('email');    
         setLogLevel('Debug');
 
         const appId = firebaseConfig.projectId || 'default-app-id';
@@ -1471,15 +1402,13 @@
         let currentUser; 
         let userId;
         
-        // References & Listeners
         let employeesRef, observationsRef, coachingsRef, storeGoalsRef; 
         let employeesListener = null;
         let observationsListener = null;
         let coachingsListener = null;
         let storeGoalsListener = null; 
 
-        // Data Containers
-        let currentStoreId = "williston"; // Default
+        let currentStoreId = "williston"; 
         let localEmployees = {};
         let localObservations = [];
         let localCoachings = [];
@@ -1488,8 +1417,6 @@
         const OBS_GOAL = 4;
         const COACH_GOAL = 2;
         
-        // --- Store Context Helper ---
-        // Williston maps to 'public' (legacy data), Nashua maps to 'nashua'
         function getStorePath(storeKey) {
             return storeKey === 'williston' ? 'public' : storeKey;
         }
@@ -1507,16 +1434,10 @@
                     return parts[0];
                 }
             } catch (e) {
-                console.error("Error parsing name:", e);
                 return fullName; 
             }
         }
         
-        function isGreeterRole(role) {
-            if (!role) return false;
-            return role.toLowerCase().includes('greeter');
-        }
-
         function calculateTenure(hireDate) {
             if (!hireDate) return "";
             const start = hireDate.toDate ? hireDate.toDate() : new Date(hireDate);
@@ -1553,7 +1474,7 @@
                 startMonth = date.getMonth() - 1;
                 startYear = date.getFullYear();
                 if (startMonth < 0) {
-                    startMonth = 11; // December
+                    startMonth = 11; 
                     startYear -= 1;
                 }
             } else {
@@ -1562,7 +1483,7 @@
                 endMonth = date.getMonth() + 1;
                 endYear = date.getFullYear();
                 if (endMonth > 11) {
-                    endMonth = 0; // January
+                    endMonth = 0; 
                     endYear += 1;
                 }
             }
@@ -1585,7 +1506,6 @@
                 option.textContent = profile.name;
                 employeeSelect.appendChild(option);
             }
-            // Only re-select if the value still exists in the new list
             if (localEmployees[selectedValue]) {
                 employeeSelect.value = selectedValue;
             }
@@ -1647,7 +1567,6 @@
                 const dateP = document.createElement('p');
                 dateP.className = 'log-entry-date';
                 
-                // Add tag if manual
                 let manualTag = log.isManual ? ' <span style="color:var(--primary-color);">(Manual Entry)</span>' : '';
                 dateP.innerHTML = log.date.toDate().toLocaleString() + manualTag;
                 
@@ -1656,7 +1575,6 @@
                 deleteBtn.className = 'log-delete-btn';
                 deleteBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
                 deleteBtn.addEventListener('click', () => {
-                    // Determine type based on properties
                     const logType = (log.greatAssessment || (log.isManual && log.type === 'observation')) ? 'observations' : 'coachings';
                     deleteLog(log.id, logType, logType === 'observations' ? 'Observation' : 'Coaching Session');
                 });
@@ -1692,15 +1610,6 @@
                             measureSpan.textContent = ` (${data.measurement})`;
                             p.appendChild(measureSpan);
                         }
-                        if (data.behaviors && data.behaviors.length > 0) {
-                            const ul = document.createElement('ul');
-                            for (const val of data.behaviors) {
-                                const li = document.createElement('li');
-                                li.textContent = val;
-                                ul.appendChild(li);
-                            }
-                            p.appendChild(ul);
-                        }
                         if (data.notes && data.notes.trim() !== "") {
                             const notesDiv = document.createElement('div');
                             notesDiv.className = 'log-step-notes';
@@ -1724,7 +1633,7 @@
                         <p><strong>Sales Logged:</strong> ${log.sales || 'N/A'}</p>
                         <p><strong>Progress Since Last Session:</strong> ${log.progress || 'N/A'}</p>
                         <p><strong>Challenges Experienced:</strong> ${log.obstacles || 'N/A'}</p>
-                        <p><strong>Action Plan / Commitment:</strong> ${log.actionPlan || 'N/A'}</p>
+                        <p><strong>Action Plan / Commitment:</strong><br>${(log.actionPlan || 'N/A').replace(/\n/g, '<br>')}</p>
                     `;
                     entryDiv.appendChild(coachingDiv);
                 } else if (log.isManual) {
@@ -1788,7 +1697,6 @@
                     if(obsCount === 0) obsTooltip = `No observations logged this fiscal month.`;
                     obsPips.innerHTML += `<span class="tooltip-content">${obsTooltip.trim()}</span>`;
                     
-                    // NEW: Manual Add Button for Obs
                     const addObsBtn = document.createElement('button');
                     addObsBtn.className = 'manual-add-btn';
                     addObsBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
@@ -1811,7 +1719,6 @@
                     if(coachCount === 0) coachTooltip = `No coaching logged this fiscal month.`;
                     coachPips.innerHTML += `<span class="tooltip-content">${coachTooltip.trim()}</span>`;
                     
-                    // NEW: Manual Add Button for Coaching
                     const addCoachBtn = document.createElement('button');
                     addCoachBtn.className = 'manual-add-btn';
                     addCoachBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
@@ -1981,7 +1888,6 @@
                     opportunities: ""
                 };
                 try {
-                    // Uses getStorePath for correct context
                     const storePath = getStorePath(currentStoreId);
                     await addDoc(collection(db, "artifacts", appId, storePath, "data","employees"), newEmployee);
                     await showToast("Employee added successfully!");
@@ -2003,7 +1909,6 @@
                 return;
             }
             try {
-                // Construct path dynamically based on store
                 const storePath = getStorePath(currentStoreId);
                 await deleteDoc(doc(db, "artifacts", appId, storePath, "data", "employees", idToDelete));
                 await showToast("Employee deleted.");
@@ -2029,7 +1934,6 @@
             }
         }
         
-        // NEW: Manual Log Function
         async function addManualLog(employeeId, type, employeeName) {
             const confirmMsg = `Manually add a ${type} credit for ${employeeName}? This will appear in the tracker but contain no details.`;
             if(!confirm(confirmMsg)) return;
@@ -2039,7 +1943,7 @@
                     employeeId: employeeId,
                     date: Timestamp.now(),
                     isManual: true,
-                    type: type, // 'observation' or 'coaching'
+                    type: type, 
                     loggedBy: currentUser.displayName || currentUser.email
                 };
                 
@@ -2079,7 +1983,7 @@
             }
         }
 
-        // --- CORE AI FUNCTION 1: Generate Observation ---
+        // --- CORE AI FUNCTION 1: Generate Observation (UPDATED FOR GREAT & PERSONALIZATION) ---
         async function generateAndLogObservation() {
             const form = document.getElementById('obsForm');
             const employeeId = form.employee.value;
@@ -2090,79 +1994,84 @@
             const profile = localEmployees[employeeId];
             const firstName = getFirstName(profile.name);
 
+            // Harvest the data (No checkboxes)
             const greatData = {
                 greet: {
                     measurement: getRadioValue(form, 'great_g_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
                     notes: form.notes_g.value.trim()
                 },
                 relate: {
                     measurement: getRadioValue(form, 'great_r_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
                     notes: form.notes_r.value.trim()
                 },
                 explore: {
                     measurement: getRadioValue(form, 'great_e_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
                     notes: form.notes_e.value.trim()
                 },
                 ask: {
                     measurement: getRadioValue(form, 'great_a_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
                     notes: form.notes_a.value.trim()
                 },
                 thank: {
                     measurement: getRadioValue(form, 'great_t_measure'),
-                    behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
                     notes: form.notes_t.value.trim()
                 }
             };
             
-            let prompt = `Act as a retail sales manager for an **Xfinity store**. Your tone is supportive, fun, and professional. <br>
-            I am observing ${firstName}. <br>
-            <br>
-            Based on the inputs below, generate a JSON object with these EXACT keys:<br>
-            - "greet_note": A 1-2 sentence note about the Greet step.<br>
-            - "relate_note": A 1-2 sentence note about the Relate step.<br>
-            - "explore_note": A 1-2 sentence note about the Explore step.<br>
-            - "ask_note": A 1-2 sentence note about the Ask step.<br>
-            - "thank_note": A 1-2 sentence note about the Thank step.<br>
-            - "manager_verbatim": A short paragraph script of what I should say to the employee.<br>
+            // --- UPDATED PROMPT: Specifics + GREAT Definitions ---
+            let prompt = `Act as a supportive, professional Retail Sales Manager for Xfinity. You are directly coaching **${firstName}**.
+            
+            I have observed ${firstName} during a customer interaction. 
+            Customer Intent: "${customerIntent}"
+            Employee Role: ${profile.role}
 
-            IMPORTANT: <br>
-            - If a step is marked "Partial" or "Did Not Demonstrate" and has no behaviors checked, state that it was missed or not observed.<br>
-            - Focus on Xfinity Mobile and "Service to Sales" unless the role is Greeter.<br>
-            <br>
-            --- INPUTS ---<br>
-            Employee Role: ${profile.role}<br>
-            Customer Intent: ${customerIntent}<br>
-            <br>
-            G - Greet: ${greatData.greet.measurement}, Behaviors: ${greatData.greet.behaviors.join(', ')}<br>
-            R - Relate: ${greatData.relate.measurement}, Behaviors: ${greatData.relate.behaviors.join(', ')}<br>
-            E - Explore: ${greatData.explore.measurement}, Behaviors: ${greatData.explore.behaviors.join(', ')}<br>
-            A - Ask: ${greatData.ask.measurement}, Behaviors: ${greatData.ask.behaviors.join(', ')}<br>
-            T - Thank: ${greatData.thank.measurement}, Behaviors: ${greatData.thank.behaviors.join(', ')}<br>
-            <br>
+            Based on the "GREAT" sales model, I will provide the rating (Effective, Partial, Did Not Demonstrate) and specific notes for each step. 
+            
+            **GREAT Definitions to Reference:**
+            1. **GREET:** Creating excitement! Acknowledging customers within 6 feet, introducing self, and mentioning Xfinity Rewards[cite: 52, 53].
+            2. **RELATE:** Building trust and common ground[cite: 31]. Asking "tell me more" questions[cite: 74].
+            3. **EXPLORE:** Uncovering needs[cite: 33]. Using T-Charts [cite: 95] and Championing Xfinity Mobile[cite: 98].
+            4. **ASK:** Confidently proposing a solution and asking for the sale[cite: 36, 125].
+            5. **THANK:** Expressing genuine gratitude [cite: 38] and asking for referrals[cite: 151].
+
+            **OBSERVATION DATA:**
+            - Greet: ${greatData.greet.measurement}. Notes: "${greatData.greet.notes}"
+            - Relate: ${greatData.relate.measurement}. Notes: "${greatData.relate.notes}"
+            - Explore: ${greatData.explore.measurement}. Notes: "${greatData.explore.notes}"
+            - Ask: ${greatData.ask.measurement}. Notes: "${greatData.ask.notes}"
+            - Thank: ${greatData.thank.measurement}. Notes: "${greatData.thank.notes}"
+            - Manager Overall Notes: "${form.notes.value.trim()}"
+
+            **INSTRUCTIONS:**
+            Generate a JSON object with these EXACT keys. 
+            For each "*_note" key, write 1-2 sentences elaborating on the feedback. 
+            *Crucial:* If I provided specific notes in the input above, YOU MUST USE THEM to personalize the output. If a step was "Effective", praise specifically. If "Partial" or "Did Not Demonstrate", coach on what was missed based on the GREAT definitions.
+
+            Keys required:
+            - "greet_note"
+            - "relate_note"
+            - "explore_note"
+            - "ask_note"
+            - "thank_note"
+            - "manager_verbatim": A short paragraph script speaking DIRECTLY to ${firstName} (use their name). Summarize the interaction, highlight a specific win, and give one clear area of focus.
+
             Output strictly valid JSON.`;
             
             showLoading('summary-loader', 'generate-and-log-ai-summary', true, 'Generating & Logging...');
             
             try {
                 const result = await callNetlifyGemini(prompt);
+                
+                // Error Handling
+                if (result.error) {
+                    const errorMessage = result.error.message || JSON.stringify(result.error);
+                    throw new Error(`Backend Error: ${errorMessage}`);
+                }
+                if (!result.candidates || !result.candidates[0]) {
+                    throw new Error("AI returned no candidates.");
+                }
 
-console.log("Full AI Response:", result); // <--- THIS WILL SHOW THE REAL ERROR IN CONSOLE
-
-// Check if the backend returned an error
-if (result.error) {
-    throw new Error(`Backend Error: ${result.error}`);
-}
-
-// Check if the AI response is valid
-if (!result.candidates || !result.candidates[0]) {
-    throw new Error("AI returned no candidates. (Safety filter or quota issue?)");
-}
-
-const responseText = result.candidates[0].content.parts[0].text;
+                const responseText = result.candidates[0].content.parts[0].text;
                 let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
                 const lastBrace = cleanJson.lastIndexOf('}');
@@ -2187,7 +2096,7 @@ const responseText = result.candidates[0].content.parts[0].text;
                 
                 document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'block');
 
-                // Save
+                // Save to Firestore
                 const greatAssessmentWithAINotes = {
                     greet: { ...greatData.greet, notes: form.notes_g.value },
                     relate: { ...greatData.relate, notes: form.notes_r.value },
@@ -2200,7 +2109,7 @@ const responseText = result.candidates[0].content.parts[0].text;
                     date: Timestamp.now(),
                     customerIntent: customerIntent,
                     greatAssessment: greatAssessmentWithAINotes, 
-                    notes: form.notes.value.trim(),
+                    notes: form.notes.value.trim(), // Keep original raw notes too? Or AI summary? Let's keep raw input for record.
                     loggedBy: currentUser.displayName || currentUser.email,
                     loggedByEmail: currentUser.email
                 };
@@ -2210,7 +2119,7 @@ const responseText = result.candidates[0].content.parts[0].text;
                 
             } catch (err) {
                 console.error('AI Gen Failed:', err);
-                await showToast('AI generation failed. Check console for details.', true);
+                await showToast(`AI Gen Failed: ${err.message}`, true);
             } finally {
                 showLoading('summary-loader', 'generate-and-log-ai-summary', false);
             }
@@ -2223,42 +2132,52 @@ const responseText = result.candidates[0].content.parts[0].text;
             
             showLoading('coaching-loader', 'generate-ai-coaching-plan', true);
             const coachingOutput = document.getElementById('ai-coaching-output');
+            const profile = localEmployees[employeeId];
             
-            let prompt = `Act as Xfinity Manager. Write a coaching plan for ${localEmployees[employeeId].name}. <br>
-            1. Feedback (Strength/Opportunity). <br>
+            let prompt = `Act as Xfinity Manager. Write a coaching plan for **${profile.name}**. 
+            Use the GREAT model language (Greet, Relate, Explore, Ask, Thank).
+            1. Feedback (Strength/Opportunity). 
             2. Manager Next Steps.`;
             
             try {
                 const result = await callNetlifyGemini(prompt);
+                
+                if (result.error) {
+                     throw new Error(result.error.message || JSON.stringify(result.error));
+                }
+
                 let responseText = result.candidates[0].content.parts[0].text;
                 responseText = responseText.replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>').replace(/\* (.*?)(?=\n|$)/g, '<li>$1</li>');
                 coachingOutput.innerHTML = responseText;
                 coachingOutput.style.display = 'block';
             } catch(e) { 
                 console.error(e); 
+                await showToast("AI Plan Gen Failed", true);
             } finally { 
                 showLoading('coaching-loader', 'generate-ai-coaching-plan', false); 
             }
         }
         
-        // --- CORE AI FUNCTION 3: Generate Coaching Notes ---
+        // --- CORE AI FUNCTION 3: Generate Coaching Notes (UPDATED FOR S.M.A.R.T.) ---
         async function getCoachingRecommendations(employeeId) {
             const recProgress = document.getElementById('ai-rec-progress');
             const recObstacles = document.getElementById('ai-rec-obstacles');
             const recActionPlan = document.getElementById('ai-rec-actionplan');
 
-            recProgress.textContent = `Ask something like, "What is going well with your performance?"`;
-            recObstacles.textContent = `Ask something like, "What has been difficult for you recently?"`;
+            recProgress.textContent = `Ask: "What is going well with your performance?"`;
+            recObstacles.textContent = `Ask: "What has been difficult for you recently?"`;
             recActionPlan.textContent = `(Include SMART goal)`;
 
             if (!employeeId) return;
             const profile = localEmployees[employeeId];
             
-            let prompt = `I am coaching ${profile.name} (${profile.role}). Give me 3 short talking points (Progress, Obstacles, Action Plan).<br>
+            let prompt = `I am coaching ${profile.name} (${profile.role}). Give me 3 short talking points (Progress, Obstacles, Action Plan).
             Generate JSON with keys: "progress_rec", "obstacles_rec", "actionplan_rec".`;
 
             try {
                 const result = await callNetlifyGemini(prompt);
+                if(result.error) return; // Silent fail on recommendations
+                
                 const responseText = result.candidates[0].content.parts[0].text;
                 let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
@@ -2289,23 +2208,30 @@ const responseText = result.candidates[0].content.parts[0].text;
             
             const profile = localEmployees[employeeId];
             
-            let prompt = `Act as Xfinity Manager. Refine my coaching notes for ${profile.name} (${profile.role}).<br>
-            <br>
-            Raw Progress: ${rawProgress}<br>
-            Raw Obstacles: ${rawObstacles}<br>
-            Raw Action Plan: ${rawActionPlan}<br>
-            <br>
-            Generate a JSON object with these EXACT keys:<br>
-            - "progress_note": Refined progress note.<br>
-            - "obstacles_note": Refined obstacles note.<br>
-            - "action_plan": A specific SMART goal based on my raw action plan.<br>
-            <br>
+            // --- UPDATED PROMPT: Force S.M.A.R.T. Format ---
+            let prompt = `Act as Xfinity Manager. Refine my coaching notes for **${profile.name}** (${profile.role}).
+            
+            Raw Progress: ${rawProgress}
+            Raw Obstacles: ${rawObstacles}
+            Raw Action Plan: ${rawActionPlan}
+            
+            Generate a JSON object with these EXACT keys:
+            - "progress_note": Refined progress note.
+            - "obstacles_note": Refined obstacles note.
+            - "action_plan": Create a strict S.M.A.R.T. goal based on the raw input. Format it EXACTLY like this:
+              "Specific: [Detail]\nMeasurable: [Metric]\nActionable: [Step]\nRelevant: [Why]\nTime-bound: [Deadline]"
+            
             Output strictly valid JSON.`;
             
             showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', true, 'Generating...');
             
             try {
                 const result = await callNetlifyGemini(prompt);
+                
+                if (result.error) {
+                    throw new Error(result.error.message || JSON.stringify(result.error));
+                }
+
                 const responseText = result.candidates[0].content.parts[0].text;
                 let cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '');
                 const firstBrace = cleanJson.indexOf('{');
@@ -2335,13 +2261,9 @@ const responseText = result.candidates[0].content.parts[0].text;
                 await addDoc(coachingsRef, newCoaching);
                 await showToast(`Coaching logged for ${profile.name}!`);
                 
-                // MODIFIED: Do NOT reset the form automatically.
-                // form.reset(); 
-                // form.employeeId.value = ""; 
-                
             } catch (err) {
                 console.error('AI Coaching Failed:', err);
-                await showToast('Failed. Check console.', true);
+                await showToast(`Failed: ${err.message}`, true);
             } finally {
                 showLoading('coaching-notes-loader', 'generate-ai-coaching-notes', false);
             }
@@ -2367,7 +2289,6 @@ const responseText = result.candidates[0].content.parts[0].text;
                 lastUpdated: Timestamp.now()
             };
             try {
-                // Uses getStorePath
                 const storePath = getStorePath(currentStoreId);
                 await setDoc(doc(db, "artifacts", appId, storePath, "data", "storeGoals", "currentMonth"), goalsToSave);
                 await showToast("Monthly goals have been saved!");
@@ -2406,19 +2327,14 @@ const responseText = result.candidates[0].content.parts[0].text;
                     customerIntent: form.customerIntent.value,
                     employeeId: form.employee.value,
                     great_g_measure: getRadioValue(form, 'great_g_measure'),
-                    great_g_behaviors: Array.from(form.querySelectorAll('input[name="great_g"]:checked')).map(cb => cb.value),
                     notes_g: form.notes_g.value,
                     great_r_measure: getRadioValue(form, 'great_r_measure'),
-                    great_r_behaviors: Array.from(form.querySelectorAll('input[name="great_r"]:checked')).map(cb => cb.value),
                     notes_r: form.notes_r.value,
                     great_e_measure: getRadioValue(form, 'great_e_measure'),
-                    great_e_behaviors: Array.from(form.querySelectorAll('input[name="great_e"]:checked')).map(cb => cb.value),
                     notes_e: form.notes_e.value,
                     great_a_measure: getRadioValue(form, 'great_a_measure'),
-                    great_a_behaviors: Array.from(form.querySelectorAll('input[name="great_a"]:checked')).map(cb => cb.value),
                     notes_a: form.notes_a.value,
                     great_t_measure: getRadioValue(form, 'great_t_measure'),
-                    great_t_behaviors: Array.from(form.querySelectorAll('input[name="great_t"]:checked')).map(cb => cb.value),
                     notes_t: form.notes_t.value,
                     notes: form.notes.value
                 };
@@ -2457,22 +2373,12 @@ const responseText = result.candidates[0].content.parts[0].text;
                 setRadio('great_a_measure', formData.great_a_measure);
                 setRadio('great_t_measure', formData.great_t_measure);
 
-                const setCheckboxes = (name, values) => {
-                    if (values) {
-                        values.forEach(value => {
-                            const cb = form.querySelector(`input[name="${name}"][value="${value}"]`);
-                            if (cb) cb.checked = true;
-                        });
-                    }
-                };
-                setCheckboxes('great_g', formData.great_g_behaviors);
-                setCheckboxes('great_r', formData.great_r_behaviors);
-                setCheckboxes('great_e', formData.great_e_behaviors);
-                setCheckboxes('great_a', formData.great_a_behaviors);
-                setCheckboxes('great_t', formData.great_t_behaviors);
-
-                console.log("Loaded data from autosave.");
-                displayLastSMARTGoal(formData.employeeId);
+                // Checkboxes removed, so we skip restoring them
+                // We still display last SMART goal if emp ID is there
+                if(formData.employeeId) {
+                     // Need slight delay if employees aren't loaded yet? 
+                     // Actually logic runs after load, so it's fine once emp listener fires.
+                }
 
             } catch (e) {
                 console.error("Failed to load from autosave:", e);
@@ -2510,8 +2416,8 @@ const responseText = result.candidates[0].content.parts[0].text;
             form.employeeId.value = "";
             document.getElementById('coaching-date').valueAsDate = new Date();
             
-            document.getElementById('ai-rec-progress').textContent = `Ask something like, "What is going well with your performance?"`;
-            document.getElementById('ai-rec-obstacles').textContent = `Ask something like, "What has been difficult for you recently?"`;
+            document.getElementById('ai-rec-progress').textContent = `Ask: "What is going well with your performance?"`;
+            document.getElementById('ai-rec-obstacles').textContent = `Ask: "What has been difficult for you recently?"`;
             document.getElementById('ai-rec-actionplan').textContent = `(Include SMART goal)`;
         }
 
@@ -2543,7 +2449,6 @@ const responseText = result.candidates[0].content.parts[0].text;
                 opportunities: editForm.opportunities.value.trim()
             };
             try {
-                // Uses getStorePath
                 const storePath = getStorePath(currentStoreId);
                 await setDoc(doc(db, "artifacts", appId, storePath, "data", "employees", id), updatedProfile, { merge: true });
                 await showToast("Employee details saved!");
@@ -2557,7 +2462,6 @@ const responseText = result.candidates[0].content.parts[0].text;
         // --- Auth Functions ---
         async function signInWithGoogle() {
             try {
-                // Now uses the top-level 'auth' variable
                 await signInWithPopup(auth, googleProvider);
             } catch (error) {
                 console.error("Google Sign-in Error:", error);
@@ -2572,15 +2476,13 @@ const responseText = result.candidates[0].content.parts[0].text;
             }
         }
         
-        // --- Setup Listeners (Modified for Store Switching) ---
+        // --- Setup Listeners ---
         function setupFirestoreListeners() {
-            // Unsubscribe existing listeners if any
             if (employeesListener) employeesListener();
             if (observationsListener) observationsListener();
             if (coachingsListener) coachingsListener();
             if (storeGoalsListener) storeGoalsListener(); 
             
-            // Clear local data to prevent bleeding between stores
             localEmployees = {};
             localObservations = [];
             localCoachings = [];
@@ -2616,7 +2518,18 @@ const responseText = result.candidates[0].content.parts[0].text;
                 snapshot.forEach((doc) => {
                     localCoachings.push({ ...doc.data(), id: doc.id });
                 });
-                displayLastSMARTGoal(document.getElementById('employee').value);
+                // Update specific display elements if active
+                const activeEmpId = document.getElementById('employee').value;
+                if(activeEmpId) {
+                     const recentCoaching = localCoachings
+                        .filter(c => c.employeeId === activeEmpId && c.actionPlan)
+                        .sort((a, b) => b.date.toDate() - a.date.toDate())[0];
+                     const goalDisplay = document.getElementById('last-goal-display');
+                     if (recentCoaching) {
+                        goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toDate().toLocaleDateString()}):</strong><br>${recentCoaching.actionPlan.replace(/\n/g, '<br>')}`;
+                        goalDisplay.style.display = 'block';
+                     }
+                }
                 displayEmployeeLogs(document.getElementById('log-employee-select').value);
             });
 
@@ -2626,25 +2539,6 @@ const responseText = result.candidates[0].content.parts[0].text;
             });
         }
         
-        function displayLastSMARTGoal(employeeId) {
-            const goalDisplay = document.getElementById('last-goal-display');
-            if (!employeeId) {
-                goalDisplay.style.display = 'none';
-                return;
-            }
-            const recentCoaching = localCoachings
-                .filter(c => c.employeeId === employeeId && c.actionPlan)
-                .sort((a, b) => b.date.toDate() - a.date.toDate())[0]; 
-            if (recentCoaching) {
-                goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toDate().toLocaleDateString()}):</strong> ${recentCoaching.actionPlan}`;
-                goalDisplay.style.display = 'block';
-            } else {
-                goalDisplay.innerHTML = `<em>No previous SMART goals found for this employee.</em>`;
-                goalDisplay.style.display = 'block';
-            }
-        }
-
-
         // --- Page Load ---
         document.addEventListener('DOMContentLoaded', async () => {
             
@@ -2680,9 +2574,6 @@ const responseText = result.candidates[0].content.parts[0].text;
                 }
             });
 
-            // --- Add All UI Event Listeners ---
-            
-            // Store Selector Change
             storeSelector.addEventListener('change', (e) => {
                 currentStoreId = e.target.value;
                 if(currentUser) {
@@ -2702,13 +2593,26 @@ const responseText = result.candidates[0].content.parts[0].text;
             document.getElementById('generate-ai-coaching-plan').addEventListener('click', generateAICoachingPlan);
             document.getElementById('generate-ai-coaching-notes').addEventListener('click', generateAndLogCoachingNotes);
             
-            // NEW: Clear Form Button Listeners
             document.getElementById('clear-obs-form-btn').addEventListener('click', () => resetObsForm(true));
             document.getElementById('clear-coaching-form-btn').addEventListener('click', resetCoachingForm);
 
             document.getElementById('employee').addEventListener('change', (event) => {
                 const employeeId = event.target.value;
-                displayLastSMARTGoal(employeeId);
+                const goalDisplay = document.getElementById('last-goal-display');
+                if (!employeeId) {
+                    goalDisplay.style.display = 'none';
+                } else {
+                    const recentCoaching = localCoachings
+                        .filter(c => c.employeeId === employeeId && c.actionPlan)
+                        .sort((a, b) => b.date.toDate() - a.date.toDate())[0];
+                    if (recentCoaching) {
+                        goalDisplay.innerHTML = `<strong>Last SMART Goal (from ${recentCoaching.date.toDate().toLocaleDateString()}):</strong><br>${recentCoaching.actionPlan.replace(/\n/g, '<br>')}`;
+                        goalDisplay.style.display = 'block';
+                    } else {
+                        goalDisplay.innerHTML = `<em>No previous SMART goals found for this employee.</em>`;
+                        goalDisplay.style.display = 'block';
+                    }
+                }
                 document.getElementById('verbatim-feedback-section').style.display = 'none';
                 document.querySelectorAll('.copy-btn').forEach(btn => btn.style.display = 'none');
             });
@@ -2788,4 +2692,4 @@ const responseText = result.candidates[0].content.parts[0].text;
     </script>
 </body>
 </html>
-    </div>
+        </div>
